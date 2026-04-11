@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA Course Tracker</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f1117;
+      --bg2: #161b27;
+      --bg3: #1e2535;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.14);
+      --text: #e8eaf0;
+      --text2: #8b92a8;
+      --text3: #555e78;
+      --green: #22c88a;
+      --green-dark: #16a371;
+      --green-glow: rgba(34, 200, 138, 0.15);
+      --accent: #6c8aff;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* LAYOUT */
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .topbar-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 1px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .course-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(108,138,255,0.1);
+      border: 1px solid rgba(108,138,255,0.25);
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .course-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 180, 0, 0.12);
+      border: 1px solid rgba(255, 180, 0, 0.25);
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #f5c842;
+    }
+
+
+    /* PLAYER PANEL */
+    .player-panel {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: none;
+      animation: slideDown 0.25s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .player-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .player-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .player-label {
+      font-size: 10px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .player-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 3px;
+    }
+
+    .player-section {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .player-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #0a1a10;
+      border-color: var(--green);
+    }
+
+    .btn-green:hover {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: #0a1a10;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      display: flex;
+      flex: 1;
+      gap: 0;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 300px;
+      min-width: 260px;
+      max-width: 320px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 57px);
+      position: sticky;
+      top: 57px;
+      overflow: hidden;
+    }
+
+    .sidebar-search {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input::placeholder {
+      color: var(--text3);
+    }
+
+    .search-input:focus {
+      border-color: var(--green);
+    }
+
+    .sidebar-sections {
+      overflow-y: auto;
+      flex: 1;
+      padding: 8px 0;
+    }
+
+    .sidebar-sections::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-sections::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar-sections::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 2px;
+    }
+
+    .sec-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-left: 2px solid transparent;
+    }
+
+    .sec-item:hover {
+      background: var(--bg3);
+    }
+
+    .sec-item.active {
+      background: var(--green-glow);
+      border-left-color: var(--green);
+    }
+
+    .sec-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .sec-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sec-name {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sec-prog-text {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 1px;
+    }
+
+    .sec-mini-bar {
+      width: 40px;
+      height: 3px;
+      background: var(--bg3);
+      border-radius: 99px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sec-mini-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--green);
+    }
+
+    /* CONTENT AREA */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      min-width: 0;
+    }
+
+    .content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 2px;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-val.green {
+      color: var(--green);
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+    }
+
+    /* OVERALL BAR */
+    .overall-bar-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+
+    .overall-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .overall-label {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    .overall-pct {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .big-bar {
+      height: 8px;
+      background: var(--bg3);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .big-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #22c88a, #6c8aff);
+      transition: width 0.5s ease;
+    }
+
+    /* SECTION DETAIL */
+    .section-detail {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .section-header:hover {
+      background: var(--bg3);
+    }
+
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .section-name-big {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-stats {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .sec-bar-wrap {
+      width: 100px;
+      height: 4px;
+      background: var(--bg3);
+      border-radius: 99px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sec-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+
+    .chevron {
+      color: var(--text3);
+      font-size: 11px;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chevron.open {
+      transform: rotate(90deg);
+    }
+
+    .video-list {
+      border-top: 1px solid var(--border);
+    }
+
+    .video-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .video-row:last-child {
+      border-bottom: none;
+    }
+
+    .video-row:hover {
+      background: var(--bg3);
+    }
+
+    .video-row.playing {
+      background: var(--green-glow);
+    }
+
+    .check-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .check-circle:hover {
+      border-color: var(--green);
+    }
+
+    .check-circle.done {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .check-circle.done::after {
+      content: '✓';
+      color: #0a1a10;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .vid-num {
+      font-size: 11px;
+      color: var(--text3);
+      min-width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .vid-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .video-row.playing .vid-name {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .vid-type {
+      font-size: 10px;
+      color: var(--text3);
+      padding: 2px 7px;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+
+    .play-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--text2);
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .video-row:hover .play-icon {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .video-row.playing .play-icon {
+      background: var(--green);
+      color: #0a1a10;
+      border-color: var(--green);
+    }
+
+    /* SECTION FILTERED MESSAGE */
+    .section-filter-msg {
+      font-size: 13px;
+      color: var(--text2);
+      padding: 12px 0;
+      display: none;
+    }
+
+    /* HIDDEN SECTIONS MESSAGE */
+    .empty-msg {
+      text-align: center;
+      padding: 40px;
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 700px) {
+      .sidebar {
+        display: none;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      background: var(--green);
+      color: #0a1a10;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── VIDEO MODAL ── */
+    .video-modal {
+      position: fixed; inset: 0;
+      background: rgba(5,7,15,0.93);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .video-modal.open { opacity: 1; pointer-events: all; }
+    .video-modal-box {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      width: min(980px, 96vw);
+      max-height: 92vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      animation: modalPop 0.28s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 28px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.92) translateY(18px); opacity: 0; }
+      to   { transform: scale(1)    translateY(0);    opacity: 1; }
+    }
+    .modal-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .modal-header-info { flex: 1; min-width: 0; }
+    .modal-np-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+    .modal-vid-title { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+    .modal-sec-name  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .modal-close-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--border2); background: var(--bg3);
+      color: var(--text2); font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .modal-close-btn:hover { border-color: #ff6c6c; color: #ff6c6c; background: rgba(255,108,108,0.08); }
+    .modal-player-area { background: #000; position: relative; min-height: 200px; }
+    .iframe-ratio-box { position: relative; padding-top: 56.25%; }
+    .iframe-ratio-box iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+    .modal-loading-state {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; background: var(--bg2);
+    }
+    .modal-spinner {
+      width: 38px; height: 38px;
+      border: 3px solid var(--border2); border-top-color: var(--green);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal-loading-text { font-size: 13px; color: var(--text2); }
+    .modal-footer {
+      display: flex; gap: 8px; align-items: center;
+      padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text2);
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(108,138,255,0.2); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .btn-logout {
+      padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      font-family: inherit; border: 1px solid var(--border2);
+      background: transparent; color: var(--text2); cursor: pointer; transition: all .15s;
+    }
+    .btn-logout:hover { border-color: #ff6c6c; color: #ff6c6c; background: rgba(255,108,108,0.06); }
+  </style>
+</head>
+
+<body>
+  <!-- Firebase auth loading overlay (removed once auth state resolves) -->
+  <div id="fb-loading" style="position:fixed;inset:0;z-index:9999;background:#0f1117;display:flex;align-items:center;justify-content:center">
+    <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.08);border-top-color:#22c88a;border-radius:50%;animation:spin 0.7s linear infinite"></div>
+  </div>
+
+  <div class="app">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo-dot"></div>
+        <div>
+          <div class="topbar-title">DSA Course Tracker</div>
+          <div class="topbar-sub">Data Structures &amp; Algorithms</div>
+        </div>
+        <div class="course-badge">
+          <div class="course-badge-dot"></div>
+          Abdul Bari — Mastering DSA
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="streak-badge" id="streak-badge">🔥 <span id="streak-text">0 day streak</span></div>
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <span id="user-name"></span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- PLAYER PANEL -->
+    <div class="player-panel" id="player-panel">
+      <div class="player-inner">
+        <div class="player-info">
+          <div class="player-label">▶ Now Playing</div>
+          <div class="player-title" id="player-title">—</div>
+          <div class="player-section" id="player-section">—</div>
+        </div>
+        <div class="player-btns">
+          <button class="btn btn-green" onclick="openVideoModal()">▶ Play Video</button>
+          <button class="btn" onclick="markDoneAndNext()">✓ Mark done + Next</button>
+          <button class="btn" onclick="openInDrive()">Open in Drive ↗</button>
+          <button class="btn" onclick="closePlayer()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-search">
+          <input class="search-input" type="text" placeholder="Search sections..." id="search-input"
+            oninput="filterSections()" />
+        </div>
+        <div class="sidebar-sections" id="sidebar-sections"></div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="content" id="content-area">
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val green" id="stat-done">0</div>
+            <div class="stat-lbl">Videos completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-lbl">Total videos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-pct">0%</div>
+            <div class="stat-lbl">Overall progress</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-secs">0</div>
+            <div class="stat-lbl">Sections completed</div>
+          </div>
+        </div>
+
+        <div class="overall-bar-wrap">
+          <div class="overall-top">
+            <span class="overall-label" id="overall-label">0 of 0 videos done</span>
+            <span class="overall-pct" id="overall-pct">0%</span>
+          </div>
+          <div class="big-bar">
+            <div class="big-bar-fill" id="big-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div id="sections-container"></div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<!-- VIDEO PLAYER MODAL -->
+<div class="video-modal" id="video-modal" onclick="handleModalBackdrop(event)">
+  <div class="video-modal-box">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-np-label">▶ Now Playing</div>
+        <div class="modal-vid-title" id="modal-title">—</div>
+        <div class="modal-sec-name"  id="modal-section">—</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeVideoModal()">✕</button>
+    </div>
+    <div class="modal-player-area">
+      <div class="iframe-ratio-box" id="iframe-wrap" style="display:none">
+        <iframe id="video-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      </div>
+      <div class="modal-loading-state" id="modal-loading">
+        <div class="modal-spinner"></div>
+        <div class="modal-loading-text">Loading…</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="markDoneAndNext()">✓ Mark done + Next</button>
+      <button class="btn" onclick="openInDrive()">Open in Drive ↗</button>
+      <button class="btn" style="margin-left:auto" onclick="closeVideoModal()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+
+  <script>
+    const DRIVE_BASE = "https://drive.google.com/drive/folders/";
+    const ROOT_FOLDER = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.rootFolder)
+      ? APP_CONFIG.rootFolder
+      : '1cUR2h1_e7kXgpdPc0q4zZ6afCU19ZkTy'; // fallback (set ROOT_FOLDER_ID in .env)
+
+    // \u2500\u2500 Video Player globals (declared early to avoid TDZ errors) \u2500\u2500
+    const API_BASE    = ''; // Relative — works on any host (local or deployed)
+    const folderCache = {};
+    const fileIdCache = {};
+    let   backendAvailable = null;
+
+    const SECTIONS = [
+      { id: "s1", name: "1. Before we Start", folderId: "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi", videos: [{ n: "Introduction", t: "vid" }, { n: "Course Overview", t: "vid" }, { n: "How to use this course", t: "vid" }] },
+      { id: "s2", name: "2. Essential C and C++", folderId: "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H", videos: [{ n: "Variables and Data Types", t: "vid" }, { n: "Arrays in C", t: "vid" }, { n: "Pointers", t: "vid" }, { n: "Structures", t: "vid" }, { n: "Functions", t: "vid" }] },
+      { id: "s3", name: "3. Required Setup", folderId: "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji", videos: [{ n: "Installing IDE", t: "vid" }, { n: "Project Setup", t: "vid" }, { n: "Hello World", t: "vid" }] },
+      { id: "s4", name: "4. Introduction", folderId: "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD", videos: [{ n: "What is Data Structure", t: "vid" }, { n: "Abstract Data Type", t: "vid" }, { n: "Time Complexity", t: "vid" }, { n: "Space Complexity", t: "vid" }] },
+      {
+        id: "s5", name: "5. Recursion", folderId: "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV", videos: [
+          { n: "1. How Recursion Works", t: "vid" }, { n: "1. How Recursion Works", t: "pdf" },
+          { n: "2. Generalising Recursion", t: "vid" }, { n: "2. Generalising Recursion", t: "pdf" },
+          { n: "3. How Recursion Uses Stack", t: "vid" }, { n: "3. How Recursion Uses Stack", t: "pdf" },
+          { n: "4. Recurrence Relation", t: "vid" }, { n: "4. Recurrence Relation", t: "pdf" },
+          { n: "5. Lets Code Recursion", t: "vid" }, { n: "5. Lets Code Recursion", t: "pdf" },
+          { n: "5.1 TailHead", t: "pdf" },
+          { n: "6. Static and Global Variables", t: "vid" }, { n: "6. Static and Global Variables", t: "pdf" },
+          { n: "7. Let's Code Static Variables", t: "vid" }, { n: "7. Let's Code Static Variables", t: "pdf" },
+          { n: "7.1 StaticGlobal", t: "pdf" },
+          { n: "8. Tail Recursion", t: "vid" }, { n: "8. Tail Recursion", t: "pdf" },
+        ]
+      },
+      { id: "s6", name: "6. Arrays", folderId: "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD", videos: [{ n: "Array Representation", t: "vid" }, { n: "Static vs Dynamic", t: "vid" }, { n: "2D Arrays", t: "vid" }, { n: "Array Operations", t: "vid" }, { n: "Searching", t: "vid" }, { n: "Sorting", t: "vid" }] },
+      { id: "s7", name: "8. Strings", folderId: "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d", videos: [{ n: "String Basics", t: "vid" }, { n: "String Functions", t: "vid" }, { n: "Pattern Matching", t: "vid" }] },
+      { id: "s8", name: "9. Matrices", folderId: "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j", videos: [{ n: "Matrix Representation", t: "vid" }, { n: "Matrix Operations", t: "vid" }, { n: "Sparse Matrix", t: "vid" }] },
+      { id: "s9", name: "10. Sparse Matrix", folderId: "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy", videos: [{ n: "Sparse Matrix Representation", t: "vid" }, { n: "Compressed Form", t: "vid" }] },
+      { id: "s10", name: "11. Linked List", folderId: "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy", videos: [{ n: "Linked List Intro", t: "vid" }, { n: "Creating Linked List", t: "vid" }, { n: "Traversal", t: "vid" }, { n: "Insertion", t: "vid" }, { n: "Deletion", t: "vid" }, { n: "Circular Linked List", t: "vid" }, { n: "Doubly Linked List", t: "vid" }] },
+      { id: "s11", name: "12. Sparse Matrix Algo", folderId: "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6", videos: [{ n: "Algorithms for Sparse Matrix", t: "vid" }] },
+      { id: "s12", name: "13. Stack", folderId: "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC", videos: [{ n: "Stack Using Array", t: "vid" }, { n: "Stack Using Linked List", t: "vid" }, { n: "Balanced Parentheses", t: "vid" }, { n: "Infix to Postfix", t: "vid" }, { n: "Evaluating Postfix", t: "vid" }] },
+      { id: "s13", name: "14. Queues", folderId: "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0", videos: [{ n: "Queue Using Array", t: "vid" }, { n: "Queue Using Linked List", t: "vid" }, { n: "Circular Queue", t: "vid" }, { n: "Double Ended Queue", t: "vid" }, { n: "Priority Queue", t: "vid" }] },
+      { id: "s14", name: "15. Trees", folderId: "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4", videos: [{ n: "Terminology", t: "vid" }, { n: "Binary Tree", t: "vid" }, { n: "Strict Binary Tree", t: "vid" }, { n: "Complete Binary Tree", t: "vid" }, { n: "Traversals", t: "vid" }, { n: "Iterative Traversal", t: "vid" }] },
+      { id: "s15", name: "16. Binary Search Trees", folderId: "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90", videos: [{ n: "BST Introduction", t: "vid" }, { n: "Insertion", t: "vid" }, { n: "Deletion", t: "vid" }, { n: "Searching", t: "vid" }, { n: "Creating BST", t: "vid" }] },
+      { id: "s16", name: "17. AVL Trees", folderId: "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK", videos: [{ n: "AVL Introduction", t: "vid" }, { n: "Rotations", t: "vid" }, { n: "LL Rotation", t: "vid" }, { n: "LR Rotation", t: "vid" }, { n: "RL Rotation", t: "vid" }, { n: "RR Rotation", t: "vid" }, { n: "Insertion in AVL", t: "vid" }] },
+      { id: "s17", name: "18. Search Trees", folderId: "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5", videos: [{ n: "Red-Black Trees", t: "vid" }, { n: "2-3 Trees", t: "vid" }, { n: "B Trees", t: "vid" }] },
+      { id: "s18", name: "19. Heap", folderId: "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm", videos: [{ n: "Heap Introduction", t: "vid" }, { n: "Inserting into Heap", t: "vid" }, { n: "Deleting from Heap", t: "vid" }, { n: "Heap Sort", t: "vid" }, { n: "Heapify", t: "vid" }] },
+      { id: "s19", name: "20. Sorting", folderId: "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF", videos: [{ n: "Bubble Sort", t: "vid" }, { n: "Selection Sort", t: "vid" }, { n: "Insertion Sort", t: "vid" }, { n: "Shell Sort", t: "vid" }, { n: "Merge Sort", t: "vid" }, { n: "Quick Sort", t: "vid" }, { n: "Count Sort", t: "vid" }, { n: "Bin/Bucket Sort", t: "vid" }, { n: "Radix Sort", t: "vid" }] },
+      { id: "s20", name: "21. Hashing", folderId: "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe", videos: [{ n: "Hashing Introduction", t: "vid" }, { n: "Chaining", t: "vid" }, { n: "Linear Probing", t: "vid" }, { n: "Quadratic Probing", t: "vid" }, { n: "Double Hashing", t: "vid" }] },
+      { id: "s21", name: "22. Graphs", folderId: "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T", videos: [{ n: "Graph Introduction", t: "vid" }, { n: "BFS", t: "vid" }, { n: "DFS", t: "vid" }, { n: "Spanning Trees", t: "vid" }, { n: "Prim's Algorithm", t: "vid" }, { n: "Kruskal's Algorithm", t: "vid" }, { n: "Dijkstra's Algorithm", t: "vid" }] },
+      { id: "s22", name: "23. Asymptotic Notation", folderId: "", videos: [{ n: "Big O", t: "vid" }, { n: "Omega", t: "vid" }, { n: "Theta", t: "vid" }, { n: "Best/Worst/Average Case", t: "vid" }] }
+    ];
+
+    const COLORS = [
+      { bg: '#1a1f35', icon: '#6c8aff', fill: '#6c8aff' },
+      { bg: '#1a2f1f', icon: '#22c88a', fill: '#22c88a' },
+      { bg: '#2f1a1a', icon: '#ff6c6c', fill: '#ff6c6c' },
+      { bg: '#2f261a', icon: '#ffb84d', fill: '#ffb84d' },
+      { bg: '#1f1a2f', icon: '#c86cff', fill: '#c86cff' },
+      { bg: '#1a2a2f', icon: '#4dd9ff', fill: '#4dd9ff' },
+      { bg: '#2a1f1a', icon: '#ff9a4d', fill: '#ff9a4d' },
+      { bg: '#1a2f2a', icon: '#4dffd9', fill: '#4dffd9' },
+      { bg: '#2f1a25', icon: '#ff4da6', fill: '#ff4da6' },
+    ];
+
+    let state = {};
+    let currentVideo = null;
+    let openSections = new Set(['s5']);
+    let activeSidebarSec = null;
+
+    function loadState() {
+      try { state = JSON.parse(localStorage.getItem('dsa_tracker_v2') || '{}'); } catch (e) { state = {}; }
+      // Load streak
+      const today = new Date().toDateString();
+      const sd = state._streakData || { lastDate: null, streak: 0 };
+      if (sd.lastDate !== today) {
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (sd.lastDate === yesterday.toDateString()) {
+          // streak continues (will be bumped when they mark something done today)
+        } else if (sd.lastDate !== today) {
+          // only reset if more than 1 day ago
+          if (sd.lastDate && sd.lastDate !== yesterday.toDateString()) {
+            sd.streak = 0;
+          }
+        }
+        state._streakData = sd;
+      }
+    }
+
+    function saveState() {
+      try { localStorage.setItem('dsa_tracker_v2', JSON.stringify(state)); } catch (e) { }
+    }
+
+    function bumpStreak() {
+      const today = new Date().toDateString();
+      const sd = state._streakData || { lastDate: null, streak: 0 };
+      if (sd.lastDate !== today) {
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (sd.lastDate === yesterday.toDateString()) {
+          sd.streak = (sd.streak || 0) + 1;
+        } else {
+          sd.streak = 1;
+        }
+        sd.lastDate = today;
+        state._streakData = sd;
+        saveState();
+      }
+      updateStreak();
+    }
+
+    function updateStreak() {
+      const sd = state._streakData || { streak: 0 };
+      const s = sd.streak || 0;
+      document.getElementById('streak-text').textContent = s + ' day' + (s !== 1 ? 's' : '') + ' streak';
+    }
+
+    function getKey(sid, vi) { return sid + '_' + vi; }
+    function isDone(sid, vi) { return !!state[getKey(sid, vi)]; }
+
+    function countDone(sec) { return sec.videos.filter((v, i) => isDone(sec.id, i)).length; }
+    function totalVideos() { return SECTIONS.reduce((a, s) => a + s.videos.length, 0); }
+    function totalDone() { return SECTIONS.reduce((a, s) => a + countDone(s), 0); }
+    function sectionsDone() { return SECTIONS.filter(s => countDone(s) === s.videos.length).length; }
+
+    function updateStats() {
+      const done = totalDone(), total = totalVideos();
+      const pct = Math.round(done / total * 100);
+      document.getElementById('stat-done').textContent = done;
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-pct').textContent = pct + '%';
+      document.getElementById('stat-secs').textContent = sectionsDone();
+      document.getElementById('overall-label').textContent = done + ' of ' + total + ' videos done';
+      document.getElementById('overall-pct').textContent = pct + '%';
+      document.getElementById('big-bar').style.width = pct + '%';
+      updateStreak();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function setCurrentVideo(sec, vi) {
+      currentVideo = { sec, vi };
+      document.getElementById('player-panel').style.display = 'block';
+      document.getElementById('player-title').textContent = sec.videos[vi].n;
+      document.getElementById('player-section').textContent = sec.name;
+      document.querySelectorAll('.video-row').forEach(r => r.classList.remove('playing'));
+      const row = document.getElementById('vrow_' + sec.id + '_' + vi);
+      if (row) { row.classList.add('playing'); row.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      // Modal opens only on explicit user click (▶ Play Video)
+    }
+
+    function closePlayer() {
+      currentVideo = null;
+      document.getElementById('player-panel').style.display = 'none';
+      document.querySelectorAll('.video-row').forEach(r => r.classList.remove('playing'));
+      closeVideoModal();
+    }
+
+    async function openInDrive() {
+      if (!currentVideo) return;
+      const { sec, vi } = currentVideo;
+      if (await checkBackend()) {
+        const fileId = await resolveFileId(sec, vi);
+        if (fileId) { window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank'); return; }
+      }
+      window.open(DRIVE_BASE + (sec.folderId || ROOT_FOLDER), '_blank');
+    }
+
+    function markDoneAndNext() {
+      if (!currentVideo) return;
+      const { sec, vi } = currentVideo;
+      state[getKey(sec.id, vi)] = true;
+      saveState();
+      bumpStreak();
+      renderAll();
+      showToast('✓ Marked done!');
+      const nextVi = vi + 1;
+      if (nextVi < sec.videos.length) {
+        setCurrentVideo(sec, nextVi);
+      } else {
+        const si = SECTIONS.indexOf(sec);
+        if (si + 1 < SECTIONS.length) {
+          const nextSec = SECTIONS[si + 1];
+          openSections.add(nextSec.id);
+          renderAll();
+          setCurrentVideo(nextSec, 0);
+        } else {
+          closePlayer();
+          showToast('🎉 Section complete!');
+        }
+      }
+    }
+
+    function toggleCheck(sec, vi, e) {
+      e.stopPropagation();
+      const key = getKey(sec.id, vi);
+      state[key] = !state[key];
+      if (state[key]) bumpStreak();
+      saveState();
+      renderAll();
+      if (currentVideo && currentVideo.sec.id === sec.id && currentVideo.vi === vi) {
+        setCurrentVideo(sec, vi);
+      }
+    }
+
+    function toggleSection(sid) {
+      if (openSections.has(sid)) openSections.delete(sid);
+      else openSections.add(sid);
+      renderSections();
+    }
+
+    function filterSections() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      document.querySelectorAll('.sidebar-sec-item').forEach(el => {
+        el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    function scrollToSection(sid) {
+      const el = document.getElementById('section_' + sid);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      activeSidebarSec = sid;
+      document.querySelectorAll('.sidebar-sec-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.sid === sid);
+      });
+    }
+
+    function renderSidebar() {
+      const sb = document.getElementById('sidebar-sections');
+      sb.innerHTML = '';
+      SECTIONS.forEach((sec, si) => {
+        const done = countDone(sec), total = sec.videos.length;
+        const pct = Math.round(done / total * 100);
+        const c = COLORS[si % COLORS.length];
+        const el = document.createElement('div');
+        el.className = 'sec-item sidebar-sec-item' + (activeSidebarSec === sec.id ? ' active' : '');
+        el.dataset.sid = sec.id;
+        el.dataset.name = sec.name;
+        el.innerHTML = `
+      <div class="sec-num" style="background:${c.bg};color:${c.icon}">${si + 1}</div>
+      <div class="sec-meta">
+        <div class="sec-name">${sec.name.replace(/^\d+\.\s*/, '')}</div>
+        <div class="sec-prog-text">${done}/${total}</div>
+      </div>
+      <div class="sec-mini-bar"><div class="sec-mini-fill" style="width:${pct}%;background:${c.fill}"></div></div>
+    `;
+        el.onclick = () => { scrollToSection(sec.id); openSections.add(sec.id); renderSections(); };
+        sb.appendChild(el);
+      });
+    }
+
+    function renderSections() {
+      const container = document.getElementById('sections-container');
+      container.innerHTML = '';
+      SECTIONS.forEach((sec, si) => {
+        const done = countDone(sec), total = sec.videos.length;
+        const pct = Math.round(done / total * 100);
+        const c = COLORS[si % COLORS.length];
+        const isOpen = openSections.has(sec.id);
+
+        const card = document.createElement('div');
+        card.className = 'section-detail';
+        card.id = 'section_' + sec.id;
+
+        const header = document.createElement('div');
+        header.className = 'section-header';
+        header.innerHTML = `
+      <div class="section-icon" style="background:${c.bg};color:${c.icon};font-size:13px;font-weight:700">${si + 1}</div>
+      <div class="section-meta">
+        <div class="section-name-big">${sec.name}</div>
+        <div class="section-stats">${done} of ${total} done${done === total && total > 0 ? ' ✓' : ''}</div>
+      </div>
+      <div class="sec-bar-wrap"><div class="sec-bar-fill" style="width:${pct}%;background:${c.fill}"></div></div>
+      <span class="chevron ${isOpen ? 'open' : ''}">▶</span>
+    `;
+        header.onclick = () => toggleSection(sec.id);
+        card.appendChild(header);
+
+        if (isOpen) {
+          const vlist = document.createElement('div');
+          vlist.className = 'video-list';
+          sec.videos.forEach((v, vi) => {
+            const done = isDone(sec.id, vi);
+            const isPlaying = currentVideo && currentVideo.sec.id === sec.id && currentVideo.vi === vi;
+            const row = document.createElement('div');
+            row.className = 'video-row' + (isPlaying ? ' playing' : '');
+            row.id = 'vrow_' + sec.id + '_' + vi;
+            row.innerHTML = `
+          <div class="check-circle ${done ? 'done' : ''}"></div>
+          <span class="vid-num">${vi + 1}</span>
+          <span class="vid-name">${v.n}</span>
+          <span class="vid-type">${v.t}</span>
+          <div class="play-icon">${isPlaying ? '▶' : '▷'}</div>
+        `;
+            row.querySelector('.check-circle').onclick = (e) => toggleCheck(sec, vi, e);
+            row.onclick = (e) => { if (!e.target.classList.contains('check-circle')) { setCurrentVideo(sec, vi); openVideoModal(); } };
+            vlist.appendChild(row);
+          });
+          card.appendChild(vlist);
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderAll() {
+      updateStats();
+      renderSidebar();
+      renderSections();
+    }
+
+    // INIT
+    loadState();
+    renderAll();
+
+    // Auto-open first incomplete section and set current video
+    (function () {
+      const firstIncomp = SECTIONS.find(s => countDone(s) < s.videos.length);
+      if (firstIncomp) {
+        openSections.add(firstIncomp.id);
+        const vi = firstIncomp.videos.findIndex((v, i) => !isDone(firstIncomp.id, i));
+        renderAll();
+        setCurrentVideo(firstIncomp, vi >= 0 ? vi : 0);
+      }
+    })();
+
+    // ── VIDEO PLAYER (Google Drive Embed) ────────────────────────
+
+    async function checkBackend() {
+      if (backendAvailable !== null) return backendAvailable;
+      try {
+        const ctrl = new AbortController();
+        const tid  = setTimeout(() => ctrl.abort(), 2000);
+        const res  = await fetch(`${API_BASE}/api/health`, { signal: ctrl.signal });
+        clearTimeout(tid);
+        backendAvailable = res.ok;
+      } catch { backendAvailable = false; }
+      return backendAvailable;
+    }
+
+    async function getFilesInFolder(folderId) {
+      if (folderCache[folderId]) return folderCache[folderId];
+      try {
+        const res  = await fetch(`${API_BASE}/api/files/${folderId}`);
+        const data = await res.json();
+        if (data.files) { folderCache[folderId] = data.files; return data.files; }
+      } catch(e) {}
+      return [];
+    }
+
+    function normName(s) { return (s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+    async function resolveFileId(sec, vi) {
+      const key = sec.id + '_' + vi;
+      if (fileIdCache[key]) return fileIdCache[key];
+      const video    = sec.videos[vi];
+      const folderId = sec.folderId || ROOT_FOLDER;
+      const files    = await getFilesInFolder(folderId);
+      if (!files.length) return null;
+      const target   = normName(video.n);
+
+      // 1. Exact name match (strip extension)
+      let match = files.find(f => normName(f.name.replace(/\.[^.]+$/, '')) === target);
+
+      // 2. Partial / contains match
+      if (!match) match = files.find(f => {
+        const fn = normName(f.name.replace(/\.[^.]+$/, ''));
+        return fn.includes(target) || target.includes(fn);
+      });
+
+      // 3. Index-based fallback by MIME type
+      if (!match) {
+        const vids = files.filter(f => f.mimeType && f.mimeType.startsWith('video/'));
+        const pdfs = files.filter(f => f.mimeType === 'application/pdf');
+        if (video.t === 'vid' && vids.length) {
+          const idx = sec.videos.slice(0, vi).filter(v => v.t === 'vid').length;
+          match = vids[idx] || null;
+        } else if (video.t === 'pdf' && pdfs.length) {
+          const idx = sec.videos.slice(0, vi).filter(v => v.t === 'pdf').length;
+          match = pdfs[idx] || null;
+        }
+      }
+
+      if (match) { fileIdCache[key] = match.id; return match.id; }
+      return null;
+    }
+
+    function openVideoModal() {
+      if (!currentVideo) return;
+      _loadVideoModal(currentVideo.sec, currentVideo.vi);
+    }
+
+    async function _loadVideoModal(sec, vi) {
+      const modal   = document.getElementById('video-modal');
+      const iframe  = document.getElementById('video-iframe');
+      const wrap    = document.getElementById('iframe-wrap');
+      const loading = document.getElementById('modal-loading');
+
+      document.getElementById('modal-title').textContent   = sec.videos[vi].n;
+      document.getElementById('modal-section').textContent = sec.name;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      iframe.src            = '';
+      wrap.style.display    = 'none';
+      loading.style.display = 'flex';
+      loading.innerHTML     = '<div class="modal-spinner"></div><div class="modal-loading-text">Connecting to backend…</div>';
+
+      const ok = await checkBackend();
+      if (!ok) {
+        const url = 'https://drive.google.com/drive/folders/' + (sec.folderId || ROOT_FOLDER);
+        loading.innerHTML = `
+          <div style="text-align:center;padding:32px 24px">
+            <div style="font-size:44px;margin-bottom:14px">⚡</div>
+            <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:8px">Backend not running</div>
+            <div style="color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8">
+              Run <code style="background:var(--bg3);padding:3px 10px;border-radius:6px;color:var(--green);font-size:12px">python backend/app.py</code><br>to enable direct video playback
+            </div>
+            <button class="btn" onclick="window.open('${url}','_blank')">Open Drive Folder ↗</button>
+          </div>`;
+        return;
+      }
+
+      loading.innerHTML = '<div class="modal-spinner"></div><div class="modal-loading-text">Finding video in Drive…</div>';
+      const fileId = await resolveFileId(sec, vi);
+
+      if (!fileId) {
+        const url = 'https://drive.google.com/drive/folders/' + (sec.folderId || ROOT_FOLDER);
+        loading.innerHTML = `
+          <div style="text-align:center;padding:32px 24px">
+            <div style="font-size:44px;margin-bottom:14px">🔍</div>
+            <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:8px">Video not found in Drive</div>
+            <div style="color:var(--text2);font-size:13px;margin-bottom:20px">Could not match this video to a file in the folder</div>
+            <button class="btn" onclick="window.open('${url}','_blank')">Open Drive Folder ↗</button>
+          </div>`;
+        return;
+      }
+
+      iframe.src            = `https://drive.google.com/file/d/${fileId}/preview`;
+      wrap.style.display    = 'block';
+      loading.style.display = 'none';
+    }
+
+    function closeVideoModal() {
+      const modal = document.getElementById('video-modal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('video-iframe').src = '';
+      document.getElementById('iframe-wrap').style.display   = 'none';
+      const loading = document.getElementById('modal-loading');
+      loading.style.display = 'flex';
+      loading.innerHTML = '<div class="modal-spinner"></div><div class="modal-loading-text">Loading…</div>';
+    }
+
+    function handleModalBackdrop(e) {
+      if (e.target.id === 'video-modal') closeVideoModal();
+    }
+
+    // ── FIREBASE AUTH GUARD ─────────────────────────────────
+    firebase.initializeApp(firebaseConfig);
+    const _auth = firebase.auth();
+
+    _auth.onAuthStateChanged(function(user) {
+      // Remove loading overlay
+      const overlay = document.getElementById('fb-loading');
+      if (overlay) overlay.remove();
+
+      if (!user) {
+        window.location.href = '/auth';
+        return;
+      }
+      // Show user info in topbar
+      const display = user.displayName || user.email.split('@')[0];
+      document.getElementById('user-name').textContent   = display;
+      document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
+    });
+
+    function logout() {
+      _auth.signOut().then(function() {
+        window.location.href = '/auth';
+      });
+    }
+
+  </script>
+</body>
+
+</html>

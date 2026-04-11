@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: dsa-tracker
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "gunicorn --chdir backend app:app --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+      # ── Server ───────────────────────────────────────────────
+      - key: SECRET_KEY
+        sync: false          # Set a long random string in Render dashboard
+
+      # ── Google Drive ─────────────────────────────────────────
+      - key: ROOT_FOLDER_ID
+        value: "1cUR2h1_e7kXgpdPc0q4zZ6afCU19ZkTy"
+      - key: GOOGLE_DRIVE_TOKEN
+        sync: false          # Run export_token.py locally, paste output here
+
+      # ── Firebase (frontend config) ───────────────────────────
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        value: "tracker-5a3c7.firebaseapp.com"
+      - key: FIREBASE_PROJECT_ID
+        value: "tracker-5a3c7"
+      - key: FIREBASE_STORAGE_BUCKET
+        value: "tracker-5a3c7.firebasestorage.app"
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        value: "909617946392"
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: FIREBASE_MEASUREMENT_ID
+        value: "G-76Y4J7BJ6K"
