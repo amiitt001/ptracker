@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dsa-tracker
+    name: ptracker
     runtime: python
     region: oregon
     plan: free
