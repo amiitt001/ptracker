@@ -163,6 +163,34 @@ def handle_progress():
         return jsonify({'status': 'ok'}), 200
 
 
+
+@app.route('/api/redeem', methods=['POST'])
+def redeem_code():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json or {}
+    coupon_code = data.get('code', '').upper().strip()
+    uid = data.get('uid', 'anonymous')
+
+    # Valid Access Codes are now managed via environment variables
+    env_codes = os.environ.get('OFFER_CODES', '')
+    VALID_FREE_CODES = [c.strip().upper() for c in env_codes.split(',') if c.strip()]
+
+    if coupon_code in VALID_FREE_CODES:
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO progress (uid, state_json, is_paid)
+            VALUES (?, '{}', 1)
+            ON CONFLICT(uid) DO UPDATE SET is_paid = 1
+        ''', (uid,))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': 'Code redeemed! Course unlocked.'}), 200
+    else:
+        return jsonify({'status': 'error', 'message': 'Invalid or expired coupon code.'}), 400
+
 # ── Stripe Payment Endpoints ─────────────────────────────────────
 @app.route('/api/checkout', methods=['POST'])
 def create_checkout_session():
@@ -179,7 +207,8 @@ def create_checkout_session():
         except Exception:
             return jsonify({'error': 'Invalid token'}), 401
     else:
-        uid = auth_header[7:]
+        data = request.json or {}
+        uid = data.get('uid', 'anonymous')
 
     domain_url = request.headers.get('Origin', 'http://localhost:5000')
 
@@ -199,7 +228,8 @@ def create_checkout_session():
             mode='payment',
             success_url=domain_url + '?payment_success=true',
             cancel_url=domain_url + '?payment_cancelled=true',
-            client_reference_id=uid
+            client_reference_id=uid,
+            allow_promotion_codes=True
         )
         return jsonify({'checkout_url': session.url}), 200
     except Exception as e:
