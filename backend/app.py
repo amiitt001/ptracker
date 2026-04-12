@@ -60,6 +60,13 @@ def init_db():
             created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS progress (
+            uid TEXT PRIMARY KEY,
+            state_json TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -96,6 +103,47 @@ def verify():
     except Exception:
         return jsonify({'error': 'Invalid or expired token'}), 401
 
+
+@app.route('/api/progress', methods=['GET', 'POST'])
+def handle_progress():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'No token provided'}), 401
+
+    uid = 'anonymous'
+    if FIREBASE_ADMIN:
+        try:
+            id_token = auth_header[7:]
+            decoded = fb_auth.verify_id_token(id_token)
+            uid = decoded['uid']
+        except Exception:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+    else:
+        # If Firebase Admin isn't setup, we use the token itself as UID for simple local persistence mapping.
+        uid = auth_header[7:]
+
+    conn = get_db()
+    
+    if request.method == 'GET':
+        row = conn.execute('SELECT state_json FROM progress WHERE uid = ?', (uid,)).fetchone()
+        conn.close()
+        if row:
+            return jsonify({'state': json.loads(row['state_json'])}), 200
+        return jsonify({'state': {}}), 200
+
+    if request.method == 'POST':
+        state_data = request.json.get('state', {})
+        state_json = json.dumps(state_data)
+        conn.execute('''
+            INSERT INTO progress (uid, state_json, updated_at) 
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(uid) DO UPDATE SET 
+                state_json=excluded.state_json, 
+                updated_at=CURRENT_TIMESTAMP
+        ''', (uid, state_json))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'ok'}), 200
 
 # ── Page routes ────────────────────────────────────────────────────
 @app.route('/')

@@ -986,8 +986,44 @@
       }
     }
 
+    async function pushStateToServer() {
+      if (typeof firebase === 'undefined' || !firebase.auth().currentUser) return;
+      try {
+        const token = await firebase.auth().currentUser.getIdToken();
+        await fetch(`${API_BASE}/api/progress`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ state })
+        });
+      } catch (e) { console.error('Failed to sync progress to server:', e); }
+    }
+
+    async function pullStateFromServer() {
+      if (typeof firebase === 'undefined' || !firebase.auth().currentUser) return;
+      try {
+        const token = await firebase.auth().currentUser.getIdToken();
+        const res = await fetch(`${API_BASE}/api/progress`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.state && Object.keys(data.state).length > 0) {
+          state = data.state;
+          localStorage.setItem('dsa_tracker_v2', JSON.stringify(state));
+          updateStats();
+          renderSidebar();
+          renderContent();
+          renderPlayerPanel();
+        }
+      } catch (e) { console.error('Failed to pull progress from server:', e); }
+    }
+
     function saveState() {
       try { localStorage.setItem('dsa_tracker_v2', JSON.stringify(state)); } catch (e) { }
+      pushStateToServer();
     }
 
     function bumpStreak() {
@@ -1376,6 +1412,9 @@
       const display = user.displayName || user.email.split('@')[0];
       document.getElementById('user-name').textContent   = display;
       document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
+
+      // Pull state after login
+      pullStateFromServer();
     });
 
     function logout() {
