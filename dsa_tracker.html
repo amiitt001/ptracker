@@ -1015,42 +1015,1998 @@
     let   backendAvailable = null;
 
     const SECTIONS = [
-      { id: "s1", name: "1. Before we Start", folderId: "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi", videos: [{ n: "Introduction", t: "vid" }, { n: "Course Overview", t: "vid" }, { n: "How to use this course", t: "vid" }] },
-      { id: "s2", name: "2. Essential C and C++", folderId: "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H", videos: [{ n: "Variables and Data Types", t: "vid" }, { n: "Arrays in C", t: "vid" }, { n: "Pointers", t: "vid" }, { n: "Structures", t: "vid" }, { n: "Functions", t: "vid" }] },
-      { id: "s3", name: "3. Required Setup", folderId: "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji", videos: [{ n: "Installing IDE", t: "vid" }, { n: "Project Setup", t: "vid" }, { n: "Hello World", t: "vid" }] },
-      { id: "s4", name: "4. Introduction", folderId: "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD", videos: [{ n: "What is Data Structure", t: "vid" }, { n: "Abstract Data Type", t: "vid" }, { n: "Time Complexity", t: "vid" }, { n: "Space Complexity", t: "vid" }] },
+  {
+    "id": "s1",
+    "name": "1. Before we Start",
+    "folderId": "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi",
+    "videos": [
       {
-        id: "s5", name: "5. Recursion", folderId: "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV", videos: [
-          { n: "1. How Recursion Works", t: "vid" }, { n: "1. How Recursion Works", t: "pdf" },
-          { n: "2. Generalising Recursion", t: "vid" }, { n: "2. Generalising Recursion", t: "pdf" },
-          { n: "3. How Recursion Uses Stack", t: "vid" }, { n: "3. How Recursion Uses Stack", t: "pdf" },
-          { n: "4. Recurrence Relation", t: "vid" }, { n: "4. Recurrence Relation", t: "pdf" },
-          { n: "5. Lets Code Recursion", t: "vid" }, { n: "5. Lets Code Recursion", t: "pdf" },
-          { n: "5.1 TailHead", t: "pdf" },
-          { n: "6. Static and Global Variables", t: "vid" }, { n: "6. Static and Global Variables", t: "pdf" },
-          { n: "7. Let's Code Static Variables", t: "vid" }, { n: "7. Let's Code Static Variables", t: "pdf" },
-          { n: "7.1 StaticGlobal", t: "pdf" },
-          { n: "8. Tail Recursion", t: "vid" }, { n: "8. Tail Recursion", t: "pdf" },
-        ]
+        "n": "1. Instructor_s Note",
+        "t": "vid"
       },
-      { id: "s6", name: "6. Arrays", folderId: "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD", videos: [{ n: "Array Representation", t: "vid" }, { n: "Static vs Dynamic", t: "vid" }, { n: "2D Arrays", t: "vid" }, { n: "Array Operations", t: "vid" }, { n: "Searching", t: "vid" }, { n: "Sorting", t: "vid" }] },
-      { id: "s7", name: "8. Strings", folderId: "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d", videos: [{ n: "String Basics", t: "vid" }, { n: "String Functions", t: "vid" }, { n: "Pattern Matching", t: "vid" }] },
-      { id: "s8", name: "9. Matrices", folderId: "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j", videos: [{ n: "Matrix Representation", t: "vid" }, { n: "Matrix Operations", t: "vid" }, { n: "Sparse Matrix", t: "vid" }] },
-      { id: "s9", name: "10. Sparse Matrix", folderId: "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy", videos: [{ n: "Sparse Matrix Representation", t: "vid" }, { n: "Compressed Form", t: "vid" }] },
-      { id: "s10", name: "11. Linked List", folderId: "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy", videos: [{ n: "Linked List Intro", t: "vid" }, { n: "Creating Linked List", t: "vid" }, { n: "Traversal", t: "vid" }, { n: "Insertion", t: "vid" }, { n: "Deletion", t: "vid" }, { n: "Circular Linked List", t: "vid" }, { n: "Doubly Linked List", t: "vid" }] },
-      { id: "s11", name: "12. Sparse Matrix Algo", folderId: "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6", videos: [{ n: "Algorithms for Sparse Matrix", t: "vid" }] },
-      { id: "s12", name: "13. Stack", folderId: "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC", videos: [{ n: "Stack Using Array", t: "vid" }, { n: "Stack Using Linked List", t: "vid" }, { n: "Balanced Parentheses", t: "vid" }, { n: "Infix to Postfix", t: "vid" }, { n: "Evaluating Postfix", t: "vid" }] },
-      { id: "s13", name: "14. Queues", folderId: "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0", videos: [{ n: "Queue Using Array", t: "vid" }, { n: "Queue Using Linked List", t: "vid" }, { n: "Circular Queue", t: "vid" }, { n: "Double Ended Queue", t: "vid" }, { n: "Priority Queue", t: "vid" }] },
-      { id: "s14", name: "15. Trees", folderId: "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4", videos: [{ n: "Terminology", t: "vid" }, { n: "Binary Tree", t: "vid" }, { n: "Strict Binary Tree", t: "vid" }, { n: "Complete Binary Tree", t: "vid" }, { n: "Traversals", t: "vid" }, { n: "Iterative Traversal", t: "vid" }] },
-      { id: "s15", name: "16. Binary Search Trees", folderId: "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90", videos: [{ n: "BST Introduction", t: "vid" }, { n: "Insertion", t: "vid" }, { n: "Deletion", t: "vid" }, { n: "Searching", t: "vid" }, { n: "Creating BST", t: "vid" }] },
-      { id: "s16", name: "17. AVL Trees", folderId: "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK", videos: [{ n: "AVL Introduction", t: "vid" }, { n: "Rotations", t: "vid" }, { n: "LL Rotation", t: "vid" }, { n: "LR Rotation", t: "vid" }, { n: "RL Rotation", t: "vid" }, { n: "RR Rotation", t: "vid" }, { n: "Insertion in AVL", t: "vid" }] },
-      { id: "s17", name: "18. Search Trees", folderId: "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5", videos: [{ n: "Red-Black Trees", t: "vid" }, { n: "2-3 Trees", t: "vid" }, { n: "B Trees", t: "vid" }] },
-      { id: "s18", name: "19. Heap", folderId: "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm", videos: [{ n: "Heap Introduction", t: "vid" }, { n: "Inserting into Heap", t: "vid" }, { n: "Deleting from Heap", t: "vid" }, { n: "Heap Sort", t: "vid" }, { n: "Heapify", t: "vid" }] },
-      { id: "s19", name: "20. Sorting", folderId: "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF", videos: [{ n: "Bubble Sort", t: "vid" }, { n: "Selection Sort", t: "vid" }, { n: "Insertion Sort", t: "vid" }, { n: "Shell Sort", t: "vid" }, { n: "Merge Sort", t: "vid" }, { n: "Quick Sort", t: "vid" }, { n: "Count Sort", t: "vid" }, { n: "Bin/Bucket Sort", t: "vid" }, { n: "Radix Sort", t: "vid" }] },
-      { id: "s20", name: "21. Hashing", folderId: "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe", videos: [{ n: "Hashing Introduction", t: "vid" }, { n: "Chaining", t: "vid" }, { n: "Linear Probing", t: "vid" }, { n: "Quadratic Probing", t: "vid" }, { n: "Double Hashing", t: "vid" }] },
-      { id: "s21", name: "22. Graphs", folderId: "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T", videos: [{ n: "Graph Introduction", t: "vid" }, { n: "BFS", t: "vid" }, { n: "DFS", t: "vid" }, { n: "Spanning Trees", t: "vid" }, { n: "Prim's Algorithm", t: "vid" }, { n: "Kruskal's Algorithm", t: "vid" }, { n: "Dijkstra's Algorithm", t: "vid" }] },
-      { id: "s22", name: "23. Asymptotic Notation", folderId: "", videos: [{ n: "Big O", t: "vid" }, { n: "Omega", t: "vid" }, { n: "Theta", t: "vid" }, { n: "Best/Worst/Average Case", t: "vid" }] }
-    ];
+      {
+        "n": "2. Introduction",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s2",
+    "name": "2. Essential C and C++ Concepts",
+    "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC",
+    "videos": [
+      {
+        "n": "1. Arrays Basics",
+        "t": "vid"
+      },
+      {
+        "n": "2. Practice  Arrays Basics",
+        "t": "vid"
+      },
+      {
+        "n": "4. Practice  Structures",
+        "t": "vid"
+      },
+      {
+        "n": "6. Practice  Pointers",
+        "t": "vid"
+      },
+      {
+        "n": "7. Reference in C++",
+        "t": "vid"
+      },
+      {
+        "n": "8. Practice  Reference",
+        "t": "vid"
+      },
+      {
+        "n": "9. Pointer to Structure",
+        "t": "vid"
+      },
+      {
+        "n": "10. Practice  Pointer to Structure",
+        "t": "vid"
+      },
+      {
+        "n": "11. Functions",
+        "t": "vid"
+      },
+      {
+        "n": "12. Practice  Functions",
+        "t": "vid"
+      },
+      {
+        "n": "13. Parameter Passing Methods",
+        "t": "vid"
+      },
+      {
+        "n": "14. Practice  Parameter Passing Methods",
+        "t": "vid"
+      },
+      {
+        "n": "16. Practice  Array as Parameter",
+        "t": "vid"
+      },
+      {
+        "n": "18. Practice  Structure as Parameter",
+        "t": "vid"
+      },
+      {
+        "n": "20. Converting a C program to a C++ class (Must Watch)",
+        "t": "vid"
+      },
+      {
+        "n": "21. Practice  Monolithic Program",
+        "t": "vid"
+      },
+      {
+        "n": "22. Practice  Modular Program",
+        "t": "vid"
+      },
+      {
+        "n": "23. Practice  Structure and Functions",
+        "t": "vid"
+      },
+      {
+        "n": "24. Practice  Object-Oriented Program",
+        "t": "vid"
+      },
+      {
+        "n": "26. Practice  C++ Class",
+        "t": "vid"
+      },
+      {
+        "n": "27. Template classes",
+        "t": "vid"
+      },
+      {
+        "n": "28. Practice  Template Class",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s3",
+    "name": "3. Required Setup for Programming",
+    "folderId": "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H",
+    "videos": [
+      {
+        "n": "1. Setup Dev-C++ and Settings",
+        "t": "vid"
+      },
+      {
+        "n": "2. Setup CodeBlocks and Settings",
+        "t": "vid"
+      },
+      {
+        "n": "3. Debugging using Dev-C++",
+        "t": "vid"
+      },
+      {
+        "n": "4. Debugging using CodeBlocks",
+        "t": "vid"
+      },
+      {
+        "n": "5. Setup Visual Studio",
+        "t": "vid"
+      },
+      {
+        "n": "6. Debugging using Visual Studio",
+        "t": "vid"
+      },
+      {
+        "n": "7. Setup Xcode",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s4",
+    "name": "4. Introduction",
+    "folderId": "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji",
+    "videos": [
+      {
+        "n": "2. Stack vs Heap Memory",
+        "t": "vid"
+      },
+      {
+        "n": "3. Stack vs Heap.  Continued__mp4",
+        "t": "vid"
+      },
+      {
+        "n": "5. ADT",
+        "t": "vid"
+      },
+      {
+        "n": "6. Time and Space Complexity",
+        "t": "vid"
+      },
+      {
+        "n": "7. Time and Space Complexity from Code",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s5",
+    "name": "5. Recursion",
+    "folderId": "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV",
+    "videos": [
+      {
+        "n": "1. How Recursion Works ( Tracing )",
+        "t": "vid"
+      },
+      {
+        "n": "2. Generalising Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "3. How Recursion uses Stack",
+        "t": "vid"
+      },
+      {
+        "n": "4. Recurrence Relation - Time Complexity of Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "5.1 7. TailHead",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Lets Code Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "6. Static and Global Variables in Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "7.1 8. StaticGlobal",
+        "t": "pdf"
+      },
+      {
+        "n": "7. Let_s Code Static and Global in Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "8. Tail Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "9. Head Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "10. Tree Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "11.1 11. TreeRecursion",
+        "t": "pdf"
+      },
+      {
+        "n": "12. Indirect Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "13.1 12. Indirect Recursion",
+        "t": "pdf"
+      },
+      {
+        "n": "13. Let_s Code Indirect Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "14. Nested Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "15.1 13. Nested Recursion",
+        "t": "pdf"
+      },
+      {
+        "n": "15. Let_s Code Nested Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "16. Sum of Natural Number using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "17.1 14. Sum of N ",
+        "t": "pdf"
+      },
+      {
+        "n": "17. Let_s Code Sum of N using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "18. Factorial using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "19.1 15. Factorial",
+        "t": "pdf"
+      },
+      {
+        "n": "19. Let_s Code Factorial using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "21.1 16. Power",
+        "t": "pdf"
+      },
+      {
+        "n": "21. Let_s Code Power Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "22. Taylor Series using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "23.1 17. Taylor Series",
+        "t": "pdf"
+      },
+      {
+        "n": "23. Let_s Code Taylor Series using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "24. Taylor Series using Horner_s Rule",
+        "t": "vid"
+      },
+      {
+        "n": "25.1 18. Taylor",
+        "t": "pdf"
+      },
+      {
+        "n": "25. Let_s Code Taylor Series Horner_s Rule - Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "26.1 18. Tayloer Series Iterative",
+        "t": "pdf"
+      },
+      {
+        "n": "28.1 19. Fibonacci",
+        "t": "pdf"
+      },
+      {
+        "n": "28. Let_s Code Fibonacci",
+        "t": "vid"
+      },
+      {
+        "n": "29. nCr using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "30.1 20. Combination",
+        "t": "pdf"
+      },
+      {
+        "n": "30. Let_s Code nCr using Recursion",
+        "t": "vid"
+      },
+      {
+        "n": "31. Tower of Hanoi Problem",
+        "t": "vid"
+      },
+      {
+        "n": "32.1 21. Tower of Hanoi",
+        "t": "pdf"
+      },
+      {
+        "n": "32. Let_s Code Tower of Hanoi",
+        "t": "vid"
+      },
+      {
+        "n": "34. Quiz 1 Solutions",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s6",
+    "name": "6. Arrays Representations",
+    "folderId": "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD",
+    "videos": [
+      {
+        "n": "1. Introduction to Array",
+        "t": "vid"
+      },
+      {
+        "n": "2. Declarations of Array",
+        "t": "vid"
+      },
+      {
+        "n": "3. Demo - Array Declaration",
+        "t": "vid"
+      },
+      {
+        "n": "4. Static vs Dynamic Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "5.1 23. Static Dyn Array",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Demo - Static vs Dynamic Array",
+        "t": "vid"
+      },
+      {
+        "n": "6. How to Increase Array Size",
+        "t": "vid"
+      },
+      {
+        "n": "7.1 23.1 Array Size",
+        "t": "pdf"
+      },
+      {
+        "n": "7. Demo - Increasing Array Size",
+        "t": "vid"
+      },
+      {
+        "n": "8. 2D Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "9.1 23.2   2D Array",
+        "t": "pdf"
+      },
+      {
+        "n": "10. Array Representation by Compiler",
+        "t": "vid"
+      },
+      {
+        "n": "11. Row Major Formula for 2D Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "12. Column Major Formula for 2D Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "13. Formulas for nD Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "14. Formulas for 3D Arrays",
+        "t": "vid"
+      },
+      {
+        "n": "16. Solutions for Quiz 2",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s7",
+    "name": "8. Strings",
+    "folderId": "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD",
+    "videos": [
+      {
+        "n": "1. Introduction to Strings",
+        "t": "vid"
+      },
+      {
+        "n": "2. Finding Length of a String",
+        "t": "vid"
+      },
+      {
+        "n": "3. Changing Case of a String",
+        "t": "vid"
+      },
+      {
+        "n": "4. Counting Words and Vowels in a String",
+        "t": "vid"
+      },
+      {
+        "n": "5. Validating a String",
+        "t": "vid"
+      },
+      {
+        "n": "6. Reversing a String",
+        "t": "vid"
+      },
+      {
+        "n": "7. Comparing Strings and Checking Palindrome",
+        "t": "vid"
+      },
+      {
+        "n": "8. Finding Duplicates in a String",
+        "t": "vid"
+      },
+      {
+        "n": "9. Finding Duplicates in a String using Bitwise Operations",
+        "t": "vid"
+      },
+      {
+        "n": "10. Checking if 2 Strings are Anagram (distinct letters)",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s8",
+    "name": "9. Matrices",
+    "folderId": "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d",
+    "videos": [
+      {
+        "n": "1. Section Introduction",
+        "t": "vid"
+      },
+      {
+        "n": "3.1 43. Diag Matrix C",
+        "t": "pdf"
+      },
+      {
+        "n": "3. Let_s Code Diagonal Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "4. C++ class for Diagonal Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "5.1 43. Diag Matrix Cpp",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Let_s Code C++ class for Diagonal matrix",
+        "t": "vid"
+      },
+      {
+        "n": "6. Lower Triangular Matrix Row-Major Mapping",
+        "t": "vid"
+      },
+      {
+        "n": "7. Lower Triangular Matrix Column-Major Mapping",
+        "t": "vid"
+      },
+      {
+        "n": "8.1 45. Lower Triangular C",
+        "t": "pdf"
+      },
+      {
+        "n": "9. Let_s Code Lower Triangular Matrix in C++",
+        "t": "vid"
+      },
+      {
+        "n": "10. Upper Triangular Matrix Row-Major Mapping",
+        "t": "vid"
+      },
+      {
+        "n": "12. Symmetric Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "13. Tri-Diagonal and Tri-Band Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "14. Toeplitz Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "15. Menu Driven Program for Matrices",
+        "t": "vid"
+      },
+      {
+        "n": "16. Menu Driven Program for Matrices using Functions",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s9",
+    "name": "10. Sparse Matrix and Polynomial Representation",
+    "folderId": "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j",
+    "videos": [
+      {
+        "n": "1. Sparse Matrix Representation",
+        "t": "vid"
+      },
+      {
+        "n": "2. Addition of Sparse Matrices",
+        "t": "vid"
+      },
+      {
+        "n": "3. Array Representation of Sparse Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "4.1 58. Sparse Matrix C",
+        "t": "pdf"
+      },
+      {
+        "n": "6.1 58. Sparse Matrix C",
+        "t": "pdf"
+      },
+      {
+        "n": "6. Let_s Code to Add Sparse Matrix",
+        "t": "vid"
+      },
+      {
+        "n": "8.1 58. Sparse Matrix C++",
+        "t": "pdf"
+      },
+      {
+        "n": "8. Let_s Code Sparse Matrix using C++ Continued__mp4",
+        "t": "vid"
+      },
+      {
+        "n": "9. Polynomial Representation",
+        "t": "vid"
+      },
+      {
+        "n": "10. Polynomial Evaluation",
+        "t": "vid"
+      },
+      {
+        "n": "11. Polynomial Addition",
+        "t": "vid"
+      },
+      {
+        "n": "12.1 60. Polynomial",
+        "t": "pdf"
+      },
+      {
+        "n": "12. Let_s Code Polynomial",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s10",
+    "name": "11. Linked List",
+    "folderId": "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy",
+    "videos": [
+      {
+        "n": "1. Why we need Dynamic Data Structure Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "2. About Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "3. More About Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "5. Let_s Code Display for Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "7.1 66. Create and Display LL",
+        "t": "pdf"
+      },
+      {
+        "n": "7. Let_s Code Recursive Display for Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "9. Sum of All Elements in a Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "10.1 67. Count SumLinked List",
+        "t": "pdf"
+      },
+      {
+        "n": "10. Let_s Code Count and Sum",
+        "t": "vid"
+      },
+      {
+        "n": "11. Maximum Element in a Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "12.1 69. Max LL",
+        "t": "pdf"
+      },
+      {
+        "n": "13. Searching in a Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "14. Improve Searching in Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "15.1 70. Search LL",
+        "t": "pdf"
+      },
+      {
+        "n": "15. Let_s Code Searching in Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "16. Inserting in a Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "17.1 73. Insert in LL",
+        "t": "pdf"
+      },
+      {
+        "n": "17. Let_s Code Insert for Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "18. Creating a Linked List using Insert",
+        "t": "vid"
+      },
+      {
+        "n": "19. Creating a Linked List by Inserting at Last",
+        "t": "vid"
+      },
+      {
+        "n": "20. Inserting in a Sorted Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "21.1 74. Create LL using Insert",
+        "t": "pdf"
+      },
+      {
+        "n": "21.1 74. SortedInsert LL",
+        "t": "pdf"
+      },
+      {
+        "n": "21.2 74. Create LL using Insert",
+        "t": "pdf"
+      },
+      {
+        "n": "21.2 74. SortedInsert LL",
+        "t": "pdf"
+      },
+      {
+        "n": "21. Let_s Code Insert in Sorted Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "22. Deleting from Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "23.1 74. Deleteing LL",
+        "t": "pdf"
+      },
+      {
+        "n": "24. Check if a Linked List is Sorted",
+        "t": "vid"
+      },
+      {
+        "n": "25.1 74. isSorted LL",
+        "t": "pdf"
+      },
+      {
+        "n": "25. Let_s Code to check if Linked List is Sorted",
+        "t": "vid"
+      },
+      {
+        "n": "26. Remove Duplicates from Sorted Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "27.1 74. Remove Duplicate LL",
+        "t": "pdf"
+      },
+      {
+        "n": "27. Let_s Code to Remove Duplicates from Sorted Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "31.1 74. Reverse LL",
+        "t": "pdf"
+      },
+      {
+        "n": "31. Let_s Code Reversing a Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "32. Concatenating 2 Linked Lists",
+        "t": "vid"
+      },
+      {
+        "n": "33. Merging 2 Linked Lists",
+        "t": "vid"
+      },
+      {
+        "n": "34.1 74. Merge LL",
+        "t": "pdf"
+      },
+      {
+        "n": "34. Let_s Code to Concatenate and Merge Linked Lists",
+        "t": "vid"
+      },
+      {
+        "n": "35. Check for LOOP in Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "36.1 74. isLoop LL",
+        "t": "pdf"
+      },
+      {
+        "n": "36. Let_s Code to Check LOOP",
+        "t": "vid"
+      },
+      {
+        "n": "38. Circular Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "40.2 194.CircularLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "40. Let\u2019s Code Circular Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "41. Inserting in a Circular Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "42. Let_s Code Insert for a Circular Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "44.1 88. Circluar Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "47. Insert in a Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "48. Let_s Code Insert for Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "49. Deleting from Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "50. Let_s Code Delete for Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "51. Reverse a Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "52.1 206.ReverseLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "52. Let_s Code Reverse for Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "53. Circular Doubly Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "54. Comparison of Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "55. Comparison of Array with Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "56. Student Challenge  Finding Middle Element of a Linked List__mp4",
+        "t": "vid"
+      },
+      {
+        "n": "57. Student Challenge  Finding Intersecting point of Two Linked List",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s11",
+    "name": "12. Sparse Matrix and Polynomial using Linked List",
+    "folderId": "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy",
+    "videos": [
+      {
+        "n": "1STUDE~1.MP4",
+        "t": "vid"
+      },
+      {
+        "n": "2STUDE~1.MP4",
+        "t": "vid"
+      },
+      {
+        "n": "3.1 96. Polynomial Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "3. Let_s Code Polynomial",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s12",
+    "name": "13. Stack",
+    "folderId": "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6",
+    "videos": [
+      {
+        "n": "2. Stack using Array",
+        "t": "vid"
+      },
+      {
+        "n": "4.2 100. Stack Array",
+        "t": "pdf"
+      },
+      {
+        "n": "4. Let_s Code Stack using Array",
+        "t": "vid"
+      },
+      {
+        "n": "5. Stack using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "6. Stack Operations using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "7.1 101. Stack LL C",
+        "t": "pdf"
+      },
+      {
+        "n": "7. Let_s Code Stack using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "8.1 222.StackLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "8.2 222.StackLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "8. Let_s Code C++ class for Stack using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "9. Parenthesis Matching",
+        "t": "vid"
+      },
+      {
+        "n": "10.1 224.ParenthesisMatchingC",
+        "t": "pdf"
+      },
+      {
+        "n": "10.2 224.ParenthesisMatchingC",
+        "t": "pdf"
+      },
+      {
+        "n": "10. Program for Parenthesis Matching",
+        "t": "vid"
+      },
+      {
+        "n": "12. More on Parenthesis Matching",
+        "t": "vid"
+      },
+      {
+        "n": "13. Infix to Postfix Conversion",
+        "t": "vid"
+      },
+      {
+        "n": "14. Associativity and Unary Operators",
+        "t": "vid"
+      },
+      {
+        "n": "15. Infix to Postfix using Stack Method 1",
+        "t": "vid"
+      },
+      {
+        "n": "18.1 110. InToPost",
+        "t": "pdf"
+      },
+      {
+        "n": "18. Let_s Code Infix to Postfix Conversion",
+        "t": "vid"
+      },
+      {
+        "n": "19.1 233.InfixToPostfixC",
+        "t": "pdf"
+      },
+      {
+        "n": "19.2 233.InfixToPostfixC",
+        "t": "pdf"
+      },
+      {
+        "n": "19. Student Challenge Infix to Postfix with Associativity and Parenthesis",
+        "t": "vid"
+      },
+      {
+        "n": "20. Evaluation of Postfix Expression",
+        "t": "vid"
+      },
+      {
+        "n": "21. Program for Evaluation of Postfix",
+        "t": "vid"
+      },
+      {
+        "n": "22.2 236.PostfixEvalutionC",
+        "t": "pdf"
+      }
+    ]
+  },
+  {
+    "id": "s13",
+    "name": "14. Queues",
+    "folderId": "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC",
+    "videos": [
+      {
+        "n": "1. Queue ADT",
+        "t": "vid"
+      },
+      {
+        "n": "3. Queue using Two Pointers",
+        "t": "vid"
+      },
+      {
+        "n": "4. Implementing Queue using Array",
+        "t": "vid"
+      },
+      {
+        "n": "5.1 117. Queue using Array C",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Let_s Code Queue using Array",
+        "t": "vid"
+      },
+      {
+        "n": "6.2 242.QueueUsingArrayC",
+        "t": "pdf"
+      },
+      {
+        "n": "6. Let_s Code Queue in C++",
+        "t": "vid"
+      },
+      {
+        "n": "8. Circular Queue",
+        "t": "vid"
+      },
+      {
+        "n": "9.1 245.CircularQueueC",
+        "t": "pdf"
+      },
+      {
+        "n": "9.2 245.CircularQueueC",
+        "t": "pdf"
+      },
+      {
+        "n": "9. Let_s Code Circular Queue",
+        "t": "vid"
+      },
+      {
+        "n": "10. Queue using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "11.1 247.QueueUsingLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "11.2 247.QueueUsingLLC",
+        "t": "pdf"
+      },
+      {
+        "n": "11. Let_s Code Queue using Linked List",
+        "t": "vid"
+      },
+      {
+        "n": "12. Double Ended Queue DEQUEUE",
+        "t": "vid"
+      },
+      {
+        "n": "14. Queue using 2 Stacks",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s14",
+    "name": "15. Trees",
+    "folderId": "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0",
+    "videos": [
+      {
+        "n": "1. Terminology",
+        "t": "vid"
+      },
+      {
+        "n": "2. Number of Binary Trees using N Nodes",
+        "t": "vid"
+      },
+      {
+        "n": "3. Height vs Nodes in Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "4. Internal Nodes vs External Nodes in Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "5. Strict Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "6. Height vs Node of Strict Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "7. Internal vs External Nodes of Strict Binary Trees",
+        "t": "vid"
+      },
+      {
+        "n": "8. n-ary Trees",
+        "t": "vid"
+      },
+      {
+        "n": "9. Analysis of n-Ary Trees",
+        "t": "vid"
+      },
+      {
+        "n": "10. Representation of Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "11. Linked Representation of Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "12. Full vs Complete Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "13. Strict vs Complete Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "14. Binary Tree Traversals",
+        "t": "vid"
+      },
+      {
+        "n": "16. Binary Tree Traversal Easy Method 2",
+        "t": "vid"
+      },
+      {
+        "n": "17. Binary Tree Traversal Easy Method 3",
+        "t": "vid"
+      },
+      {
+        "n": "18. Creating Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "19. Program to Create Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "20.1 146.Tree",
+        "t": "pdf"
+      },
+      {
+        "n": "20.2 146.Tree",
+        "t": "pdf"
+      },
+      {
+        "n": "20. Let_s Code Creating Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "21.1 TreeCPP Complete",
+        "t": "pdf"
+      },
+      {
+        "n": "21.2 142. TreeCpp",
+        "t": "pdf"
+      },
+      {
+        "n": "21.3 142. TreeCpp",
+        "t": "pdf"
+      },
+      {
+        "n": "21.4 TreeCPP Complete",
+        "t": "pdf"
+      },
+      {
+        "n": "21. Let_s Code Creating Binary Tree in C++",
+        "t": "vid"
+      },
+      {
+        "n": "22. Preorder Tree Traversal",
+        "t": "vid"
+      },
+      {
+        "n": "24. Iterative Preorder",
+        "t": "vid"
+      },
+      {
+        "n": "25. Iterative Inorder",
+        "t": "vid"
+      },
+      {
+        "n": "26. Let_s Code Iterative Traversals",
+        "t": "vid"
+      },
+      {
+        "n": "27. Level Order Traversal",
+        "t": "vid"
+      },
+      {
+        "n": "28.1 278.LevelOrderTraversalC",
+        "t": "pdf"
+      },
+      {
+        "n": "28. Let_s Code Level Order Traversal",
+        "t": "vid"
+      },
+      {
+        "n": "29. Can we Generate Tree from Traversals",
+        "t": "vid"
+      },
+      {
+        "n": "30. Generating Tree from Traversals",
+        "t": "vid"
+      },
+      {
+        "n": "31. Height and Count of Binary Tree",
+        "t": "vid"
+      },
+      {
+        "n": "32.1 Tree Count and Height",
+        "t": "pdf"
+      },
+      {
+        "n": "32. Let_s Code Height and Count",
+        "t": "vid"
+      },
+      {
+        "n": "33. Student Challenge  Count Leaf Nodes of a Binary Tree",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s15",
+    "name": "16. Binary Search Trees",
+    "folderId": "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4",
+    "videos": [
+      {
+        "n": "1. BST intro",
+        "t": "vid"
+      },
+      {
+        "n": "2. Searching in a Binary Search Tree",
+        "t": "vid"
+      },
+      {
+        "n": "3. Inserting in a Binary Search Tree",
+        "t": "vid"
+      },
+      {
+        "n": "5. Creating a Binary Search Tree",
+        "t": "vid"
+      },
+      {
+        "n": "6. Let_s code Binary Search Tree",
+        "t": "vid"
+      },
+      {
+        "n": "7. Deleting from Binary Search Tree",
+        "t": "vid"
+      },
+      {
+        "n": "8. Let_s Code Recursive Insert and Delete on BST",
+        "t": "vid"
+      },
+      {
+        "n": "10. Program for Generating BST from Preorder",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s16",
+    "name": "17. AVL Trees",
+    "folderId": "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90",
+    "videos": [
+      {
+        "n": "2. Inserting in AVL with Rotations",
+        "t": "vid"
+      },
+      {
+        "n": "3. General form of AVL Rotations",
+        "t": "vid"
+      },
+      {
+        "n": "4.1 298.LL_LRRotationonAVLTreeC",
+        "t": "pdf"
+      },
+      {
+        "n": "4. Let_s Code LL Rotation on AVL",
+        "t": "vid"
+      },
+      {
+        "n": "5.2 299.RR_RLRotationonAVLTreeC",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Let_s Code LR Rotation on AVL",
+        "t": "vid"
+      },
+      {
+        "n": "8. Height Analysis of AVL Trees",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s17",
+    "name": "18. Search Trees",
+    "folderId": "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK",
+    "videos": [
+      {
+        "n": "1. 2-3 Trees",
+        "t": "vid"
+      },
+      {
+        "n": "2. 2-3-4 Trees",
+        "t": "vid"
+      },
+      {
+        "n": "3. Re-Black Trees Introduction",
+        "t": "vid"
+      },
+      {
+        "n": "4. Red-Black Tree creation",
+        "t": "vid"
+      },
+      {
+        "n": "5. Red-Black Trees vs 2-3-4 Trees",
+        "t": "vid"
+      },
+      {
+        "n": "6. Creating Red-Black Tree similar to Creating 2-3-4 Tree",
+        "t": "vid"
+      },
+      {
+        "n": "8. Red-Black Tree Deletion Examples",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s18",
+    "name": "19. Heap",
+    "folderId": "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5",
+    "videos": [
+      {
+        "n": "1. Introduction to Heap",
+        "t": "vid"
+      },
+      {
+        "n": "2. Inserting in a Heap",
+        "t": "vid"
+      },
+      {
+        "n": "4. Creating a Heap",
+        "t": "vid"
+      },
+      {
+        "n": "5. Deleting from Heap and Heap Sort",
+        "t": "vid"
+      },
+      {
+        "n": "6.1 HeapSort New",
+        "t": "pdf"
+      },
+      {
+        "n": "6. Let_s Code Heap Sort",
+        "t": "vid"
+      },
+      {
+        "n": "7. Heapify - Faster Method for creating Heap",
+        "t": "vid"
+      },
+      {
+        "n": "8. Heap as Priority Queue",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s19",
+    "name": "20. Sorting Techniques",
+    "folderId": "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm",
+    "videos": [
+      {
+        "n": "1. Criteria used for Analysing Sorts",
+        "t": "vid"
+      },
+      {
+        "n": "2. Bubble Sort",
+        "t": "vid"
+      },
+      {
+        "n": "3.1 322.BubbleSortC",
+        "t": "pdf"
+      },
+      {
+        "n": "3. Let_s Code Bubble Sort",
+        "t": "vid"
+      },
+      {
+        "n": "4. Insertion Sort",
+        "t": "vid"
+      },
+      {
+        "n": "5. Insertion Sort  Continued__mp4",
+        "t": "vid"
+      },
+      {
+        "n": "6. Program for Insertion Sort",
+        "t": "vid"
+      },
+      {
+        "n": "7. Analysis of Insertion Sort",
+        "t": "vid"
+      },
+      {
+        "n": "8.2 327.InsertionSortC",
+        "t": "pdf"
+      },
+      {
+        "n": "8. Let_s Code Insertion Sort",
+        "t": "vid"
+      },
+      {
+        "n": "9. Comparing Bubble and Insertion Sort",
+        "t": "vid"
+      },
+      {
+        "n": "10. Selection Sort",
+        "t": "vid"
+      },
+      {
+        "n": "11. Program for Selection Sort",
+        "t": "vid"
+      },
+      {
+        "n": "12. Analysis of Selection Sort",
+        "t": "vid"
+      },
+      {
+        "n": "13.1 332.SelectionSortC",
+        "t": "pdf"
+      },
+      {
+        "n": "13. Let_s Code Selection Sort",
+        "t": "vid"
+      },
+      {
+        "n": "14. Idea behind Quick Sort",
+        "t": "vid"
+      },
+      {
+        "n": "15. Quick Sort",
+        "t": "vid"
+      },
+      {
+        "n": "16. Analysis of Quick Sort",
+        "t": "vid"
+      },
+      {
+        "n": "17. Analysis of Quick Sort Continued__mp4",
+        "t": "vid"
+      },
+      {
+        "n": "18.2 337.QuickSortC",
+        "t": "pdf"
+      },
+      {
+        "n": "18. Let_s Code Quick Sort",
+        "t": "vid"
+      },
+      {
+        "n": "19.2 338.MergingFunctionC",
+        "t": "pdf"
+      },
+      {
+        "n": "19. Merging",
+        "t": "vid"
+      },
+      {
+        "n": "20. Iterative Merge Sort",
+        "t": "vid"
+      },
+      {
+        "n": "21.1 IMergeSortNEW",
+        "t": "pdf"
+      },
+      {
+        "n": "21. Let_s Code Iterative Merge Sort",
+        "t": "vid"
+      },
+      {
+        "n": "22. Recursive Merge Sort",
+        "t": "vid"
+      },
+      {
+        "n": "23.2 342.RecursiveMergeSortC",
+        "t": "pdf"
+      },
+      {
+        "n": "23. Let_s Code Recursive Merge Sort",
+        "t": "vid"
+      },
+      {
+        "n": "24. Count Sort",
+        "t": "vid"
+      },
+      {
+        "n": "25.1 344.CountSortFunctionC",
+        "t": "pdf"
+      },
+      {
+        "n": "25. Let_s Code Count Sort",
+        "t": "vid"
+      },
+      {
+        "n": "26. Radix Sort",
+        "t": "vid"
+      },
+      {
+        "n": "27. Bin  Bucket Sort",
+        "t": "vid"
+      },
+      {
+        "n": "28. Shell Sort",
+        "t": "vid"
+      },
+      {
+        "n": "29.1 348.ShellSortC",
+        "t": "pdf"
+      }
+    ]
+  },
+  {
+    "id": "s20",
+    "name": "21. Hashing Technique",
+    "folderId": "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF",
+    "videos": [
+      {
+        "n": "1. Introduction to Hashing",
+        "t": "vid"
+      },
+      {
+        "n": "2. Chaining",
+        "t": "vid"
+      },
+      {
+        "n": "3.1 351.HashingC",
+        "t": "pdf"
+      },
+      {
+        "n": "3. Let_s Code Chaining",
+        "t": "vid"
+      },
+      {
+        "n": "4. Linear Probing",
+        "t": "vid"
+      },
+      {
+        "n": "5.2 353.LinearProbingC",
+        "t": "pdf"
+      },
+      {
+        "n": "5. Let_s Code Linear Probing",
+        "t": "vid"
+      },
+      {
+        "n": "6. Quadratic Probing",
+        "t": "vid"
+      },
+      {
+        "n": "7. Double Hashing",
+        "t": "vid"
+      },
+      {
+        "n": "8. Hash Function Ideas",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s21",
+    "name": "22. Graphs",
+    "folderId": "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe",
+    "videos": [
+      {
+        "n": "1. Introduction to Graphs",
+        "t": "vid"
+      },
+      {
+        "n": "2. Representation of Undirected Graph",
+        "t": "vid"
+      },
+      {
+        "n": "3. Representation of Directed Graphs",
+        "t": "vid"
+      },
+      {
+        "n": "4. Breadth First Search",
+        "t": "vid"
+      },
+      {
+        "n": "5. Program for BFS",
+        "t": "vid"
+      },
+      {
+        "n": "6. Depth First Search",
+        "t": "vid"
+      },
+      {
+        "n": "7. Program for DFS",
+        "t": "vid"
+      },
+      {
+        "n": "8.1 Graph BFS DFS",
+        "t": "pdf"
+      },
+      {
+        "n": "8. Let_s Code BFS _ DFS",
+        "t": "vid"
+      },
+      {
+        "n": "10. Prim_s Minimum Cost Spanning Tree",
+        "t": "vid"
+      },
+      {
+        "n": "11. Prim_s Program",
+        "t": "vid"
+      },
+      {
+        "n": "12. Let_s Code Prim_s using",
+        "t": "vid"
+      },
+      {
+        "n": "13. Kruskal_s Minimum Cost Spanning Tree",
+        "t": "vid"
+      },
+      {
+        "n": "14. Disjoint Subsets",
+        "t": "vid"
+      },
+      {
+        "n": "15. Kruskal_s Program",
+        "t": "vid"
+      },
+      {
+        "n": "16. Let_s Code Kruskla_s Program",
+        "t": "vid"
+      }
+    ]
+  },
+  {
+    "id": "s22",
+    "name": "23. Asymptotic Notations",
+    "folderId": "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T",
+    "videos": [
+      {
+        "n": "1. Asymptotic Notations Big Oh , Omega , Theta",
+        "t": "vid"
+      },
+      {
+        "n": "2.1 1. TailHead Recursion",
+        "t": "pdf"
+      },
+      {
+        "n": "2.2 2. StaticGlobal",
+        "t": "pdf"
+      },
+      {
+        "n": "2.3 7. Factorial",
+        "t": "pdf"
+      },
+      {
+        "n": "2.4 20 Delete",
+        "t": "pdf"
+      },
+      {
+        "n": "2.5 13. Combination",
+        "t": "pdf"
+      },
+      {
+        "n": "2.7 26. isSorted",
+        "t": "pdf"
+      },
+      {
+        "n": "2.8 3. TreeRecursion",
+        "t": "pdf"
+      },
+      {
+        "n": "2.9 10. Tayloer Series Iterative",
+        "t": "pdf"
+      },
+      {
+        "n": "2.10 15. Static Dyn Array",
+        "t": "pdf"
+      },
+      {
+        "n": "2.11 12. Fibonacci",
+        "t": "pdf"
+      },
+      {
+        "n": "2.12 11. Taylor",
+        "t": "pdf"
+      },
+      {
+        "n": "2.13 28. Merge 2",
+        "t": "pdf"
+      },
+      {
+        "n": "2.14 8. Power",
+        "t": "pdf"
+      },
+      {
+        "n": "2.15 29. Array Menu C",
+        "t": "pdf"
+      },
+      {
+        "n": "2.16 14. Tower of Hanoi",
+        "t": "pdf"
+      },
+      {
+        "n": "2.17 4. Indirect Recursion",
+        "t": "pdf"
+      },
+      {
+        "n": "2.18 32. Array C++ class",
+        "t": "pdf"
+      },
+      {
+        "n": "2.20 9. Taylor Series",
+        "t": "pdf"
+      },
+      {
+        "n": "2.21 19. Insert",
+        "t": "pdf"
+      },
+      {
+        "n": "2.22 6 Sum of N ",
+        "t": "pdf"
+      },
+      {
+        "n": "2.23 34. Diag Matrix Cpp",
+        "t": "pdf"
+      },
+      {
+        "n": "2.24 23. Get Set",
+        "t": "pdf"
+      },
+      {
+        "n": "2.26 41. Create and Display LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.27 24. Reverse Array",
+        "t": "pdf"
+      },
+      {
+        "n": "2.28 72. Circular Queue",
+        "t": "pdf"
+      },
+      {
+        "n": "2.29 37. Sparse Matrix C",
+        "t": "pdf"
+      },
+      {
+        "n": "2.30 27. Merge",
+        "t": "pdf"
+      },
+      {
+        "n": "2.31 83. Quick Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.32 18.   2D Array",
+        "t": "pdf"
+      },
+      {
+        "n": "2.33 30. Set Operations",
+        "t": "pdf"
+      },
+      {
+        "n": "2.34 74. TreeCpp",
+        "t": "pdf"
+      },
+      {
+        "n": "2.35 25. is Sorted",
+        "t": "pdf"
+      },
+      {
+        "n": "2.36 38. Sparse Matrix C++",
+        "t": "pdf"
+      },
+      {
+        "n": "2.37 63. Stack Array",
+        "t": "pdf"
+      },
+      {
+        "n": "2.39 80. Bubble Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.40 69. Evaulation Postfix",
+        "t": "pdf"
+      },
+      {
+        "n": "2.41 36. Lower Triangular CPP",
+        "t": "pdf"
+      },
+      {
+        "n": "2.42 40. Polynomial Array",
+        "t": "pdf"
+      },
+      {
+        "n": "2.43 55. Reverse LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.44 43. Count SumLinked List",
+        "t": "pdf"
+      },
+      {
+        "n": "2.45 35. Lower Triangular C",
+        "t": "pdf"
+      },
+      {
+        "n": "2.46 60. Doubly Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "2.47 57. Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "2.48 56. SortedInsert LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.49 IMergeSortNEW",
+        "t": "pdf"
+      },
+      {
+        "n": "2.50 50. Deleteing LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.51 45. Search LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.52 76. BST Insert Delete",
+        "t": "pdf"
+      },
+      {
+        "n": "2.54 44. Max LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.57 89. Graph",
+        "t": "pdf"
+      },
+      {
+        "n": "2.59 51. isLoop LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.60 22. BinarySearch",
+        "t": "pdf"
+      },
+      {
+        "n": "2.61 54. Remove Duplicate LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.62 77. AVL ",
+        "t": "pdf"
+      },
+      {
+        "n": "2.63 93. Linear Probing",
+        "t": "pdf"
+      },
+      {
+        "n": "2.64 85. Merge Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.65 90. Hashing",
+        "t": "pdf"
+      },
+      {
+        "n": "2.66 86. Recursive Merge Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.67 78. AVL #2",
+        "t": "pdf"
+      },
+      {
+        "n": "2.68 52. isSorted LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.69 58. LinkedList CPP",
+        "t": "pdf"
+      },
+      {
+        "n": "2.70 65. Stack Linked List CPP",
+        "t": "pdf"
+      },
+      {
+        "n": "2.71 87. Count Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.73 46. Insert in LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.74 HeapSort New",
+        "t": "pdf"
+      },
+      {
+        "n": "2.76 95. Tree Level Order Traversal",
+        "t": "pdf"
+      },
+      {
+        "n": "2.77 48. Concat LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.78 59. Circluar Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "2.79 81. Insertion Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.80 42. Deleting from LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.81 47. LinearLinkedList",
+        "t": "pdf"
+      },
+      {
+        "n": "2.82 61. Polynomial Linked List",
+        "t": "pdf"
+      },
+      {
+        "n": "2.83 33. Diag Matrix C",
+        "t": "pdf"
+      },
+      {
+        "n": "2.84 49. Create LL using Insert",
+        "t": "pdf"
+      },
+      {
+        "n": "2.85 73. Queue LL",
+        "t": "pdf"
+      },
+      {
+        "n": "2.86 64. Stack Array CPP",
+        "t": "pdf"
+      },
+      {
+        "n": "2.87 82. Selection Sort",
+        "t": "pdf"
+      },
+      {
+        "n": "2.88 67. Parantheses Matching",
+        "t": "pdf"
+      },
+      {
+        "n": "2.89 31. Array C++ #2",
+        "t": "pdf"
+      },
+      {
+        "n": "2.90 75. Tree",
+        "t": "pdf"
+      },
+      {
+        "n": "2.91 94. Graph BFS DFS",
+        "t": "pdf"
+      },
+      {
+        "n": "2.92 68. InToPost",
+        "t": "pdf"
+      },
+      {
+        "n": "2.93 66. Stack LL C",
+        "t": "pdf"
+      }
+    ]
+  }
+]
+;
 
     const COLORS = [
       { bg: '#1a1f35', icon: '#6c8aff', fill: '#6c8aff' },
