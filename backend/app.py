@@ -49,8 +49,8 @@ SCOPES     = ['https://www.googleapis.com/auth/drive.readonly']
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dsa-tracker-change-in-production')
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_placeholder')
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_placeholder')
+# stripe.api_key is set dynamically in routes
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 COURSE_PRICE_AMOUNT = int(os.environ.get('COURSE_PRICE_AMOUNT', 199900)) # Default 1999.00 INR (in paise)
 COURSE_PRICE_CURRENCY = os.environ.get('COURSE_PRICE_CURRENCY', 'inr')
 
@@ -193,7 +193,7 @@ def redeem_code():
 
 # ── Stripe Payment Endpoints ─────────────────────────────────────
 @app.route('/api/checkout', methods=['POST'])
-def create_checkout_session():
+def create_checkout_session():\n    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer '):
         return jsonify({'error': 'Unauthorized'}), 401
@@ -236,7 +236,7 @@ def create_checkout_session():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/webhook/stripe', methods=['POST'])
-def stripe_webhook():
+def stripe_webhook():\n    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
     payload = request.data
     sig_header = request.headers.get('Stripe-Signature')
 
@@ -368,7 +368,7 @@ def list_files(folder_id):
 
 
 @app.route('/api/stream/<file_id>')
-def stream_video(file_id):
+def stream_video(file_id):\n    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
     # Verify auth token and check explicitly if paid 
     auth_token = request.args.get('token')
     is_paid = False
