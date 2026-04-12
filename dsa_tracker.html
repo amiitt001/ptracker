@@ -880,7 +880,7 @@
     </div>
     <div class="modal-player-area">
       <div class="iframe-ratio-box" id="iframe-wrap" style="display:none">
-        <iframe id="video-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        <video id="video-iframe" controls autoplay playsinline controlsList="nodownload" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
       </div>
       <div class="modal-loading-state" id="modal-loading">
         <div class="modal-spinner"></div>
@@ -1375,7 +1375,10 @@
         return;
       }
 
-      iframe.src            = `https://drive.google.com/file/d/${fileId}/preview`;
+      // Important: Use API directly so the proxy forwards bytes!
+      iframe.src            = `${API_BASE}/api/stream/${fileId}`;
+      iframe.onended        = markDoneAndNext;
+      
       wrap.style.display    = 'block';
       loading.style.display = 'none';
     }
@@ -1384,7 +1387,9 @@
       const modal = document.getElementById('video-modal');
       modal.classList.remove('open');
       document.body.style.overflow = '';
-      document.getElementById('video-iframe').src = '';
+      const iframe = document.getElementById('video-iframe');
+      iframe.pause();
+      iframe.src = '';
       document.getElementById('iframe-wrap').style.display   = 'none';
       const loading = document.getElementById('modal-loading');
       loading.style.display = 'flex';

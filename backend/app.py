@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 # Load .env from the backend directory (where this file lives)
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, Response, jsonify, request, send_file
+import requests
 from flask_cors import CORS
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -235,6 +236,40 @@ def list_files(folder_id):
         return jsonify({'files': resp.get('files', []), 'folderId': folder_id})
     except RuntimeError as e:
         return jsonify({'error': str(e), 'setup_required': True}), 503
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/stream/<file_id>')
+def stream_video(file_id):
+    svc = get_service()
+    creds = svc._http.credentials
+    # Refresh credentials if theoretically expired
+    if not creds.valid and creds.refresh_token:
+        try:
+            creds.refresh(Request())
+        except Exception:
+            pass
+
+    url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
+    headers = {'Authorization': f'Bearer {creds.token}'}
+    if 'Range' in request.headers:
+        headers['Range'] = request.headers['Range']
+
+    try:
+        r = requests.get(url, headers=headers, stream=True)
+        # Use generator to stream chunks safely
+        def generate():
+            for chunk in r.iter_content(chunk_size=1024 * 1024):
+                if chunk:
+                    yield chunk
+
+        resp = Response(generate(), status=r.status_code)
+        # Forward necessary headers
+        for key in ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges']:
+            if key in r.headers:
+                resp.headers[key] = r.headers[key]
+        return resp
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
