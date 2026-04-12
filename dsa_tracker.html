@@ -768,7 +768,128 @@
       background: transparent; color: var(--text2); cursor: pointer; transition: all .15s;
     }
     .btn-logout:hover { border-color: #ff6c6c; color: #ff6c6c; background: rgba(255,108,108,0.06); }
-  </style>
+  
+    /* UDEMY STYLE LAYOUT */
+    .main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .main-player-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+    .player-container {
+      background: #000;
+      position: relative;
+      width: 100%;
+    }
+    .iframe-ratio-box {
+      position: relative;
+      padding-top: 56.25%; /* 16:9 */
+    }
+    .modal-loading-state {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; background: var(--bg2);
+    }
+    .modal-spinner {
+      width: 38px; height: 38px;
+      border: 3px solid var(--border2); border-top-color: var(--green);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+    }
+    .player-below {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .player-label {
+      font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 4px;
+    }
+    .player-title {
+      font-size: 22px; font-weight: 600; color: var(--text);
+    }
+    .player-btns {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 12px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      position: relative;
+    }
+    .tab.active {
+      color: var(--text);
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: var(--text);
+    }
+    
+    .course-sidebar {
+      width: 380px;
+      min-width: 380px;
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+    .sidebar-header-box {
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 15px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .sidebar-sections-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .sidebar-sections-wrapper::-webkit-scrollbar { width: 4px; }
+    .sidebar-sections-wrapper::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* Fix section details for sidebar */
+    .course-sidebar .section-detail {
+        margin-bottom: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+    }
+
+    @media (max-width: 900px) {
+      .main { flex-direction: column; height: auto; overflow: visible; }
+      .course-sidebar { width: 100%; min-width: 100%; border-left: none; border-top: 1px solid var(--border); }
+    }
+
+</style>
 </head>
 
 <body>
@@ -802,100 +923,81 @@
       </div>
     </div>
 
-    <!-- PLAYER PANEL -->
-    <div class="player-panel" id="player-panel">
-      <div class="player-inner">
-        <div class="player-info">
-          <div class="player-label">▶ Now Playing</div>
-          <div class="player-title" id="player-title">—</div>
-          <div class="player-section" id="player-section">—</div>
-        </div>
-        <div class="player-btns">
-          <button class="btn btn-green" onclick="openVideoModal()">▶ Play Video</button>
-          <button class="btn" onclick="markDoneAndNext()">✓ Mark done + Next</button>
-          <button class="btn" onclick="openInDrive()">Open in Drive ↗</button>
-          <button class="btn" onclick="closePlayer()">✕</button>
-        </div>
-      </div>
-    </div>
-
+    
     <div class="main">
-      <!-- SIDEBAR -->
-      <div class="sidebar">
-        <div class="sidebar-search">
-          <input class="search-input" type="text" placeholder="Search sections..." id="search-input"
-            oninput="filterSections()" />
+      <div class="main-player-area" id="main-scroll">
+        <div class="player-container" id="player-container">
+          <div class="iframe-ratio-box" id="iframe-wrap" style="display:none">
+            <video id="video-iframe" controls autoplay playsinline controlsList="nodownload" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+          </div>
+          <div class="modal-loading-state" id="modal-loading">
+            <div style="text-align:center">
+              <div style="font-size:32px;margin-bottom:12px;opacity:0.2">▶</div>
+              <div style="color:var(--text2);font-size:14px">Select a video from the course content to start learning</div>
+            </div>
+          </div>
         </div>
-        <div class="sidebar-sections" id="sidebar-sections"></div>
+        
+        <div class="player-below">
+          <div class="player-header">
+            <div>
+               <div class="player-label" id="player-label">Course Overview</div>
+               <div class="player-title" id="player-title">Welcome to the Tracker</div>
+            </div>
+            <div class="player-btns" id="player-btns" style="display:none">
+               <button class="btn btn-green" onclick="markDoneAndNext()">✓ Mark Complete + Next</button>
+               <button class="btn" onclick="openInDrive()">Drive ↗</button>
+            </div>
+          </div>
+          
+          <div class="tabs">
+            <div class="tab active">Overview</div>
+          </div>
+          <div class="tab-content" id="overview-tab">
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-val green" id="stat-done">0</div>
+                <div class="stat-lbl">Videos completed</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="stat-total">0</div>
+                <div class="stat-lbl">Total videos</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="stat-pct">0%</div>
+                <div class="stat-lbl">Overall progress</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="stat-secs">0</div>
+                <div class="stat-lbl">Sections completed</div>
+              </div>
+            </div>
+            <div class="overall-bar-wrap" style="margin-top: 16px;">
+              <div class="overall-top">
+                <span class="overall-label" id="overall-label">0 of 0 videos done</span>
+                <span class="overall-pct" id="overall-pct">0%</span>
+              </div>
+              <div class="big-bar">
+                <div class="big-bar-fill" id="big-bar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- CONTENT -->
-      <div class="content" id="content-area">
-
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-val green" id="stat-done">0</div>
-            <div class="stat-lbl">Videos completed</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total">0</div>
-            <div class="stat-lbl">Total videos</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-pct">0%</div>
-            <div class="stat-lbl">Overall progress</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-secs">0</div>
-            <div class="stat-lbl">Sections completed</div>
-          </div>
+      <div class="course-sidebar">
+        <div class="sidebar-header-box">
+          Course Content
         </div>
-
-        <div class="overall-bar-wrap">
-          <div class="overall-top">
-            <span class="overall-label" id="overall-label">0 of 0 videos done</span>
-            <span class="overall-pct" id="overall-pct">0%</span>
-          </div>
-          <div class="big-bar">
-            <div class="big-bar-fill" id="big-bar" style="width:0%"></div>
-          </div>
+        <div class="sidebar-sections-wrapper" id="sections-container">
+          <!-- Accordions go here -->
         </div>
-
-        <div id="sections-container"></div>
       </div>
     </div>
-  </div>
+    
   <div class="toast" id="toast"></div>
 
-<!-- VIDEO PLAYER MODAL -->
-<div class="video-modal" id="video-modal" onclick="handleModalBackdrop(event)">
-  <div class="video-modal-box">
-    <div class="modal-header">
-      <div class="modal-header-info">
-        <div class="modal-np-label">▶ Now Playing</div>
-        <div class="modal-vid-title" id="modal-title">—</div>
-        <div class="modal-sec-name"  id="modal-section">—</div>
-      </div>
-      <button class="modal-close-btn" onclick="closeVideoModal()">✕</button>
-    </div>
-    <div class="modal-player-area">
-      <div class="iframe-ratio-box" id="iframe-wrap" style="display:none">
-        <video id="video-iframe" controls autoplay playsinline controlsList="nodownload" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
-      </div>
-      <div class="modal-loading-state" id="modal-loading">
-        <div class="modal-spinner"></div>
-        <div class="modal-loading-text">Loading…</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-green" onclick="markDoneAndNext()">✓ Mark done + Next</button>
-      <button class="btn" onclick="openInDrive()">Open in Drive ↗</button>
-      <button class="btn" style="margin-left:auto" onclick="closeVideoModal()">✕ Close</button>
-    </div>
-  </div>
-</div>
-
-  <!-- Firebase SDK -->
+<!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
   <script src="/firebase-config.js"></script>
@@ -1014,9 +1116,7 @@
           state = data.state;
           localStorage.setItem('dsa_tracker_v2', JSON.stringify(state));
           updateStats();
-          renderSidebar();
-          renderContent();
-          renderPlayerPanel();
+          renderAll();
         }
       } catch (e) { console.error('Failed to pull progress from server:', e); }
     }
@@ -1124,7 +1224,7 @@
           renderAll();
           setCurrentVideo(nextSec, 0);
         } else {
-          closePlayer();
+          console.log("Course complete");
           showToast('🎉 Section complete!');
         }
       }
@@ -1152,39 +1252,6 @@
       const q = document.getElementById('search-input').value.toLowerCase();
       document.querySelectorAll('.sidebar-sec-item').forEach(el => {
         el.style.display = el.dataset.name.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-
-    function scrollToSection(sid) {
-      const el = document.getElementById('section_' + sid);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      activeSidebarSec = sid;
-      document.querySelectorAll('.sidebar-sec-item').forEach(el => {
-        el.classList.toggle('active', el.dataset.sid === sid);
-      });
-    }
-
-    function renderSidebar() {
-      const sb = document.getElementById('sidebar-sections');
-      sb.innerHTML = '';
-      SECTIONS.forEach((sec, si) => {
-        const done = countDone(sec), total = sec.videos.length;
-        const pct = Math.round(done / total * 100);
-        const c = COLORS[si % COLORS.length];
-        const el = document.createElement('div');
-        el.className = 'sec-item sidebar-sec-item' + (activeSidebarSec === sec.id ? ' active' : '');
-        el.dataset.sid = sec.id;
-        el.dataset.name = sec.name;
-        el.innerHTML = `
-      <div class="sec-num" style="background:${c.bg};color:${c.icon}">${si + 1}</div>
-      <div class="sec-meta">
-        <div class="sec-name">${sec.name.replace(/^\d+\.\s*/, '')}</div>
-        <div class="sec-prog-text">${done}/${total}</div>
-      </div>
-      <div class="sec-mini-bar"><div class="sec-mini-fill" style="width:${pct}%;background:${c.fill}"></div></div>
-    `;
-        el.onclick = () => { scrollToSection(sec.id); openSections.add(sec.id); renderSections(); };
-        sb.appendChild(el);
       });
     }
 
@@ -1232,7 +1299,7 @@
           <div class="play-icon">${isPlaying ? '▶' : '▷'}</div>
         `;
             row.querySelector('.check-circle').onclick = (e) => toggleCheck(sec, vi, e);
-            row.onclick = (e) => { if (!e.target.classList.contains('check-circle')) { setCurrentVideo(sec, vi); openVideoModal(); } };
+            row.onclick = (e) => { if (!e.target.classList.contains('check-circle')) { playVideo(sec, vi); } };
             vlist.appendChild(row);
           });
           card.appendChild(vlist);
@@ -1244,24 +1311,9 @@
 
     function renderAll() {
       updateStats();
-      renderSidebar();
+      
       renderSections();
     }
-
-    // INIT
-    loadState();
-    renderAll();
-
-    // Auto-open first incomplete section and set current video
-    (function () {
-      const firstIncomp = SECTIONS.find(s => countDone(s) < s.videos.length);
-      if (firstIncomp) {
-        openSections.add(firstIncomp.id);
-        const vi = firstIncomp.videos.findIndex((v, i) => !isDone(firstIncomp.id, i));
-        renderAll();
-        setCurrentVideo(firstIncomp, vi >= 0 ? vi : 0);
-      }
-    })();
 
     // ── VIDEO PLAYER (Google Drive Embed) ────────────────────────
 
@@ -1324,102 +1376,81 @@
       return null;
     }
 
-    function openVideoModal() {
-      if (!currentVideo) return;
-      _loadVideoModal(currentVideo.sec, currentVideo.vi);
-    }
-
-    async function _loadVideoModal(sec, vi) {
-      const modal   = document.getElementById('video-modal');
-      const iframe  = document.getElementById('video-iframe');
-      const wrap    = document.getElementById('iframe-wrap');
+    
+    async function playVideo(sec, vi) {
+      if (!sec) return;
+      currentVideo = { sec, vi };
+      
+      document.getElementById('player-btns').style.display = 'flex';
+      
+      // Update sidebar highlighting
+      renderSections();
+      
+      const iframe = document.getElementById('video-iframe');
+      const wrap = document.getElementById('iframe-wrap');
       const loading = document.getElementById('modal-loading');
 
-      document.getElementById('modal-title').textContent   = sec.videos[vi].n;
-      document.getElementById('modal-section').textContent = sec.name;
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-
-      iframe.src            = '';
-      wrap.style.display    = 'none';
+      iframe.src = '';
+      wrap.style.display = 'none';
       loading.style.display = 'flex';
-      loading.innerHTML     = '<div class="modal-spinner"></div><div class="modal-loading-text">Connecting to backend…</div>';
+      loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Connecting to server...</div>';
 
       const ok = await checkBackend();
       if (!ok) {
-        const url = 'https://drive.google.com/drive/folders/' + (sec.folderId || ROOT_FOLDER);
-        loading.innerHTML = `
-          <div style="text-align:center;padding:32px 24px">
-            <div style="font-size:44px;margin-bottom:14px">⚡</div>
-            <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:8px">Backend not running</div>
-            <div style="color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.8">
-              Run <code style="background:var(--bg3);padding:3px 10px;border-radius:6px;color:var(--green);font-size:12px">python backend/app.py</code><br>to enable direct video playback
-            </div>
-            <button class="btn" onclick="window.open('${url}','_blank')">Open Drive Folder ↗</button>
-          </div>`;
+        loading.innerHTML = '<div style="color:#ff6c6c;font-size:14px;margin-top:12px">Backend not running. Cannot proxy video stream.</div>';
         return;
       }
 
-      loading.innerHTML = '<div class="modal-spinner"></div><div class="modal-loading-text">Finding video in Drive…</div>';
+      loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Finding video in Drive...</div>';
       const fileId = await resolveFileId(sec, vi);
 
       if (!fileId) {
-        const url = 'https://drive.google.com/drive/folders/' + (sec.folderId || ROOT_FOLDER);
-        loading.innerHTML = `
-          <div style="text-align:center;padding:32px 24px">
-            <div style="font-size:44px;margin-bottom:14px">🔍</div>
-            <div style="color:var(--text);font-weight:600;font-size:15px;margin-bottom:8px">Video not found in Drive</div>
-            <div style="color:var(--text2);font-size:13px;margin-bottom:20px">Could not match this video to a file in the folder</div>
-            <button class="btn" onclick="window.open('${url}','_blank')">Open Drive Folder ↗</button>
-          </div>`;
+        loading.innerHTML = '<div style="font-size:32px;margin-bottom:12px">🔍</div><div style="color:var(--text2);font-size:14px">Video not found in Drive folder</div>';
         return;
       }
 
-      // Important: Use API directly so the proxy forwards bytes!
-      iframe.src            = `${API_BASE}/api/stream/${fileId}`;
-      iframe.onended        = markDoneAndNext;
-      
-      wrap.style.display    = 'block';
+      iframe.src = `${API_BASE}/api/stream/${fileId}`;
+      iframe.onended = markDoneAndNext;
+      wrap.style.display = 'block';
       loading.style.display = 'none';
     }
 
-    function closeVideoModal() {
-      const modal = document.getElementById('video-modal');
-      modal.classList.remove('open');
-      document.body.style.overflow = '';
-      const iframe = document.getElementById('video-iframe');
-      iframe.pause();
-      iframe.src = '';
-      document.getElementById('iframe-wrap').style.display   = 'none';
-      const loading = document.getElementById('modal-loading');
-      loading.style.display = 'flex';
-      loading.innerHTML = '<div class="modal-spinner"></div><div class="modal-loading-text">Loading…</div>';
+    function setCurrentVideo(sec, vi) {
+      playVideo(sec, vi);
     }
-
-    function handleModalBackdrop(e) {
-      if (e.target.id === 'video-modal') closeVideoModal();
-    }
-
-    // ── FIREBASE AUTH GUARD ─────────────────────────────────
+    
+// ── FIREBASE AUTH GUARD ─────────────────────────────────
     firebase.initializeApp(firebaseConfig);
     const _auth = firebase.auth();
 
-    _auth.onAuthStateChanged(function(user) {
-      // Remove loading overlay
+        _auth.onAuthStateChanged(async function(user) {
       const overlay = document.getElementById('fb-loading');
       if (overlay) overlay.remove();
 
-      if (!user) {
-        window.location.href = '/auth';
-        return;
-      }
-      // Show user info in topbar
+      if (!user) { window.location.href = '/auth'; return; }
       const display = user.displayName || user.email.split('@')[0];
-      document.getElementById('user-name').textContent   = display;
-      document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
+      document.getElementById('user-name').textContent = display;
+      if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
 
-      // Pull state after login
-      pullStateFromServer();
+      await pullStateFromServer();
+      
+      // Auto-start first unwatched video!
+      let found = false;
+      for (const sec of SECTIONS) {
+        for (let i = 0; i < sec.videos.length; i++) {
+          if (!isDone(sec.id, i)) {
+            openSections.add(sec.id);
+            playVideo(sec, i);
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+      if (!found && SECTIONS.length > 0) {
+        openSections.add(SECTIONS[0].id);
+        playVideo(SECTIONS[0], 0);
+      }
     });
 
     function logout() {
