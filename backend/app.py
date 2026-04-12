@@ -11,6 +11,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 from flask import Flask, Response, jsonify, request, send_file
 import requests
+import re
 from flask_cors import CORS
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -230,10 +231,18 @@ def list_files(folder_id):
         resp = svc.files().list(
             q        = f"'{folder_id}' in parents and trashed=false",
             fields   = "files(id, name, mimeType)",
-            orderBy  = "name",
             pageSize = 300
         ).execute()
-        return jsonify({'files': resp.get('files', []), 'folderId': folder_id})
+        
+        files = resp.get('files', [])
+        
+        # Natural sort so "10. Video" comes after "2. Video" instead of before
+        def natural_keys(item):
+            return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', item.get('name', ''))]
+        
+        files.sort(key=natural_keys)
+
+        return jsonify({'files': files, 'folderId': folder_id})
     except RuntimeError as e:
         return jsonify({'error': str(e), 'setup_required': True}), 503
     except Exception as e:
