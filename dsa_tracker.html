@@ -3021,6 +3021,7 @@
     ];
 
     let state = {};
+    let isPaid = false;
     let currentVideo = null;
     let openSections = new Set(['s5']);
     let activeSidebarSec = null;
@@ -3068,6 +3069,7 @@
         });
         if (!res.ok) return;
         const data = await res.json();
+        if (data.is_paid) isPaid = true;
         if (data.state && Object.keys(data.state).length > 0) {
           state = data.state;
           localStorage.setItem('dsa_tracker_v2', JSON.stringify(state));
@@ -3159,6 +3161,31 @@
         if (fileId) { window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank'); return; }
       }
       window.open(DRIVE_BASE + (sec.folderId || ROOT_FOLDER), '_blank');
+    }
+
+    
+    async function buyCourse() {
+       const btn = event.target;
+       const oldText = btn.textContent;
+       btn.textContent = 'Redirecting to checkout...';
+       try {
+           const user = firebase.auth().currentUser;
+           if(!user) return;
+           const res = await fetch(`${API_BASE}/api/checkout`, {
+               method: 'POST',
+               headers: {
+                   'Authorization': 'Bearer ' + await user.getIdToken()
+               }
+           });
+           const data = await res.json();
+           if (data.checkout_url) {
+               window.location.href = data.checkout_url;
+           } else {
+               btn.textContent = 'Error handling checkout';
+           }
+       } catch(e) {
+           btn.textContent = 'Error contacting server';
+       }
     }
 
     function markDoneAndNext() {
@@ -3349,6 +3376,20 @@
       iframe.src = '';
       wrap.style.display = 'none';
       loading.style.display = 'flex';
+      
+      if (!isPaid) {
+          loading.innerHTML = `
+            <div style="text-align:center;padding:32px">
+              <div style="font-size:40px;margin-bottom:12px">🔒</div>
+              <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px">Premium Course Locked</div>
+              <div style="font-size:14px;color:var(--text2);margin-bottom:24px;max-width:400px">Purchase the course to instantly unlock lifetime access to all lectures, codebase resources, and progress tracking.</div>
+              <button class="btn btn-green" onclick="buyCourse()" style="font-size:15px;padding:12px 24px">Unlock Full Access — ₹1999</button>
+            </div>
+          `;
+          document.getElementById('player-btns').style.display = 'none';
+          return;
+      }
+      
       loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Connecting to server...</div>';
 
       const ok = await checkBackend();
@@ -3365,7 +3406,8 @@
         return;
       }
 
-      iframe.src = `${API_BASE}/api/stream/${fileId}`;
+      const token = await firebase.auth().currentUser.getIdToken();
+      iframe.src = `${API_BASE}/api/stream/${fileId}?token=` + token;
       iframe.onended = markDoneAndNext;
       wrap.style.display = 'block';
       loading.style.display = 'none';
@@ -3376,6 +3418,13 @@
     }
     
 // ── FIREBASE AUTH GUARD ─────────────────────────────────
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success')) {
+        showToast("🎉 Payment Successful! Your course is unlocked.");
+        window.history.replaceState({}, document.title, "/");
+    }
+
     firebase.initializeApp(firebaseConfig);
     const _auth = firebase.auth();
 

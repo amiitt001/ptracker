@@ -12,6 +12,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 from flask import Flask, Response, jsonify, request, send_file
 import requests
 import re
+import stripe
 from flask_cors import CORS
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -47,10 +48,18 @@ DB_PATH    = os.path.join(BASE_DIR, 'users.db')
 SCOPES     = ['https://www.googleapis.com/auth/drive.readonly']
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dsa-tracker-change-in-production')
 serializer = URLSafeTimedSerializer(SECRET_KEY)
+
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_placeholder')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_placeholder')
+COURSE_PRICE_AMOUNT = int(os.environ.get('COURSE_PRICE_AMOUNT', 199900)) # Default 1999.00 INR (in paise)
+COURSE_PRICE_CURRENCY = os.environ.get('COURSE_PRICE_CURRENCY', 'inr')
+
 _service   = None
 
 
+
 # ── Database ───────────────────────────────────────────────────────
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute('''
@@ -66,9 +75,15 @@ def init_db():
         CREATE TABLE IF NOT EXISTS progress (
             uid TEXT PRIMARY KEY,
             state_json TEXT NOT NULL,
+            is_paid BOOLEAN DEFAULT 0,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Try gracefully altering table if old schema exists
+    try:
+        conn.execute("ALTER TABLE progress ADD COLUMN is_paid BOOLEAN DEFAULT 0")
+    except Exception:
+        pass
     conn.commit()
     conn.close()
 
@@ -127,11 +142,11 @@ def handle_progress():
     conn = get_db()
     
     if request.method == 'GET':
-        row = conn.execute('SELECT state_json FROM progress WHERE uid = ?', (uid,)).fetchone()
+        row = conn.execute('SELECT state_json, is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
         conn.close()
         if row:
-            return jsonify({'state': json.loads(row['state_json'])}), 200
-        return jsonify({'state': {}}), 200
+            return jsonify({'state': json.loads(row['state_json']), 'is_paid': bool(row['is_paid'])}), 200
+        return jsonify({'state': {}, 'is_paid': False}), 200
 
     if request.method == 'POST':
         state_data = request.json.get('state', {})
@@ -146,6 +161,79 @@ def handle_progress():
         conn.commit()
         conn.close()
         return jsonify({'status': 'ok'}), 200
+
+
+# ── Stripe Payment Endpoints ─────────────────────────────────────
+@app.route('/api/checkout', methods=['POST'])
+def create_checkout_session():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    uid = 'anonymous'
+    if FIREBASE_ADMIN:
+        try:
+            id_token = auth_header[7:]
+            decoded = fb_auth.verify_id_token(id_token)
+            uid = decoded['uid']
+        except Exception:
+            return jsonify({'error': 'Invalid token'}), 401
+    else:
+        uid = auth_header[7:]
+
+    domain_url = request.headers.get('Origin', 'http://localhost:5000')
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': COURSE_PRICE_CURRENCY,
+                    'product_data': {
+                        'name': 'DSA Course Tracker Premium Access',
+                    },
+                    'unit_amount': COURSE_PRICE_AMOUNT,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=domain_url + '?payment_success=true',
+            cancel_url=domain_url + '?payment_cancelled=true',
+            client_reference_id=uid
+        )
+        return jsonify({'checkout_url': session.url}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/webhook/stripe', methods=['POST'])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        return 'Invalid signature', 400
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        uid = session.get('client_reference_id')
+        if uid:
+            conn = get_db()
+            conn.execute('''
+                INSERT INTO progress (uid, state_json, is_paid)
+                VALUES (?, '{}', 1)
+                ON CONFLICT(uid) DO UPDATE SET is_paid = 1
+            ''', (uid,))
+            conn.commit()
+            conn.close()
+
+    return jsonify({'status': 'success'}), 200
+
 
 # ── Page routes ────────────────────────────────────────────────────
 @app.route('/')
@@ -251,6 +339,37 @@ def list_files(folder_id):
 
 @app.route('/api/stream/<file_id>')
 def stream_video(file_id):
+    # Verify auth token and check explicitly if paid 
+    auth_token = request.args.get('token')
+    is_paid = False
+    
+    if not auth_token:
+        # Also try header for completeness, though Video tags use src=... url params
+        auth_hdr = request.headers.get('Authorization','')
+        if auth_hdr.startswith('Bearer '):
+            auth_token = auth_hdr[7:]
+
+    if auth_token:
+        # decode uid
+        try:
+            if FIREBASE_ADMIN:
+                decoded = fb_auth.verify_id_token(auth_token)
+                uid = decoded['uid']
+            else:
+                uid = auth_token
+            # check db
+            conn = get_db()
+            row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+            conn.close()
+            if row and row['is_paid']:
+                is_paid = True
+        except:
+            pass
+
+    if not is_paid:
+        # Instead of 402, returning a 403 or sending an empty chunk blocks it properly
+        return jsonify({'error': 'Payment required to view video.'}), 402
+
     svc = get_service()
     creds = svc._http.credentials
     # Refresh credentials if theoretically expired
