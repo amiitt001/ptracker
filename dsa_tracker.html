@@ -2561,7 +2561,8 @@
            if (data.checkout_url) {
                window.location.href = data.checkout_url;
            } else {
-               btn.textContent = 'Error handling checkout';
+               btn.textContent = data.error || 'Access Denied / Error';
+               console.error('Checkout Error:', data);
            }
        } catch(e) {
            btn.textContent = 'Error contacting server';
