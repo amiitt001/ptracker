@@ -3,6 +3,7 @@ import json
 import os
 import pickle
 import sqlite3
+import time
 
 from dotenv import load_dotenv
 
@@ -61,7 +62,7 @@ _service   = None
 # ── Database ───────────────────────────────────────────────────────
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +90,7 @@ def init_db():
 
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -111,6 +112,35 @@ def extract_uid_from_token(id_token: str) -> str:
     except Exception:
         pass
     return id_token
+
+
+def mark_user_paid(uid: str, retries: int = 3) -> bool:
+    """Upsert paid flag with simple retry for sqlite lock/contention."""
+    for attempt in range(retries):
+        conn = None
+        try:
+            conn = get_db()
+            conn.execute('''
+                INSERT INTO progress (uid, state_json, is_paid)
+                VALUES (?, '{}', 1)
+                ON CONFLICT(uid) DO UPDATE SET is_paid = 1
+            ''', (uid,))
+            conn.commit()
+            return True
+        except sqlite3.OperationalError as e:
+            msg = str(e).lower()
+            if 'locked' in msg and attempt < retries - 1:
+                time.sleep(0.15 * (attempt + 1))
+                continue
+            print(f"[mark_user_paid] sqlite error for uid={uid}: {e}")
+            return False
+        except Exception as e:
+            print(f"[mark_user_paid] unexpected error for uid={uid}: {e}")
+            return False
+        finally:
+            if conn:
+                conn.close()
+    return False
 
 
 # ── Auth endpoint ─────────────────────────────────────────────────
@@ -274,7 +304,7 @@ def verify_checkout_session():
     if not auth_header.startswith('Bearer '):
         return jsonify({'error': 'Unauthorized'}), 401
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     session_id = data.get('session_id', '').strip()
     if not session_id:
         return jsonify({'error': 'Missing session_id'}), 400
@@ -302,14 +332,8 @@ def verify_checkout_session():
     if session_uid and session_uid != uid:
         return jsonify({'error': 'Session user mismatch'}), 403
 
-    conn = get_db()
-    conn.execute('''
-        INSERT INTO progress (uid, state_json, is_paid)
-        VALUES (?, '{}', 1)
-        ON CONFLICT(uid) DO UPDATE SET is_paid = 1
-    ''', (uid,))
-    conn.commit()
-    conn.close()
+    if not mark_user_paid(uid):
+        return jsonify({'error': 'Failed to persist payment status'}), 500
 
     return jsonify({'status': 'success', 'is_paid': True}), 200
 
@@ -332,14 +356,7 @@ def stripe_webhook():
         session = event['data']['object']
         uid = session.get('client_reference_id')
         if uid:
-            conn = get_db()
-            conn.execute('''
-                INSERT INTO progress (uid, state_json, is_paid)
-                VALUES (?, '{}', 1)
-                ON CONFLICT(uid) DO UPDATE SET is_paid = 1
-            ''', (uid,))
-            conn.commit()
-            conn.close()
+            mark_user_paid(uid)
 
     return jsonify({'status': 'success'}), 200
 

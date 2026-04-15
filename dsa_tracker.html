@@ -2829,25 +2829,33 @@
     async function verifyCheckoutReturn(user, sessionId) {
       if (!sessionId) return;
 
-      try {
-        const token = await user.getIdToken();
-        const res = await fetch(`${API_BASE}/api/checkout/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ session_id: sessionId })
-        });
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const token = await user.getIdToken();
+          const res = await fetch(`${API_BASE}/api/checkout/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ session_id: sessionId })
+          });
 
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.is_paid) {
-          isPaid = true;
-          renderAll();
+          if (res.ok) {
+            const data = await res.json();
+            if (data.is_paid) {
+              isPaid = true;
+              renderAll();
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to verify checkout session:', e);
         }
-      } catch (e) {
-        console.error('Failed to verify checkout session:', e);
+
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 600));
+        }
       }
     }
     
