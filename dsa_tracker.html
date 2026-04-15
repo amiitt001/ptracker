@@ -2825,14 +2825,38 @@
     function setCurrentVideo(sec, vi) {
       playVideo(sec, vi);
     }
+
+    async function verifyCheckoutReturn(user, sessionId) {
+      if (!sessionId) return;
+
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`${API_BASE}/api/checkout/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ session_id: sessionId })
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.is_paid) {
+          isPaid = true;
+          renderAll();
+        }
+      } catch (e) {
+        console.error('Failed to verify checkout session:', e);
+      }
+    }
     
 // ── FIREBASE AUTH GUARD ─────────────────────────────────
     
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_success')) {
-        showToast("🎉 Payment Successful! Your course is unlocked.");
-        window.history.replaceState({}, document.title, "/");
-    }
+  const paymentSuccess = urlParams.get('payment_success');
+  const paymentCancelled = urlParams.get('payment_cancelled');
+  const checkoutSessionId = urlParams.get('session_id');
 
     firebase.initializeApp(firebaseConfig);
     const _auth = firebase.auth();
@@ -2845,6 +2869,18 @@
       const display = user.displayName || user.email.split('@')[0];
       document.getElementById('user-name').textContent = display;
       if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
+
+      await verifyCheckoutReturn(user, checkoutSessionId);
+
+      if (paymentSuccess) {
+        showToast("🎉 Payment Successful! Your course is unlocked.");
+      }
+      if (paymentCancelled) {
+        showToast("Payment cancelled. You can try again anytime.");
+      }
+      if (paymentSuccess || paymentCancelled || checkoutSessionId) {
+        window.history.replaceState({}, document.title, "/dashboard");
+      }
 
       await pullStateFromServer();
       
