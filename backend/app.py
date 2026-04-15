@@ -146,6 +146,26 @@ def mark_user_paid(uid: str, retries: int = 3) -> bool:
     return False
 
 
+def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
+    """Validate Stripe Checkout session as paid, optionally binding to user UID."""
+    if not session_id:
+        return False
+    key = os.environ.get('STRIPE_SECRET_KEY')
+    if not key or 'placeholder' in key:
+        return False
+    stripe.api_key = key
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        if session.get('payment_status') != 'paid':
+            return False
+        session_uid = session.get('client_reference_id')
+        if expected_uid and session_uid and session_uid != expected_uid:
+            return False
+        return True
+    except Exception:
+        return False
+
+
 # ── Auth endpoint ─────────────────────────────────────────────────
 @app.route('/api/auth/verify')
 def verify():
@@ -334,10 +354,9 @@ def verify_checkout_session():
     if not session_uid:
         return jsonify({'error': 'Unable to resolve user from checkout session'}), 400
 
-    if not mark_user_paid(session_uid):
-        return jsonify({'error': 'Failed to persist payment status'}), 500
-
-    return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid}), 200
+    persisted = mark_user_paid(session_uid)
+    # Do not block user access if DB persistence has a transient failure.
+    return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid, 'persisted': persisted}), 200
 
 @app.route('/api/webhook/stripe', methods=['POST'])
 def stripe_webhook():
@@ -467,6 +486,7 @@ def stream_video(file_id):
     stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
     # Verify auth token and check explicitly if paid 
     auth_token = request.args.get('token')
+    checkout_session_id = request.args.get('session_id', '').strip()
     is_paid = False
     
     if not auth_token:
@@ -490,6 +510,21 @@ def stream_video(file_id):
             if row and row['is_paid']:
                 is_paid = True
         except:
+            pass
+
+    # Fallback unlock path for successful Stripe return when DB write is delayed/fails.
+    if (not is_paid) and checkout_session_id and auth_token:
+        try:
+            if FIREBASE_ADMIN:
+                decoded = fb_auth.verify_id_token(auth_token)
+                uid = decoded['uid']
+            else:
+                uid = extract_uid_from_token(auth_token)
+
+            if is_paid_checkout_session(checkout_session_id, expected_uid=uid):
+                is_paid = True
+                mark_user_paid(uid)
+        except Exception:
             pass
 
     if not is_paid:

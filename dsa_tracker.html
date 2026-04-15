@@ -2816,7 +2816,10 @@
       }
 
       const token = await firebase.auth().currentUser.getIdToken();
-      iframe.src = `${API_BASE}/api/stream/${fileId}?token=` + token;
+      const savedSessionId = localStorage.getItem('dsa_last_checkout_session') || '';
+      let streamUrl = `${API_BASE}/api/stream/${fileId}?token=` + token;
+      if (savedSessionId) streamUrl += '&session_id=' + encodeURIComponent(savedSessionId);
+      iframe.src = streamUrl;
       iframe.onended = markDoneAndNext;
       wrap.style.display = 'block';
       loading.style.display = 'none';
@@ -2865,6 +2868,10 @@
   const paymentSuccess = urlParams.get('payment_success');
   const paymentCancelled = urlParams.get('payment_cancelled');
   const checkoutSessionId = urlParams.get('session_id');
+
+  if (checkoutSessionId) {
+    localStorage.setItem('dsa_last_checkout_session', checkoutSessionId);
+  }
 
     firebase.initializeApp(firebaseConfig);
     const _auth = firebase.auth();
