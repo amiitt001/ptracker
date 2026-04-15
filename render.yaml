@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     buildCommand: "pip install -r backend/requirements.txt"
-    startCommand: "gunicorn --chdir backend app:app --bind 0.0.0.0:$PORT --threads 8"
+    startCommand: "gunicorn --chdir backend app:app --bind 0.0.0.0:$PORT --threads 2"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"

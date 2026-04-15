@@ -63,6 +63,8 @@ _service   = None
 
 def init_db():
     conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=30000')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,6 +93,7 @@ def init_db():
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
+    conn.execute('PRAGMA busy_timeout=30000')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -300,25 +303,10 @@ def verify_checkout_session():
         return jsonify({'error': 'Missing or Invalid STRIPE_SECRET_KEY in Render settings. Please check your Dashboard.'}), 500
     stripe.api_key = key
 
-    auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
-        return jsonify({'error': 'Unauthorized'}), 401
-
     data = request.get_json(silent=True) or {}
     session_id = data.get('session_id', '').strip()
     if not session_id:
         return jsonify({'error': 'Missing session_id'}), 400
-
-    uid = 'anonymous'
-    if FIREBASE_ADMIN:
-        try:
-            id_token = auth_header[7:]
-            decoded = fb_auth.verify_id_token(id_token)
-            uid = decoded['uid']
-        except Exception:
-            return jsonify({'error': 'Invalid token'}), 401
-    else:
-        uid = extract_uid_from_token(auth_header[7:])
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
@@ -329,13 +317,27 @@ def verify_checkout_session():
         return jsonify({'status': 'pending', 'is_paid': False}), 200
 
     session_uid = session.get('client_reference_id')
-    if session_uid and session_uid != uid:
-        return jsonify({'error': 'Session user mismatch'}), 403
+    if not session_uid:
+        # Backward-compatible fallback if an older checkout session missed client_reference_id.
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            raw_token = auth_header[7:]
+            if FIREBASE_ADMIN:
+                try:
+                    decoded = fb_auth.verify_id_token(raw_token)
+                    session_uid = decoded['uid']
+                except Exception:
+                    session_uid = extract_uid_from_token(raw_token)
+            else:
+                session_uid = extract_uid_from_token(raw_token)
 
-    if not mark_user_paid(uid):
+    if not session_uid:
+        return jsonify({'error': 'Unable to resolve user from checkout session'}), 400
+
+    if not mark_user_paid(session_uid):
         return jsonify({'error': 'Failed to persist payment status'}), 500
 
-    return jsonify({'status': 'success', 'is_paid': True}), 200
+    return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid}), 200
 
 @app.route('/api/webhook/stripe', methods=['POST'])
 def stripe_webhook():
