@@ -156,9 +156,9 @@ def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
     stripe.api_key = key
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-        if session.get('payment_status') != 'paid':
+        if getattr(session, 'payment_status', None) != 'paid':
             return False
-        session_uid = session.get('client_reference_id')
+        session_uid = getattr(session, 'client_reference_id', None)
         if expected_uid and session_uid and session_uid != expected_uid:
             return False
         return True
@@ -333,10 +333,10 @@ def verify_checkout_session():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-    if session.get('payment_status') != 'paid':
+    if getattr(session, 'payment_status', None) != 'paid':
         return jsonify({'status': 'pending', 'is_paid': False}), 200
 
-    session_uid = session.get('client_reference_id')
+    session_uid = getattr(session, 'client_reference_id', None)
     if not session_uid:
         # Backward-compatible fallback if an older checkout session missed client_reference_id.
         auth_header = request.headers.get('Authorization', '')
@@ -375,7 +375,7 @@ def stripe_webhook():
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        uid = session.get('client_reference_id')
+        uid = getattr(session, 'client_reference_id', None)
         if uid:
             mark_user_paid(uid)
 
