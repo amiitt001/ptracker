@@ -1,9 +1,11 @@
 import base64
+import hashlib
 import json
 import os
 import pickle
 import sqlite3
 import time
+import traceback
 
 from dotenv import load_dotenv
 
@@ -101,20 +103,29 @@ def get_db():
 init_db()   # runs on startup (works with gunicorn too)
 
 
-def extract_uid_from_token(id_token: str) -> str:
-    """Best-effort UID extraction when Firebase Admin isn't configured."""
-    if not id_token:
-        return 'anonymous'
-    try:
-        parts = id_token.split('.')
-        if len(parts) >= 2:
-            payload = parts[1]
-            payload += '=' * (-len(payload) % 4)
-            claims = json.loads(base64.urlsafe_b64decode(payload.encode()).decode())
-            return claims.get('user_id') or claims.get('sub') or id_token
-    except Exception:
-        pass
-    return id_token
+def token_to_uid(raw_token: str) -> str:
+    """Convert Firebase token to consistent, short UID hash (Stripe-compatible)."""
+    if not raw_token:
+        return ''
+    # Hash to 64-char hex string (SHA256), then create Stripe-safe UID.
+    hash_val = hashlib.sha256(raw_token.encode()).hexdigest()
+    return 'tok_' + hash_val[:60]
+
+
+def resolve_uid_from_auth_header(auth_header: str) -> str:
+    """Resolve UID from Authorization header across Firebase Admin/non-Admin modes."""
+    if not auth_header.startswith('Bearer '):
+        return ''
+    raw_token = auth_header[7:]
+    if FIREBASE_ADMIN:
+        try:
+            decoded = fb_auth.verify_id_token(raw_token)
+            return decoded['uid']
+        except Exception:
+            pass
+    # When Firebase Admin is OFF, hash the token to create consistent short UID.
+    # This ensures the same token always produces the same UID and passes Stripe limits.
+    return token_to_uid(raw_token)
 
 
 def mark_user_paid(uid: str, retries: int = 3) -> bool:
@@ -166,6 +177,34 @@ def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
         return False
 
 
+@app.route('/api/access/check', methods=['POST'])
+def check_access():
+    """Check whether current user has paid access via DB or Stripe session fallback."""
+    try:
+        auth_header = request.headers.get('Authorization', '')
+        uid = resolve_uid_from_auth_header(auth_header)
+        if not uid:
+            return jsonify({'is_paid': False, 'reason': 'unauthorized'}), 401
+
+        conn = get_db()
+        row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+        conn.close()
+        if row and row['is_paid']:
+            return jsonify({'is_paid': True, 'source': 'db'}), 200
+
+        data = request.get_json(silent=True) or {}
+        session_id = (data.get('session_id') or '').strip()
+        if session_id and is_paid_checkout_session(session_id, expected_uid=uid):
+            mark_user_paid(uid)
+            return jsonify({'is_paid': True, 'source': 'stripe_session'}), 200
+
+        return jsonify({'is_paid': False, 'source': 'none'}), 200
+    except Exception as e:
+        print('[check_access] unexpected error:', e)
+        traceback.print_exc()
+        return jsonify({'is_paid': False, 'reason': 'server_error'}), 200
+
+
 # ── Auth endpoint ─────────────────────────────────────────────────
 @app.route('/api/auth/verify')
 def verify():
@@ -193,19 +232,9 @@ def verify():
 @app.route('/api/progress', methods=['GET', 'POST'])
 def handle_progress():
     auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
+    uid = resolve_uid_from_auth_header(auth_header)
+    if not uid:
         return jsonify({'error': 'No token provided'}), 401
-
-    uid = 'anonymous'
-    if FIREBASE_ADMIN:
-        try:
-            id_token = auth_header[7:]
-            decoded = fb_auth.verify_id_token(id_token)
-            uid = decoded['uid']
-        except Exception:
-            return jsonify({'error': 'Invalid or expired token'}), 401
-    else:
-        uid = extract_uid_from_token(auth_header[7:])
 
     conn = get_db()
     
@@ -235,21 +264,12 @@ def handle_progress():
 @app.route('/api/redeem', methods=['POST'])
 def redeem_code():
     auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
+    uid = resolve_uid_from_auth_header(auth_header)
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = request.json or {}
     coupon_code = data.get('code', '').upper().strip()
-
-    if FIREBASE_ADMIN:
-        try:
-            id_token = auth_header[7:]
-            decoded = fb_auth.verify_id_token(id_token)
-            uid = decoded['uid']
-        except Exception:
-            return jsonify({'error': 'Invalid token'}), 401
-    else:
-        uid = extract_uid_from_token(auth_header[7:])
 
     # Valid Access Codes are now managed via environment variables
     env_codes = os.environ.get('OFFER_CODES', '')
@@ -276,19 +296,9 @@ def create_checkout_session():
         return jsonify({'error': 'Missing or Invalid STRIPE_SECRET_KEY in Render settings. Please check your Dashboard.'}), 500
     stripe.api_key = key
     auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
+    uid = resolve_uid_from_auth_header(auth_header)
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
-    
-    uid = 'anonymous'
-    if FIREBASE_ADMIN:
-        try:
-            id_token = auth_header[7:]
-            decoded = fb_auth.verify_id_token(id_token)
-            uid = decoded['uid']
-        except Exception:
-            return jsonify({'error': 'Invalid token'}), 401
-    else:
-        uid = extract_uid_from_token(auth_header[7:])
 
     domain_url = request.headers.get('Origin', 'http://localhost:5000').rstrip('/')
 
@@ -318,45 +328,38 @@ def create_checkout_session():
 
 @app.route('/api/checkout/verify', methods=['POST'])
 def verify_checkout_session():
-    key = os.environ.get('STRIPE_SECRET_KEY')
-    if not key or 'placeholder' in key:
-        return jsonify({'error': 'Missing or Invalid STRIPE_SECRET_KEY in Render settings. Please check your Dashboard.'}), 500
-    stripe.api_key = key
-
-    data = request.get_json(silent=True) or {}
-    session_id = data.get('session_id', '').strip()
-    if not session_id:
-        return jsonify({'error': 'Missing session_id'}), 400
-
     try:
-        session = stripe.checkout.Session.retrieve(session_id)
+        key = os.environ.get('STRIPE_SECRET_KEY')
+        if not key or 'placeholder' in key:
+            return jsonify({'status': 'error', 'is_paid': False, 'error': 'missing_stripe_key'}), 200
+        stripe.api_key = key
+
+        data = request.get_json(silent=True) or {}
+        session_id = (data.get('session_id') or '').strip()
+        if not session_id:
+            return jsonify({'status': 'error', 'is_paid': False, 'error': 'missing_session_id'}), 200
+
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+        except Exception as e:
+            return jsonify({'status': 'error', 'is_paid': False, 'error': str(e)}), 200
+
+        if session.get('payment_status') != 'paid':
+            return jsonify({'status': 'pending', 'is_paid': False}), 200
+
+        session_uid = session.get('client_reference_id')
+        if not session_uid:
+            session_uid = resolve_uid_from_auth_header(request.headers.get('Authorization', ''))
+
+        if not session_uid:
+            return jsonify({'status': 'error', 'is_paid': False, 'error': 'unable_to_resolve_uid'}), 200
+
+        persisted = mark_user_paid(session_uid)
+        return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid, 'persisted': persisted}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-    if getattr(session, 'payment_status', None) != 'paid':
-        return jsonify({'status': 'pending', 'is_paid': False}), 200
-
-    session_uid = getattr(session, 'client_reference_id', None)
-    if not session_uid:
-        # Backward-compatible fallback if an older checkout session missed client_reference_id.
-        auth_header = request.headers.get('Authorization', '')
-        if auth_header.startswith('Bearer '):
-            raw_token = auth_header[7:]
-            if FIREBASE_ADMIN:
-                try:
-                    decoded = fb_auth.verify_id_token(raw_token)
-                    session_uid = decoded['uid']
-                except Exception:
-                    session_uid = extract_uid_from_token(raw_token)
-            else:
-                session_uid = extract_uid_from_token(raw_token)
-
-    if not session_uid:
-        return jsonify({'error': 'Unable to resolve user from checkout session'}), 400
-
-    persisted = mark_user_paid(session_uid)
-    # Do not block user access if DB persistence has a transient failure.
-    return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid, 'persisted': persisted}), 200
+        print('[verify_checkout_session] unexpected error:', e)
+        traceback.print_exc()
+        return jsonify({'status': 'error', 'is_paid': False, 'error': 'server_exception'}), 200
 
 @app.route('/api/webhook/stripe', methods=['POST'])
 def stripe_webhook():
@@ -496,32 +499,24 @@ def stream_video(file_id):
             auth_token = auth_hdr[7:]
 
     if auth_token:
-        # decode uid
+        # decode uid using consistent resolver
         try:
-            if FIREBASE_ADMIN:
-                decoded = fb_auth.verify_id_token(auth_token)
-                uid = decoded['uid']
-            else:
-                uid = extract_uid_from_token(auth_token)
-            # check db
-            conn = get_db()
-            row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
-            conn.close()
-            if row and row['is_paid']:
-                is_paid = True
+            uid = resolve_uid_from_auth_header('Bearer ' + auth_token)
+            if uid:
+                # check db
+                conn = get_db()
+                row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+                conn.close()
+                if row and row['is_paid']:
+                    is_paid = True
         except:
             pass
 
     # Fallback unlock path for successful Stripe return when DB write is delayed/fails.
     if (not is_paid) and checkout_session_id and auth_token:
         try:
-            if FIREBASE_ADMIN:
-                decoded = fb_auth.verify_id_token(auth_token)
-                uid = decoded['uid']
-            else:
-                uid = extract_uid_from_token(auth_token)
-
-            if is_paid_checkout_session(checkout_session_id, expected_uid=uid):
+            uid = resolve_uid_from_auth_header('Bearer ' + auth_token)
+            if uid and is_paid_checkout_session(checkout_session_id, expected_uid=uid):
                 is_paid = True
                 mark_user_paid(uid)
         except Exception:

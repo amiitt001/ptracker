@@ -185,7 +185,7 @@
       border: 1px solid rgba(59, 130, 246, 0.2); padding: 5px 12px; border-radius: 20px; 
       font-size: 11px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .course-badge-dot { width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 8px #3b82f6; animate: pulse 2s infinite; }
+    .course-badge-dot { width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 8px #3b82f6; animation: pulse 2s infinite; }
     @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 
 </style>
@@ -2765,6 +2765,24 @@
       const iframe = document.getElementById('video-iframe');
       const wrap = document.getElementById('iframe-wrap');
       const loading = document.getElementById('modal-loading');
+      let savedSessionId = localStorage.getItem('dsa_last_checkout_session') || '';
+
+      // Validate stored checkout session against backend access check.
+      // If stale/invalid, clear it so purchase options show again.
+      if (!isPaid && savedSessionId) {
+        const user = firebase.auth().currentUser;
+        if (user) {
+          const hasAccess = await checkPaidAccess(user, savedSessionId);
+          if (hasAccess) {
+            isPaid = true;
+            renderAll();
+          }
+        }
+        if (!isPaid) {
+          localStorage.removeItem('dsa_last_checkout_session');
+          savedSessionId = '';
+        }
+      }
 
       iframe.src = '';
       wrap.style.display = 'none';
@@ -2816,7 +2834,6 @@
       }
 
       const token = await firebase.auth().currentUser.getIdToken();
-      const savedSessionId = localStorage.getItem('dsa_last_checkout_session') || '';
       let streamUrl = `${API_BASE}/api/stream/${fileId}?token=` + token;
       if (savedSessionId) streamUrl += '&session_id=' + encodeURIComponent(savedSessionId);
       iframe.src = streamUrl;
@@ -2861,6 +2878,26 @@
         }
       }
     }
+
+    async function checkPaidAccess(user, sessionId) {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`${API_BASE}/api/access/check`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ session_id: sessionId || '' })
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        return !!data.is_paid;
+      } catch (e) {
+        console.error('Failed to check paid access:', e);
+        return false;
+      }
+    }
     
 // ── FIREBASE AUTH GUARD ─────────────────────────────────
     
@@ -2885,7 +2922,12 @@
       document.getElementById('user-name').textContent = display;
       if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
 
-      await verifyCheckoutReturn(user, checkoutSessionId);
+      if (checkoutSessionId) {
+        const hasAccess = await checkPaidAccess(user, checkoutSessionId);
+        if (hasAccess) {
+          isPaid = true;
+        }
+      }
 
       if (paymentSuccess) {
         showToast("🎉 Payment Successful! Your course is unlocked.");
