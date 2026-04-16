@@ -376,8 +376,8 @@ def stripe_webhook():
     except stripe.error.SignatureVerificationError as e:
         return 'Invalid signature', 400
 
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
+    if event.type == 'checkout.session.completed':
+        session = event.data.object
         uid = getattr(session, 'client_reference_id', None)
         if uid:
             mark_user_paid(uid)
