@@ -35,3 +35,17 @@ services:
         sync: false
       - key: FIREBASE_MEASUREMENT_ID
         value: "G-76Y4J7BJ6K"
+
+      # ── Firebase Admin / Stripe ──────────────────────────────────
+      - key: FIREBASE_SERVICE_ACCOUNT
+        value: "serviceAccountKey.json" # or set an absolute path if mounted elsewhere
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false # preferred on Render: paste the service account JSON secret here
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: COURSE_PRICE_AMOUNT
+        value: "199900"
+      - key: COURSE_PRICE_CURRENCY
+        value: "inr"

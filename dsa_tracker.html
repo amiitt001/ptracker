@@ -2542,13 +2542,17 @@
         }
     }
 
-    async function buyCourse() {
-       const btn = event.target;
-       const oldText = btn.textContent;
+    async function buyCourse(e) {
+       const btn = e && e.currentTarget ? e.currentTarget : document.querySelector('button[onclick^="buyCourse"]');
+       if (!btn) return;
+       btn.disabled = true;
        btn.textContent = 'Redirecting to checkout...';
        try {
            const user = firebase.auth().currentUser;
-           if(!user) return;
+           if(!user) {
+               window.location.href = '/auth';
+               return;
+           }
            const res = await fetch(`${API_BASE}/api/checkout`, {
                method: 'POST',
                headers: {
@@ -2563,9 +2567,11 @@
            } else {
                btn.textContent = data.error || 'Access Denied / Error';
                console.error('Checkout Error:', data);
+               btn.disabled = false;
            }
        } catch(e) {
            btn.textContent = 'Error contacting server';
+           btn.disabled = false;
        }
     }
 
@@ -2800,7 +2806,7 @@
                 <span style="font-size:28px;font-weight:800;color:var(--text)">₹1999</span>
                 <span style="background:var(--green);color:#000;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700">60% OFF</span>
               </div>
-              <button class="btn btn-green" onclick="buyCourse()" style="font-size:16px;padding:14px 32px;width:100%;max-width:300px;box-shadow:0 10px 20px rgba(34,200,138,0.2)">Unlock Everything Now</button>
+              <button class="btn btn-green" onclick="buyCourse(event)" style="font-size:16px;padding:14px 32px;width:100%;max-width:300px;box-shadow:0 10px 20px rgba(34,200,138,0.2)">Unlock Everything Now</button>
               
               <div style="margin-top:24px; border-top: 1px solid var(--border); padding-top: 20px; width: 100%; max-width: 300px;">
                 <div style="font-size:12px; color:var(--text3); margin-bottom:8px; text-align:left">Have an access code?</div>

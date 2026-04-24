@@ -10,7 +10,8 @@ import traceback
 from dotenv import load_dotenv
 
 # Load .env from the backend directory (where this file lives)
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BACKEND_DIR, '.env'))
 
 from flask import Flask, Response, jsonify, request, send_file
 import requests
@@ -28,20 +29,27 @@ try:
     import firebase_admin
     from firebase_admin import credentials as fb_creds
     from firebase_admin import auth as fb_auth
-    _FB_KEY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'serviceAccountKey.json')
-    if os.path.exists(_FB_KEY) and not firebase_admin._apps:
+    _FB_JSON = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip()
+    _FB_KEY = os.environ.get('FIREBASE_SERVICE_ACCOUNT', os.path.join(BACKEND_DIR, 'serviceAccountKey.json'))
+    if _FB_KEY and not os.path.isabs(_FB_KEY):
+        _FB_KEY = os.path.join(BACKEND_DIR, _FB_KEY)
+    if _FB_JSON and not firebase_admin._apps:
+        firebase_admin.initialize_app(fb_creds.Certificate(json.loads(_FB_JSON)))
+        FIREBASE_ADMIN = True
+    elif _FB_KEY and os.path.exists(_FB_KEY) and not firebase_admin._apps:
         firebase_admin.initialize_app(fb_creds.Certificate(_FB_KEY))
         FIREBASE_ADMIN = True
     else:
         FIREBASE_ADMIN = False
-except ImportError:
+except (ImportError, ValueError, json.JSONDecodeError) as e:
+    print(f"[firebase] Admin SDK not configured: {e}")
     FIREBASE_ADMIN = False
 
 app = Flask(__name__)
 CORS(app, origins="*")
 
 # ── Paths ──────────────────────────────────────────────────────────
-BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR   = BACKEND_DIR
 HTML_DIR   = os.path.join(BASE_DIR, '..')
 TOKEN_PATH = os.path.join(BASE_DIR, 'token.pickle')
 CREDS_PATH = os.path.join(BASE_DIR, 'credentials.json')
@@ -104,28 +112,130 @@ init_db()   # runs on startup (works with gunicorn too)
 
 
 def token_to_uid(raw_token: str) -> str:
-    """Convert Firebase token to consistent, short UID hash (Stripe-compatible)."""
+    """Convert an opaque token to a deterministic legacy UID hash."""
     if not raw_token:
         return ''
-    # Hash to 64-char hex string (SHA256), then create Stripe-safe UID.
     hash_val = hashlib.sha256(raw_token.encode()).hexdigest()
     return 'tok_' + hash_val[:60]
 
 
+def decode_firebase_uid_unverified(raw_token: str) -> str:
+    """Read Firebase uid from JWT payload when Admin SDK is unavailable.
+
+    This is only a fallback for deployments that have not configured
+    Firebase Admin yet. The frontend already obtained this token from
+    Firebase; the stable uid avoids payment/progress loss when ID tokens
+    rotate. Configure Firebase Admin in production for verification.
+    """
+    try:
+        parts = raw_token.split('.')
+        if len(parts) < 2:
+            return ''
+        payload = parts[1] + '=' * (-len(parts[1]) % 4)
+        decoded = json.loads(base64.urlsafe_b64decode(payload.encode()).decode())
+        uid = decoded.get('user_id') or decoded.get('sub') or ''
+        return str(uid)[:128]
+    except Exception:
+        return ''
+
+
 def resolve_uid_from_auth_header(auth_header: str) -> str:
     """Resolve UID from Authorization header across Firebase Admin/non-Admin modes."""
+    candidates = resolve_uid_candidates_from_auth_header(auth_header)
+    return candidates[0] if candidates else ''
+
+
+def resolve_uid_candidates_from_auth_header(auth_header: str) -> list:
+    """Return primary uid plus legacy token-hash uid for old rows/sessions."""
     if not auth_header.startswith('Bearer '):
-        return ''
+        return []
     raw_token = auth_header[7:]
+    legacy_uid = token_to_uid(raw_token)
+    primary_uid = ''
     if FIREBASE_ADMIN:
         try:
             decoded = fb_auth.verify_id_token(raw_token)
-            return decoded['uid']
+            primary_uid = decoded['uid']
         except Exception:
-            pass
-    # When Firebase Admin is OFF, hash the token to create consistent short UID.
-    # This ensures the same token always produces the same UID and passes Stripe limits.
-    return token_to_uid(raw_token)
+            return []
+    else:
+        primary_uid = decode_firebase_uid_unverified(raw_token) or legacy_uid
+
+    return list(dict.fromkeys([uid for uid in (primary_uid, legacy_uid) if uid]))
+
+
+def fetch_progress_for_uids(conn, uids):
+    if not uids:
+        return None
+    placeholders = ','.join('?' for _ in uids)
+    rows = conn.execute(
+        f'SELECT uid, state_json, is_paid FROM progress WHERE uid IN ({placeholders})',
+        uids
+    ).fetchall()
+    if not rows:
+        return None
+    if len(rows) == 1:
+        return rows[0]
+
+    primary_uid = uids[0]
+    primary = next((row for row in rows if row['uid'] == primary_uid), None)
+    state_json = '{}'
+    if primary and primary['state_json'] != '{}':
+        state_json = primary['state_json']
+    else:
+        non_empty = next((row['state_json'] for row in rows if row['state_json'] != '{}'), None)
+        if non_empty:
+            state_json = non_empty
+    is_paid = 1 if any(row['is_paid'] for row in rows) else 0
+
+    if primary:
+        conn.execute(
+            'UPDATE progress SET state_json = ?, is_paid = ?, updated_at = CURRENT_TIMESTAMP WHERE uid = ?',
+            (state_json, is_paid, primary_uid)
+        )
+        for row in rows:
+            if row['uid'] != primary_uid:
+                conn.execute('DELETE FROM progress WHERE uid = ?', (row['uid'],))
+    else:
+        chosen = sorted(rows, key=lambda row: (not row['is_paid'], uids.index(row['uid'])))[0]
+        conn.execute(
+            'UPDATE progress SET uid = ?, state_json = ?, is_paid = ?, updated_at = CURRENT_TIMESTAMP WHERE uid = ?',
+            (primary_uid, state_json, is_paid, chosen['uid'])
+        )
+        for row in rows:
+            if row['uid'] != chosen['uid']:
+                conn.execute('DELETE FROM progress WHERE uid = ?', (row['uid'],))
+    conn.commit()
+    return conn.execute('SELECT uid, state_json, is_paid FROM progress WHERE uid = ?', (primary_uid,)).fetchone()
+
+
+def migrate_progress_uid(old_uid: str, new_uid: str):
+    """Move legacy token-hash progress/payment to the stable Firebase uid."""
+    if not old_uid or not new_uid or old_uid == new_uid:
+        return
+    conn = None
+    try:
+        conn = get_db()
+        old = conn.execute('SELECT state_json, is_paid FROM progress WHERE uid = ?', (old_uid,)).fetchone()
+        if not old:
+            return
+        new = conn.execute('SELECT state_json, is_paid FROM progress WHERE uid = ?', (new_uid,)).fetchone()
+        if new:
+            state_json = new['state_json'] if new['state_json'] != '{}' else old['state_json']
+            is_paid = 1 if (new['is_paid'] or old['is_paid']) else 0
+            conn.execute(
+                'UPDATE progress SET state_json = ?, is_paid = ?, updated_at = CURRENT_TIMESTAMP WHERE uid = ?',
+                (state_json, is_paid, new_uid)
+            )
+            conn.execute('DELETE FROM progress WHERE uid = ?', (old_uid,))
+        else:
+            conn.execute('UPDATE progress SET uid = ?, updated_at = CURRENT_TIMESTAMP WHERE uid = ?', (new_uid, old_uid))
+        conn.commit()
+    except Exception as e:
+        print(f"[migrate_progress_uid] failed old={old_uid} new={new_uid}: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 
 def mark_user_paid(uid: str, retries: int = 3) -> bool:
@@ -177,24 +287,44 @@ def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
         return False
 
 
+def is_paid_checkout_session_for_uids(session_id: str, expected_uids: list) -> bool:
+    if not session_id:
+        return False
+    key = os.environ.get('STRIPE_SECRET_KEY')
+    if not key or 'placeholder' in key:
+        return False
+    stripe.api_key = key
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        if session.get('payment_status') != 'paid':
+            return False
+        session_uid = session.get('client_reference_id')
+        return (not session_uid) or session_uid in expected_uids
+    except Exception:
+        return False
+
+
 @app.route('/api/access/check', methods=['POST'])
 def check_access():
     """Check whether current user has paid access via DB or Stripe session fallback."""
     try:
         auth_header = request.headers.get('Authorization', '')
-        uid = resolve_uid_from_auth_header(auth_header)
-        if not uid:
+        uids = resolve_uid_candidates_from_auth_header(auth_header)
+        if not uids:
             return jsonify({'is_paid': False, 'reason': 'unauthorized'}), 401
+        uid = uids[0]
 
         conn = get_db()
-        row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+        row = fetch_progress_for_uids(conn, uids)
         conn.close()
         if row and row['is_paid']:
+            if row['uid'] != uid:
+                migrate_progress_uid(row['uid'], uid)
             return jsonify({'is_paid': True, 'source': 'db'}), 200
 
         data = request.get_json(silent=True) or {}
         session_id = (data.get('session_id') or '').strip()
-        if session_id and is_paid_checkout_session(session_id, expected_uid=uid):
+        if session_id and is_paid_checkout_session_for_uids(session_id, uids):
             mark_user_paid(uid)
             return jsonify({'is_paid': True, 'source': 'stripe_session'}), 200
 
@@ -232,21 +362,24 @@ def verify():
 @app.route('/api/progress', methods=['GET', 'POST'])
 def handle_progress():
     auth_header = request.headers.get('Authorization', '')
-    uid = resolve_uid_from_auth_header(auth_header)
-    if not uid:
+    uids = resolve_uid_candidates_from_auth_header(auth_header)
+    if not uids:
         return jsonify({'error': 'No token provided'}), 401
+    uid = uids[0]
 
     conn = get_db()
     
     if request.method == 'GET':
-        row = conn.execute('SELECT state_json, is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+        row = fetch_progress_for_uids(conn, uids)
         conn.close()
         if row:
+            if row['uid'] != uid:
+                migrate_progress_uid(row['uid'], uid)
             return jsonify({'state': json.loads(row['state_json']), 'is_paid': bool(row['is_paid'])}), 200
         return jsonify({'state': {}, 'is_paid': False}), 200
 
     if request.method == 'POST':
-        state_data = request.json.get('state', {})
+        state_data = (request.get_json(silent=True) or {}).get('state', {})
         state_json = json.dumps(state_data)
         conn.execute('''
             INSERT INTO progress (uid, state_json, updated_at) 
@@ -347,15 +480,16 @@ def verify_checkout_session():
         if session.get('payment_status') != 'paid':
             return jsonify({'status': 'pending', 'is_paid': False}), 200
 
-        session_uid = session.get('client_reference_id')
-        if not session_uid:
-            session_uid = resolve_uid_from_auth_header(request.headers.get('Authorization', ''))
-
-        if not session_uid:
+        uids = resolve_uid_candidates_from_auth_header(request.headers.get('Authorization', ''))
+        if not uids:
             return jsonify({'status': 'error', 'is_paid': False, 'error': 'unable_to_resolve_uid'}), 200
+        uid = uids[0]
+        session_uid = session.get('client_reference_id')
+        if session_uid and session_uid not in uids:
+            return jsonify({'status': 'error', 'is_paid': False, 'error': 'session_user_mismatch'}), 403
 
-        persisted = mark_user_paid(session_uid)
-        return jsonify({'status': 'success', 'is_paid': True, 'uid': session_uid, 'persisted': persisted}), 200
+        persisted = mark_user_paid(uid)
+        return jsonify({'status': 'success', 'is_paid': True, 'uid': uid, 'persisted': persisted}), 200
     except Exception as e:
         print('[verify_checkout_session] unexpected error:', e)
         traceback.print_exc()
@@ -364,6 +498,8 @@ def verify_checkout_session():
 @app.route('/api/webhook/stripe', methods=['POST'])
 def stripe_webhook():
     stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+    if not STRIPE_WEBHOOK_SECRET:
+        return 'Webhook secret not configured', 500
     payload = request.data
     sig_header = request.headers.get('Stripe-Signature')
 
@@ -378,7 +514,7 @@ def stripe_webhook():
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        uid = getattr(session, 'client_reference_id', None)
+        uid = session.get('client_reference_id')
         if uid:
             mark_user_paid(uid)
 
@@ -499,24 +635,26 @@ def stream_video(file_id):
             auth_token = auth_hdr[7:]
 
     if auth_token:
-        # decode uid using consistent resolver
         try:
-            uid = resolve_uid_from_auth_header('Bearer ' + auth_token)
-            if uid:
-                # check db
+            uids = resolve_uid_candidates_from_auth_header('Bearer ' + auth_token)
+            uid = uids[0] if uids else ''
+            if uids:
                 conn = get_db()
-                row = conn.execute('SELECT is_paid FROM progress WHERE uid = ?', (uid,)).fetchone()
+                row = fetch_progress_for_uids(conn, uids)
                 conn.close()
                 if row and row['is_paid']:
                     is_paid = True
+                    if row['uid'] != uid:
+                        migrate_progress_uid(row['uid'], uid)
         except:
             pass
 
     # Fallback unlock path for successful Stripe return when DB write is delayed/fails.
     if (not is_paid) and checkout_session_id and auth_token:
         try:
-            uid = resolve_uid_from_auth_header('Bearer ' + auth_token)
-            if uid and is_paid_checkout_session(checkout_session_id, expected_uid=uid):
+            uids = resolve_uid_candidates_from_auth_header('Bearer ' + auth_token)
+            uid = uids[0] if uids else ''
+            if uid and is_paid_checkout_session_for_uids(checkout_session_id, uids):
                 is_paid = True
                 mark_user_paid(uid)
         except Exception:
