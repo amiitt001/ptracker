@@ -2958,7 +2958,21 @@
       document.getElementById('user-name').textContent = display;
       if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
 
+      loadState();
+      renderAll();
+
       if (checkoutSessionId) {
+        const loading = document.getElementById('modal-loading');
+        if (loading) {
+          loading.style.display = 'flex';
+          loading.innerHTML = `
+            <div style="text-align:center;padding:32px">
+              <div class="modal-spinner" style="margin:0 auto 16px"></div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px">Verifying your payment</div>
+              <div style="font-size:14px;color:var(--text2);margin-bottom:20px;max-width:420px">Please wait while we sync your payment with the server...</div>
+            </div>
+          `;
+        }
         let hasAccess = false;
         if (paymentSuccess) {
           hasAccess = await verifyCheckoutReturn(user, checkoutSessionId);
