@@ -2773,20 +2773,20 @@
       const loading = document.getElementById('modal-loading');
       let savedSessionId = localStorage.getItem('dsa_last_checkout_session') || '';
 
-      // Validate stored checkout session against backend access check.
-      // If stale/invalid, clear it so purchase options show again.
+      // Validate stored checkout session against the backend. Keep the
+      // session id even if a check is slow/fails so the backend can retry
+      // Stripe verification later instead of losing the payment proof.
       if (!isPaid && savedSessionId) {
         const user = firebase.auth().currentUser;
         if (user) {
-          const hasAccess = await checkPaidAccess(user, savedSessionId);
+          let hasAccess = await verifyCheckoutReturn(user, savedSessionId);
+          if (!hasAccess) {
+            hasAccess = await checkPaidAccess(user, savedSessionId);
+          }
           if (hasAccess) {
             isPaid = true;
             renderAll();
           }
-        }
-        if (!isPaid) {
-          localStorage.removeItem('dsa_last_checkout_session');
-          savedSessionId = '';
         }
       }
 
@@ -2794,6 +2794,19 @@
       wrap.style.display = 'none';
       loading.style.display = 'flex';
       
+      if (!isPaid && savedSessionId) {
+          loading.innerHTML = `
+            <div style="text-align:center;padding:32px">
+              <div class="modal-spinner" style="margin:0 auto 16px"></div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px">Verifying your payment</div>
+              <div style="font-size:14px;color:var(--text2);margin-bottom:20px;max-width:420px">Your checkout was successful, but the payment record has not synced yet. Please try verification again in a moment.</div>
+              <button class="btn btn-green" onclick="verifySavedPayment()" style="font-size:15px;padding:12px 28px;width:100%;max-width:260px">Retry Verification</button>
+            </div>
+          `;
+          document.getElementById('player-btns').style.display = 'none';
+          return;
+      }
+
       if (!isPaid) {
           loading.innerHTML = `
             <div style="text-align:center;padding:32px">
@@ -2855,7 +2868,7 @@
     async function verifyCheckoutReturn(user, sessionId) {
       if (!sessionId) return false;
 
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      for (let attempt = 1; attempt <= 6; attempt++) {
         try {
           const token = await user.getIdToken(true);
           const res = await fetch(`${API_BASE}/api/checkout/verify`, {
@@ -2879,11 +2892,27 @@
           console.error('Failed to verify checkout session:', e);
         }
 
-        if (attempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, attempt * 600));
+        if (attempt < 6) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
         }
       }
       return false;
+    }
+
+    async function verifySavedPayment() {
+      const user = firebase.auth().currentUser;
+      const sessionId = localStorage.getItem('dsa_last_checkout_session') || '';
+      if (!user || !sessionId) return;
+
+      const ok = await verifyCheckoutReturn(user, sessionId) || await checkPaidAccess(user, sessionId);
+      if (ok) {
+        isPaid = true;
+        showToast("Payment verified. Your course is unlocked.");
+        renderAll();
+        if (currentVideo) playVideo(currentVideo.sec, currentVideo.vi);
+      } else {
+        showToast("Payment is still syncing. Please retry in a moment.");
+      }
     }
 
     async function checkPaidAccess(user, sessionId) {

@@ -13,6 +13,8 @@ services:
       # ── Server ───────────────────────────────────────────────
       - key: SECRET_KEY
         sync: false          # Set a long random string in Render dashboard
+      # For persistent SQLite on Render, attach a paid disk mounted at /var/data
+      # and set DATABASE_PATH=/var/data/users.db in the dashboard.
 
       # ── Google Drive ─────────────────────────────────────────
       - key: ROOT_FOLDER_ID

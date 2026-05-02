@@ -53,7 +53,10 @@ BASE_DIR   = BACKEND_DIR
 HTML_DIR   = os.path.join(BASE_DIR, '..')
 TOKEN_PATH = os.path.join(BASE_DIR, 'token.pickle')
 CREDS_PATH = os.path.join(BASE_DIR, 'credentials.json')
-DB_PATH    = os.path.join(BASE_DIR, 'users.db')
+DB_PATH    = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'users.db'))
+DB_DIR     = os.path.dirname(os.path.abspath(DB_PATH))
+if DB_DIR:
+    os.makedirs(DB_DIR, exist_ok=True)
 
 # ── Config ─────────────────────────────────────────────────────────
 SCOPES     = ['https://www.googleapis.com/auth/drive.readonly']
