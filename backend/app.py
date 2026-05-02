@@ -119,8 +119,8 @@ def token_to_uid(raw_token: str) -> str:
     return 'tok_' + hash_val[:60]
 
 
-def decode_firebase_uid_unverified(raw_token: str) -> str:
-    """Read Firebase uid from JWT payload when Admin SDK is unavailable.
+def decode_firebase_claims_unverified(raw_token: str) -> dict:
+    """Read Firebase JWT payload when Admin SDK is unavailable.
 
     This is only a fallback for deployments that have not configured
     Firebase Admin yet. The frontend already obtained this token from
@@ -130,13 +130,17 @@ def decode_firebase_uid_unverified(raw_token: str) -> str:
     try:
         parts = raw_token.split('.')
         if len(parts) < 2:
-            return ''
+            return {}
         payload = parts[1] + '=' * (-len(parts[1]) % 4)
-        decoded = json.loads(base64.urlsafe_b64decode(payload.encode()).decode())
-        uid = decoded.get('user_id') or decoded.get('sub') or ''
-        return str(uid)[:128]
+        return json.loads(base64.urlsafe_b64decode(payload.encode()).decode())
     except Exception:
-        return ''
+        return {}
+
+
+def decode_firebase_uid_unverified(raw_token: str) -> str:
+    claims = decode_firebase_claims_unverified(raw_token)
+    uid = claims.get('user_id') or claims.get('sub') or ''
+    return str(uid)[:128]
 
 
 def resolve_uid_from_auth_header(auth_header: str) -> str:
@@ -162,6 +166,20 @@ def resolve_uid_candidates_from_auth_header(auth_header: str) -> list:
         primary_uid = decode_firebase_uid_unverified(raw_token) or legacy_uid
 
     return list(dict.fromkeys([uid for uid in (primary_uid, legacy_uid) if uid]))
+
+
+def resolve_auth_email_from_header(auth_header: str) -> str:
+    if not auth_header.startswith('Bearer '):
+        return ''
+    raw_token = auth_header[7:]
+    if FIREBASE_ADMIN:
+        try:
+            decoded = fb_auth.verify_id_token(raw_token)
+            return (decoded.get('email') or '').strip().lower()
+        except Exception:
+            return ''
+    claims = decode_firebase_claims_unverified(raw_token)
+    return (claims.get('email') or '').strip().lower()
 
 
 def fetch_progress_for_uids(conn, uids):
@@ -287,7 +305,16 @@ def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
         return False
 
 
-def is_paid_checkout_session_for_uids(session_id: str, expected_uids: list) -> bool:
+def stripe_session_email(session) -> str:
+    customer_details = session.get('customer_details') or {}
+    return (
+        customer_details.get('email')
+        or session.get('customer_email')
+        or ''
+    ).strip().lower()
+
+
+def is_paid_checkout_session_for_user(session_id: str, expected_uids: list, expected_email: str = '') -> bool:
     if not session_id:
         return False
     key = os.environ.get('STRIPE_SECRET_KEY')
@@ -299,7 +326,9 @@ def is_paid_checkout_session_for_uids(session_id: str, expected_uids: list) -> b
         if session.get('payment_status') != 'paid':
             return False
         session_uid = session.get('client_reference_id')
-        return (not session_uid) or session_uid in expected_uids
+        if (not session_uid) or session_uid in expected_uids:
+            return True
+        return bool(expected_email and stripe_session_email(session) == expected_email)
     except Exception:
         return False
 
@@ -324,7 +353,8 @@ def check_access():
 
         data = request.get_json(silent=True) or {}
         session_id = (data.get('session_id') or '').strip()
-        if session_id and is_paid_checkout_session_for_uids(session_id, uids):
+        auth_email = resolve_auth_email_from_header(auth_header)
+        if session_id and is_paid_checkout_session_for_user(session_id, uids, auth_email):
             mark_user_paid(uid)
             return jsonify({'is_paid': True, 'source': 'stripe_session'}), 200
 
@@ -432,11 +462,12 @@ def create_checkout_session():
     uid = resolve_uid_from_auth_header(auth_header)
     if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
+    auth_email = resolve_auth_email_from_header(auth_header)
 
     domain_url = request.headers.get('Origin', 'http://localhost:5000').rstrip('/')
 
     try:
-        session = stripe.checkout.Session.create(
+        session_params = dict(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
@@ -454,6 +485,9 @@ def create_checkout_session():
             client_reference_id=uid,
             allow_promotion_codes=True
         )
+        if auth_email:
+            session_params['customer_email'] = auth_email
+        session = stripe.checkout.Session.create(**session_params)
         return jsonify({'checkout_url': session.url}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -484,8 +518,10 @@ def verify_checkout_session():
         if not uids:
             return jsonify({'status': 'error', 'is_paid': False, 'error': 'unable_to_resolve_uid'}), 200
         uid = uids[0]
+        auth_email = resolve_auth_email_from_header(request.headers.get('Authorization', ''))
         session_uid = session.get('client_reference_id')
-        if session_uid and session_uid not in uids:
+        email_matches = auth_email and stripe_session_email(session) == auth_email
+        if session_uid and session_uid not in uids and not email_matches:
             return jsonify({'status': 'error', 'is_paid': False, 'error': 'session_user_mismatch'}), 403
 
         persisted = mark_user_paid(uid)
@@ -654,7 +690,8 @@ def stream_video(file_id):
         try:
             uids = resolve_uid_candidates_from_auth_header('Bearer ' + auth_token)
             uid = uids[0] if uids else ''
-            if uid and is_paid_checkout_session_for_uids(checkout_session_id, uids):
+            auth_email = resolve_auth_email_from_header('Bearer ' + auth_token)
+            if uid and is_paid_checkout_session_for_user(checkout_session_id, uids, auth_email):
                 is_paid = True
                 mark_user_paid(uid)
         except Exception:
