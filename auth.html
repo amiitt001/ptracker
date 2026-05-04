@@ -1,313 +1,395 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — DSA Course Tracker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
-  <script src="/firebase-config.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #070b14; --bg2: #0d1424; --bg3: #131c30;
-      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12);
-      --text: #e8edf5; --text2: #8892aa; --text3: #4a5468;
-      --green: #22c88a; --green-d: #1ab07a; --blue: #6c8aff; --error: #ff6c6c;
-    }
-    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
-
-    /* ── LEFT PANEL ── */
-    .left {
-      width: 420px; min-height: 100vh; flex-shrink: 0;
-      background: linear-gradient(160deg, #0d1a2e, #091420);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; padding: 40px;
-      position: relative; overflow: hidden;
-    }
-    .left::before { content:''; position:absolute; bottom:-120px; left:-80px; width:420px; height:420px; background:radial-gradient(circle,rgba(34,200,138,.08),transparent 70%); }
-    .left::after  { content:''; position:absolute; top:-80px; right:-80px; width:300px; height:300px; background:radial-gradient(circle,rgba(108,138,255,.06),transparent 70%); }
-    .brand { display:flex; align-items:center; gap:10px; text-decoration:none; position:relative; z-index:1; }
-    .brand-dot  { width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); }
-    .brand-name { font-size:14px; font-weight:700; color:var(--text); }
-    .left-body { flex:1; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:1; padding:48px 0; }
-    .left-body h2 { font-size:28px; font-weight:800; letter-spacing:-.03em; line-height:1.25; margin-bottom:12px; }
-    .grad { background:linear-gradient(135deg,var(--green),var(--blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .left-body p { font-size:14px; color:var(--text2); line-height:1.65; margin-bottom:32px; }
-    .left-feats { display:flex; flex-direction:column; gap:14px; }
-    .left-feat  { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text2); }
-    .left-feat-ico { width:30px; height:30px; border-radius:9px; background:rgba(34,200,138,.1); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-    .left-footer { font-size:12px; color:var(--text3); position:relative; z-index:1; }
-
-    /* ── RIGHT PANEL ── */
-    .right { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 32px; min-height:100vh; overflow-y:auto; }
-    .auth-card { width:100%; max-width:420px; }
-    .auth-heading { font-size:26px; font-weight:800; letter-spacing:-.03em; margin-bottom:6px; }
-    .auth-sub { font-size:14px; color:var(--text2); margin-bottom:28px; }
-    .auth-sub a { color:var(--green); text-decoration:none; }
-    .auth-sub a:hover { text-decoration:underline; }
-
-    /* Google button */
-    .g-btn {
-      width:100%; padding:12px 16px; background:var(--bg2); border:1px solid var(--border2);
-      border-radius:10px; font-size:14px; font-weight:600; font-family:inherit;
-      color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center;
-      gap:10px; transition:all .2s; margin-bottom:20px;
-    }
-    .g-btn:hover:not(:disabled) { border-color:rgba(108,138,255,.4); background:var(--bg3); transform:translateY(-1px); }
-    .g-btn:disabled { opacity:.6; cursor:not-allowed; }
-    .g-icon { flex-shrink:0; }
-
-    /* Divider */
-    .or { display:flex; align-items:center; gap:12px; margin-bottom:20px; font-size:12px; color:var(--text3); }
-    .or::before,.or::after { content:''; flex:1; height:1px; background:var(--border); }
-
-    /* Tabs */
-    .tabs { display:flex; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:24px; }
-    .tab  { flex:1; padding:9px; font-size:13px; font-weight:600; font-family:inherit; border:none; border-radius:7px; cursor:pointer; transition:all .2s; color:var(--text2); background:transparent; }
-    .tab.on { background:var(--bg3); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.3); }
-
-    /* Form elements */
-    .fg { margin-bottom:16px; }
-    .flbl { display:block; font-size:11px; font-weight:600; color:var(--text2); margin-bottom:7px; text-transform:uppercase; letter-spacing:.07em; }
-    .finp {
-      width:100%; background:var(--bg2); border:1px solid var(--border2); border-radius:10px;
-      padding:11px 14px; font-size:14px; color:var(--text); font-family:inherit;
-      outline:none; transition:border-color .15s, box-shadow .15s;
-    }
-    .finp::placeholder { color:var(--text3); }
-    .finp:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(34,200,138,.1); }
-    .finp.err   { border-color:var(--error);  box-shadow:0 0 0 3px rgba(255,108,108,.1); }
-    .ferr { font-size:12px; color:var(--error); margin-top:5px; display:none; }
-    .ferr.on { display:block; }
-    .name-row { display:none; }
-    .name-row.on { display:block; }
-
-    .submit {
-      width:100%; padding:13px; background:var(--green); color:#061410;
-      border:none; border-radius:10px; font-size:15px; font-weight:700;
-      font-family:inherit; cursor:pointer; transition:all .2s; margin-top:6px;
-    }
-    .submit:hover:not(:disabled) { background:var(--green-d); transform:translateY(-1px); box-shadow:0 6px 20px rgba(34,200,138,.3); }
-    .submit:disabled { opacity:.6; cursor:not-allowed; }
-    .spinner { display:none; width:16px; height:16px; border:2px solid rgba(6,20,16,.3); border-top-color:#061410; border-radius:50%; animation:spin .7s linear infinite; margin:0 auto; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-
-    .msg { border-radius:10px; padding:12px 14px; font-size:13px; margin-bottom:16px; display:none; }
-    .msg.on { display:block; }
-    .msg.err { background:rgba(255,108,108,.08); border:1px solid rgba(255,108,108,.2); color:var(--error); }
-
-    .back { display:block; text-align:center; margin-top:20px; font-size:13px; color:var(--text3); text-decoration:none; transition:color .15s; }
-    .back:hover { color:var(--text2); }
-
-    /* Auth loading overlay */
-    .auth-init { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999; }
-    .init-spinner { width:28px; height:28px; border:3px solid var(--border2); border-top-color:var(--green); border-radius:50%; animation:spin .7s linear infinite; }
-
-    @media(max-width:700px) { .left { display:none; } }
-  </style>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Log In — EduStream</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#8900d4",
+                        "secondary-fixed": "#e3e2e4",
+                        "surface-container-high": "#f1e4f3",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#a435f0",
+                        "on-surface": "#201924",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#4e4354",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e2e2e5",
+                        "surface-dim": "#e3d6e5",
+                        "surface-variant": "#ebdeee",
+                        "outline-variant": "#d1c1d7",
+                        "surface-container": "#f7eaf9",
+                        "inverse-on-surface": "#faedfc",
+                        "secondary-fixed-dim": "#c7c6c8",
+                        "on-tertiary-fixed-variant": "#454749",
+                        "surface-container-highest": "#ebdeee",
+                        "on-secondary-fixed-variant": "#464749",
+                        "outline": "#807386",
+                        "on-primary-fixed-variant": "#6d00ab",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#8e10db",
+                        "tertiary-container": "#707274",
+                        "secondary-container": "#e0dfe2",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#e2b6ff",
+                        "on-tertiary-fixed": "#1a1c1e",
+                        "on-primary-container": "#fff5fe",
+                        "on-primary-fixed": "#2f004d",
+                        "inverse-surface": "#352e39",
+                        "primary-fixed": "#f3daff",
+                        "tertiary": "#58595c",
+                        "surface": "#fff7fd",
+                        "on-tertiary-container": "#f8f8fa",
+                        "on-secondary-fixed": "#1b1c1e",
+                        "surface-bright": "#fff7fd",
+                        "on-primary": "#ffffff",
+                        "secondary": "#5e5e60",
+                        "surface-container-low": "#fdefff",
+                        "inverse-primary": "#e2b6ff",
+                        "on-secondary-container": "#626265",
+                        "tertiary-fixed-dim": "#c6c6c9",
+                        "on-background": "#201924",
+                        "background": "#fff7fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "80px",
+                        "xs": "4px",
+                        "container-max": "1340px",
+                        "sm": "12px",
+                        "md": "24px",
+                        "lg": "48px",
+                        "gutter": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .spinner { display:none; width:16px; height:16px; border:2px solid rgba(255,255,255,.3); border-top-color:#ffffff; border-radius:50%; animation:spin .7s linear infinite; margin:0 auto; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        /* Auth loading overlay */
+        .auth-init { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999; }
+        .init-spinner { width:28px; height:28px; border:3px solid #e3e2e4; border-top-color:#8900d4; border-radius:50%; animation:spin .7s linear infinite; }
+    </style>
 </head>
-<body>
+<body class="bg-background font-body-md text-on-background min-h-screen flex flex-col">
 
-  <!-- Auth checking overlay -->
-  <div class="auth-init" id="auth-init">
+<!-- Auth checking overlay -->
+<div class="auth-init bg-background" id="auth-init">
     <div class="init-spinner"></div>
-  </div>
+</div>
 
-  <!-- LEFT PANEL -->
-  <div class="left">
-    <a class="brand" href="/"><div class="brand-dot"></div><span class="brand-name">DSA Course Tracker</span></a>
-    <div class="left-body">
-      <h2>Track your path to<br><span class="grad">DSA mastery</span></h2>
-      <p>Every section, every video — organized and tracked so you never lose your place.</p>
-      <div class="left-feats">
-        <div class="left-feat"><div class="left-feat-ico">📊</div>Section-by-section progress tracking</div>
-        <div class="left-feat"><div class="left-feat-ico">▶️</div>Direct Google Drive video playback</div>
-        <div class="left-feat"><div class="left-feat-ico">🔥</div>Daily streak to build learning habits</div>
-        <div class="left-feat"><div class="left-feat-ico">✅</div>Mark done and auto-advance</div>
-      </div>
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none sticky top-0 z-50">
+    <div class="flex justify-between items-center w-full px-8 py-4 max-w-[1340px] mx-auto">
+        <a href="/" class="text-2xl font-black text-purple-600 dark:text-purple-500 tracking-tighter text-decoration-none">
+            EduStream
+        </a>
+        <div class="hidden md:flex gap-8 items-center">
+            <a class="font-['Inter'] antialiased text-sm tracking-tight text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-200" href="#">Explore</a>
+            <a class="font-['Inter'] antialiased text-sm tracking-tight text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-200" href="#">Categories</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="switchTab('login')" class="font-['Inter'] antialiased text-sm tracking-tight text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-200 active:scale-95 duration-150">Log In</button>
+            <button onclick="switchTab('register')" class="font-['Inter'] antialiased text-sm tracking-tight bg-primary-container text-white px-6 py-2.5 font-bold hover:opacity-90 active:scale-95 duration-150">Sign Up</button>
+        </div>
     </div>
-    <div class="left-footer">DSA Course Tracker · Powered by Firebase</div>
-  </div>
+</header>
+<main class="flex-grow flex items-center justify-center px-gutter py-xl bg-surface">
+    <div class="w-full max-w-[400px]">
+        <div class="bg-surface-container-lowest p-lg shadow-sm rounded-none border border-outline-variant">
+            <div class="mb-lg">
+                <h1 class="font-headline-md text-headline-md text-on-surface mb-xs" id="heading">Log in to your account</h1>
+                <p class="font-body-sm text-body-sm text-on-surface-variant" id="sub-desc">Welcome back! Please enter your details.</p>
+            </div>
 
-  <!-- RIGHT PANEL -->
-  <div class="right">
-    <div class="auth-card">
-      <div class="auth-heading" id="heading">Welcome back</div>
-      <div class="auth-sub" id="sub">
-        Don't have an account? <a href="#" onclick="switchTab('register');return false;">Sign up</a>
-      </div>
+            <!-- Social Login -->
+            <div class="space-y-base mb-md">
+                <button id="g-btn" onclick="signWithGoogle()" type="button" class="w-full flex items-center justify-center gap-base h-[48px] border-2 border-on-surface text-on-surface font-label-md hover:bg-surface-container transition-colors duration-200">
+                    <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq3hbaBXrTB7PfcMDPKB-563aZyRlTMt4dIdNB8-YxI51MBy4uVEj_D9uLvoM9tFVrHu-dsTV01FP5JedtXzGyKfCv2iu20HMfkyZ4HyiooizHySGUARIwM1UJPq8ecIcI797icQGLOTJMzZv0herM0niLSHWmtcrcvfSV3BtU2NNjbcmDqxf0A8gbd1MEuNIv21zzwOvGRa4bpDZtFTu2hg1TGxMPAw-Ue5Kq35z8WR-wcdx33SoZs9fJ4u6S2woI8mO11TCP7o9F"/>
+                    Continue with Google
+                </button>
+                <button id="f-btn" onclick="signWithFacebook()" type="button" class="w-full flex items-center justify-center gap-base h-[48px] border-2 border-on-surface text-on-surface font-label-md hover:bg-surface-container transition-colors duration-200">
+                    <span class="material-symbols-outlined text-[#1877F2]" style="font-variation-settings: 'FILL' 1;">social_leaderboard</span>
+                    Continue with Facebook
+                </button>
+            </div>
+            <div class="relative flex items-center justify-center mb-md">
+                <div class="border-t border-outline-variant w-full"></div>
+                <span class="bg-surface-container-lowest px-base font-label-sm text-on-surface-variant absolute">or</span>
+            </div>
 
-      <!-- Google Sign-In -->
-      <button class="g-btn" id="g-btn" onclick="signWithGoogle()">
-        <svg class="g-icon" width="18" height="18" viewBox="0 0 18 18">
-          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
-          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
-        </svg>
-        Continue with Google
-      </button>
+            <div id="msg-err" class="hidden mb-4 p-3 bg-error-container text-error font-body-sm rounded"></div>
 
-      <div class="or">or</div>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab on" id="tab-in" onclick="switchTab('login')">Sign In</button>
-        <button class="tab"    id="tab-up" onclick="switchTab('register')">Sign Up</button>
-      </div>
-
-      <div class="msg err" id="msg-err"></div>
-
-      <!-- Form -->
-      <form id="form" onsubmit="handleSubmit(event)">
-        <div class="fg name-row" id="name-row">
-          <label class="flbl" for="inp-name">Full Name</label>
-          <input class="finp" type="text" id="inp-name" placeholder="Amit Verma" autocomplete="name" />
-          <div class="ferr" id="err-name">Please enter your name</div>
+            <!-- Credentials Form -->
+            <form id="form" onsubmit="handleSubmit(event)" class="space-y-md">
+                <div class="space-y-xs hidden" id="name-row">
+                    <label class="font-label-md text-label-md text-on-surface" for="inp-name">Full Name</label>
+                    <input class="w-full h-[48px] border border-outline px-md font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all bg-white" id="inp-name" placeholder="Amit Verma" type="text" autocomplete="name"/>
+                    <div class="ferr hidden text-error font-body-sm mt-1" id="err-name">Please enter your name</div>
+                </div>
+                <div class="space-y-xs">
+                    <label class="font-label-md text-label-md text-on-surface" for="email">Email</label>
+                    <input class="w-full h-[48px] border border-outline px-md font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all bg-white" id="email" placeholder="Enter your email" type="email" autocomplete="email" required/>
+                    <div class="ferr hidden text-error font-body-sm mt-1" id="err-email">Enter a valid email address</div>
+                </div>
+                <div class="space-y-xs">
+                    <div class="flex justify-between items-center">
+                        <label class="font-label-md text-label-md text-on-surface" for="password">Password</label>
+                        <a class="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot Password?</a>
+                    </div>
+                    <input class="w-full h-[48px] border border-outline px-md font-body-md focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all bg-white" id="password" placeholder="••••••••" type="password" autocomplete="current-password" required/>
+                    <div class="ferr hidden text-error font-body-sm mt-1" id="err-pw">Password must be at least 6 characters</div>
+                </div>
+                <button id="sub-btn" class="w-full h-[48px] bg-primary-container text-white font-label-md hover:opacity-95 transition-all active:scale-95 duration-150 shadow-sm flex items-center justify-center" type="submit">
+                    <span id="sub-txt">Log In</span>
+                    <div class="spinner" id="spinner"></div>
+                </button>
+            </form>
+            <div class="mt-lg text-center" id="sub">
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Don't have an account?
+                    <a class="font-label-md text-primary hover:underline cursor-pointer" onclick="switchTab('register');return false;">Sign Up</a>
+                </p>
+            </div>
         </div>
-        <div class="fg">
-          <label class="flbl" for="inp-email">Email Address</label>
-          <input class="finp" type="email" id="inp-email" placeholder="you@example.com" autocomplete="email" required />
-          <div class="ferr" id="err-email">Enter a valid email address</div>
-        </div>
-        <div class="fg">
-          <label class="flbl" for="inp-pw">Password</label>
-          <input class="finp" type="password" id="inp-pw" placeholder="Enter your password" autocomplete="current-password" required />
-          <div class="ferr" id="err-pw">Password must be at least 6 characters</div>
-        </div>
-        <button class="submit" type="submit" id="sub-btn">
-          <span id="sub-txt">Sign In</span>
-          <div class="spinner" id="spinner"></div>
-        </button>
-      </form>
-
-      <a class="back" href="/">← Back to home</a>
     </div>
-  </div>
+</main>
+<!-- Footer -->
+<footer class="bg-gray-50 dark:bg-gray-950 w-full border-t mt-auto border-gray-200 dark:border-gray-800">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 px-8 py-12 max-w-[1340px] mx-auto">
+        <div class="text-lg font-bold text-gray-900 dark:text-white">EduStream</div>
+        <div class="flex flex-wrap justify-center gap-6">
+            <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80 transition-opacity" href="#">Terms of Service</a>
+            <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80 transition-opacity" href="#">Privacy Policy</a>
+            <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80 transition-opacity" href="#">Help Center</a>
+            <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80 transition-opacity" href="#">Cookie Settings</a>
+        </div>
+        <div class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400">
+            © 2024 EduStream, Inc. All rights reserved.
+        </div>
+    </div>
+</footer>
 
-  <script>
+<script>
     // ── Firebase init ──────────────────────────────────────────
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
     // Hide overlay once Firebase resolves auth state
     auth.onAuthStateChanged(function(user) {
-      document.getElementById('auth-init').style.display = 'none';
-      if (user) window.location.href = '/dashboard';
+        document.getElementById('auth-init').style.display = 'none';
+        if (user) window.location.href = '/dashboard';
     });
-
-    // Auto-detect register mode from URL
-    (function() {
-      const p = new URLSearchParams(window.location.search);
-      if (p.get('mode') === 'register') switchTab('register');
-    })();
 
     let mode = 'login';
 
+    // Auto-detect register mode from URL
+    (function() {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('mode') === 'register') switchTab('register');
+    })();
+
     // ── Google Sign-In ─────────────────────────────────────────
     async function signWithGoogle() {
-      clearMsgs();
-      setGLoading(true);
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-        window.location.href = '/dashboard';
-      } catch(err) {
-        if (err.code !== 'auth/popup-closed-by-user' &&
-            err.code !== 'auth/cancelled-popup-request') {
-          showErr(mapError(err.code));
+        clearMsgs();
+        setGLoading(true);
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await auth.signInWithPopup(provider);
+            window.location.href = '/dashboard';
+        } catch(err) {
+            if (err.code !== 'auth/popup-closed-by-user' &&
+                err.code !== 'auth/cancelled-popup-request') {
+                showErr(mapError(err.code));
+            }
+        } finally {
+            setGLoading(false);
         }
-      } finally {
-        setGLoading(false);
-      }
+    }
+
+    // ── Facebook Sign-In ───────────────────────────────────────
+    async function signWithFacebook() {
+        clearMsgs();
+        setFLoading(true);
+        try {
+            const provider = new firebase.auth.FacebookAuthProvider();
+            await auth.signInWithPopup(provider);
+            window.location.href = '/dashboard';
+        } catch(err) {
+            if (err.code !== 'auth/popup-closed-by-user' &&
+                err.code !== 'auth/cancelled-popup-request') {
+                showErr(mapError(err.code));
+            }
+        } finally {
+            setFLoading(false);
+        }
     }
 
     // ── Email/Password ─────────────────────────────────────────
     async function handleSubmit(e) {
-      e.preventDefault();
-      clearMsgs();
+        e.preventDefault();
+        clearMsgs();
 
-      const name  = document.getElementById('inp-name').value.trim();
-      const email = document.getElementById('inp-email').value.trim();
-      const pw    = document.getElementById('inp-pw').value;
-      let valid = true;
+        const name  = document.getElementById('inp-name') ? document.getElementById('inp-name').value.trim() : '';
+        const email = document.getElementById('email').value.trim();
+        const pw    = document.getElementById('password').value;
+        let valid = true;
 
-      if (mode === 'register' && !name) {
-        document.getElementById('err-name').classList.add('on');
-        document.getElementById('inp-name').classList.add('err');
-        valid = false;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('err-email').classList.add('on');
-        document.getElementById('inp-email').classList.add('err');
-        valid = false;
-      }
-      if (!pw || pw.length < 6) {
-        document.getElementById('err-pw').classList.add('on');
-        document.getElementById('inp-pw').classList.add('err');
-        valid = false;
-      }
-      if (!valid) return;
-
-      setLoading(true);
-      try {
-        if (mode === 'register') {
-          const uc = await auth.createUserWithEmailAndPassword(email, pw);
-          await uc.user.updateProfile({ displayName: name });
-        } else {
-          await auth.signInWithEmailAndPassword(email, pw);
+        if (mode === 'register' && !name) {
+            document.getElementById('err-name').classList.remove('hidden');
+            document.getElementById('inp-name').classList.add('border-error');
+            valid = false;
         }
-        window.location.href = '/dashboard';
-      } catch(err) {
-        showErr(mapError(err.code));
-      } finally {
-        setLoading(false);
-      }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('err-email').classList.remove('hidden');
+            document.getElementById('email').classList.add('border-error');
+            valid = false;
+        }
+        if (!pw || pw.length < 6) {
+            document.getElementById('err-pw').classList.remove('hidden');
+            document.getElementById('password').classList.add('border-error');
+            valid = false;
+        }
+        if (!valid) return;
+
+        setLoading(true);
+        try {
+            if (mode === 'register') {
+                const uc = await auth.createUserWithEmailAndPassword(email, pw);
+                await uc.user.updateProfile({ displayName: name });
+            } else {
+                await auth.signInWithEmailAndPassword(email, pw);
+            }
+            window.location.href = '/dashboard';
+        } catch(err) {
+            showErr(mapError(err.code));
+        } finally {
+            setLoading(false);
+        }
     }
 
     // ── Helpers ────────────────────────────────────────────────
     function switchTab(m) {
-      mode = m;
-      clearMsgs();
-      const reg = m === 'register';
-      document.getElementById('tab-in').classList.toggle('on', !reg);
-      document.getElementById('tab-up').classList.toggle('on',  reg);
-      document.getElementById('name-row').classList.toggle('on', reg);
-      document.getElementById('heading').textContent = reg ? 'Create your account' : 'Welcome back';
-      document.getElementById('sub').innerHTML = reg
-        ? 'Already have an account? <a href="#" onclick="switchTab(\'login\');return false;">Sign in</a>'
-        : 'Don\'t have an account? <a href="#" onclick="switchTab(\'register\');return false;">Sign up</a>';
-      document.getElementById('sub-txt').textContent = reg ? 'Create Account' : 'Sign In';
-      document.getElementById('inp-pw').autocomplete = reg ? 'new-password' : 'current-password';
-      document.getElementById('inp-pw').placeholder  = reg ? 'Minimum 6 characters' : 'Enter your password';
+        mode = m;
+        clearMsgs();
+        const reg = m === 'register';
+
+        const nameRow = document.getElementById('name-row');
+        if (reg) {
+            nameRow.classList.remove('hidden');
+        } else {
+            nameRow.classList.add('hidden');
+        }
+
+        document.getElementById('heading').textContent = reg ? 'Create your account' : 'Log in to your account';
+
+        document.getElementById('sub-desc').textContent = reg ? 'Sign up to get started.' : 'Welcome back! Please enter your details.';
+
+        const subContainer = document.getElementById('sub');
+        if (reg) {
+            subContainer.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant">Already have an account? <a class="font-label-md text-primary hover:underline cursor-pointer" onclick="switchTab(\'login\');return false;">Sign In</a></p>';
+        } else {
+            subContainer.innerHTML = '<p class="font-body-sm text-body-sm text-on-surface-variant">Don\'t have an account? <a class="font-label-md text-primary hover:underline cursor-pointer" onclick="switchTab(\'register\');return false;">Sign Up</a></p>';
+        }
+
+        document.getElementById('sub-txt').textContent = reg ? 'Create Account' : 'Log In';
+        document.getElementById('password').autocomplete = reg ? 'new-password' : 'current-password';
+        document.getElementById('password').placeholder  = reg ? 'Minimum 6 characters' : '••••••••';
     }
 
     function clearMsgs() {
-      document.getElementById('msg-err').classList.remove('on');
-      document.querySelectorAll('.ferr').forEach(e => e.classList.remove('on'));
-      document.querySelectorAll('.finp').forEach(e => e.classList.remove('err'));
+        document.getElementById('msg-err').classList.add('hidden');
+        document.querySelectorAll('.ferr').forEach(e => e.classList.add('hidden'));
+        document.querySelectorAll('input').forEach(e => {
+            e.classList.remove('border-error');
+            e.classList.remove('border-error-container');
+        });
     }
-    function showErr(msg) { const el = document.getElementById('msg-err'); el.textContent = msg; el.classList.add('on'); }
-    function setLoading(on)  { document.getElementById('sub-btn').disabled = on; document.getElementById('sub-txt').style.display = on ? 'none' : ''; document.getElementById('spinner').style.display = on ? 'block' : 'none'; }
-    function setGLoading(on) { const b = document.getElementById('g-btn'); b.disabled = on; b.style.opacity = on ? '0.6' : '1'; }
+
+    function showErr(msg) {
+        const el = document.getElementById('msg-err');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function setLoading(on) {
+        document.getElementById('sub-btn').disabled = on;
+        document.getElementById('sub-txt').style.display = on ? 'none' : '';
+        document.getElementById('spinner').style.display = on ? 'block' : 'none';
+    }
+
+    function setGLoading(on) {
+        const b = document.getElementById('g-btn');
+        b.disabled = on;
+        b.style.opacity = on ? '0.6' : '1';
+    }
+
+    function setFLoading(on) {
+        const b = document.getElementById('f-btn');
+        b.disabled = on;
+        b.style.opacity = on ? '0.6' : '1';
+    }
 
     function mapError(code) {
-      return ({
-        'auth/email-already-in-use'  : 'This email is already registered. Try signing in.',
-        'auth/user-not-found'        : 'No account found with this email.',
-        'auth/wrong-password'        : 'Incorrect password. Try again.',
-        'auth/invalid-credential'    : 'Invalid email or password. Try again.',
-        'auth/invalid-email'         : 'Please enter a valid email address.',
-        'auth/weak-password'         : 'Password must be at least 6 characters.',
-        'auth/too-many-requests'     : 'Too many attempts. Try again later.',
-        'auth/network-request-failed': 'Network error. Check your connection.',
-        'auth/operation-not-allowed' : 'This sign-in method is disabled in Firebase Console.',
-      })[code] || 'Something went wrong. Please try again.';
+        return ({
+            'auth/email-already-in-use'  : 'This email is already registered. Try signing in.',
+            'auth/user-not-found'        : 'No account found with this email.',
+            'auth/wrong-password'        : 'Incorrect password. Try again.',
+            'auth/invalid-credential'    : 'Invalid email or password. Try again.',
+            'auth/invalid-email'         : 'Please enter a valid email address.',
+            'auth/weak-password'         : 'Password must be at least 6 characters.',
+            'auth/too-many-requests'     : 'Too many attempts. Try again later.',
+            'auth/network-request-failed': 'Network error. Check your connection.',
+            'auth/operation-not-allowed' : 'This sign-in method is disabled in Firebase Console.',
+        })[code] || 'Something went wrong. Please try again.';
     }
-  </script>
+</script>
 </body>
 </html>
