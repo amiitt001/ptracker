@@ -583,6 +583,10 @@ def dashboard():
 def edustream_page():
     return send_file(os.path.join(HTML_DIR, 'edustream.html'))
 
+@app.route('/edustream_auth')
+def edustream_auth_page():
+    return send_file(os.path.join(HTML_DIR, 'edustream_auth.html'))
+
 @app.route('/course')
 def course_page():
     return send_file(os.path.join(HTML_DIR, 'course.html'))
