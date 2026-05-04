@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#8900d4",
+                        "secondary-fixed": "#e3e2e4",
+                        "surface-container-high": "#f1e4f3",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#a435f0",
+                        "on-surface": "#201924",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#4e4354",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#e2e2e5",
+                        "surface-dim": "#e3d6e5",
+                        "surface-variant": "#ebdeee",
+                        "outline-variant": "#d1c1d7",
+                        "surface-container": "#f7eaf9",
+                        "inverse-on-surface": "#faedfc",
+                        "secondary-fixed-dim": "#c7c6c8",
+                        "on-tertiary-fixed-variant": "#454749",
+                        "surface-container-highest": "#ebdeee",
+                        "on-secondary-fixed-variant": "#464749",
+                        "outline": "#807386",
+                        "on-primary-fixed-variant": "#6d00ab",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#8e10db",
+                        "tertiary-container": "#707274",
+                        "secondary-container": "#e0dfe2",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#e2b6ff",
+                        "on-tertiary-fixed": "#1a1c1e",
+                        "on-primary-container": "#fff5fe",
+                        "on-primary-fixed": "#2f004d",
+                        "inverse-surface": "#352e39",
+                        "primary-fixed": "#f3daff",
+                        "tertiary": "#58595c",
+                        "surface": "#fff7fd",
+                        "on-tertiary-container": "#f8f8fa",
+                        "on-secondary-fixed": "#1b1c1e",
+                        "surface-bright": "#fff7fd",
+                        "on-primary": "#ffffff",
+                        "secondary": "#5e5e60",
+                        "surface-container-low": "#fdefff",
+                        "inverse-primary": "#e2b6ff",
+                        "on-secondary-container": "#626265",
+                        "tertiary-fixed-dim": "#c6c6c9",
+                        "on-background": "#201924",
+                        "background": "#fff7fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "80px",
+                        "xs": "4px",
+                        "container-max": "1340px",
+                        "sm": "12px",
+                        "md": "24px",
+                        "lg": "48px",
+                        "gutter": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col">
+<!-- Top Branding Header (Non-Navigation Shell for Transactional Flow) -->
+<header class="w-full py-md px-8 flex justify-center">
+<a class="text-primary-container font-display text-[28px] tracking-tighter" href="/edustream.html">
+            EduStream
+</a>
+</header>
+<!-- Main Content: Sign Up Canvas -->
+<main class="flex-grow flex items-center justify-center px-4 py-lg">
+<div class="bg-surface-container-lowest w-full max-w-[480px] p-8 lg:p-md shadow-[0px_2px_20px_rgba(0,0,0,0.08)] rounded-lg">
+<div class="text-center mb-lg">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs" id="auth-title">Join EduStream</h1>
+<p class="font-body-md text-body-md text-on-surface-variant" id="auth-subtitle">Elevate your expertise with world-class instruction.</p>
+</div>
+<!-- Social Sign Up -->
+<div class="space-y-sm mb-lg">
+<button class="w-full h-[48px] flex items-center justify-center gap-sm border-2 border-outline text-on-surface font-label-md hover:bg-surface-variant transition-all duration-200 active:scale-[0.98]">
+<img alt="" class="w-5 h-5" data-alt="A sharp, minimalist Google logo centered on a clean white background, representing professional digital integration. The image is captured in bright, high-key studio lighting that emphasizes clarity and modern tech aesthetics, perfectly aligning with a corporate-modern design language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-EnTLC1a3QahnH30PYY8aVu1DzM5WcJ6705Sadk_d98DdWdL2cXUBTbeiAOIVhMRmHn0q3pFHALqEpGjP9QhtW9uhGHTtK-_eQn34qO-Wn7OU-hbXICoOuaUMAUIJa51eP1QAv0nkD_y7XgsuWmrbxUg8R8bamovKkowX1_pO6096E7rEr8sUAfNL5qt1jlPvDWFfKfJ_kHWiTpEtYT3KhreoeaDptq4LV6gyCJW-kxZndMibm-BwdUKD_Jkb6_9ohFkpSVQj7N_A"/>
+<span>Continue with Google</span>
+</button>
+<button class="w-full h-[48px] flex items-center justify-center gap-sm border-2 border-outline text-on-surface font-label-md hover:bg-surface-variant transition-all duration-200 active:scale-[0.98]">
+<span class="material-symbols-outlined text-on-surface" data-icon="facebook" style="font-variation-settings: 'FILL' 1;">social_leaderboard</span>
+<span>Continue with Facebook</span>
+</button>
+</div>
+<div class="relative flex items-center justify-center mb-lg">
+<div class="absolute inset-0 flex items-center">
+<span class="w-full border-t border-outline-variant"></span>
+</div>
+<span class="relative bg-surface-container-lowest px-4 text-label-sm text-on-surface-variant uppercase tracking-wider" id="auth-divider-text">or sign up with email</span>
+</div>
+<!-- Form -->
+<form class="space-y-md" id="auth-form">
+<div class="space-y-xs" id="name-container">
+<label class="font-label-md text-label-md text-on-surface" for="full_name">Full Name</label>
+<input class="w-full h-[48px] px-md border border-outline-variant focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all placeholder:text-outline bg-transparent" id="full_name" name="full_name" placeholder="Enter your full name" type="text"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="email">Email</label>
+<input class="w-full h-[48px] px-md border border-outline-variant focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all placeholder:text-outline bg-transparent" id="email" name="email" placeholder="email@example.com" type="email"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface" for="password">Password</label>
+<div class="relative">
+<input class="w-full h-[48px] px-md border border-outline-variant focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all placeholder:text-outline bg-transparent" id="password" name="password" placeholder="At least 8 characters" type="password"/>
+<button class="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-start gap-sm" id="terms-container">
+<div class="flex items-center h-5">
+<input class="w-4 h-4 text-primary-container border-outline-variant rounded-sm focus:ring-primary-container" id="terms" type="checkbox"/>
+</div>
+<label class="font-body-sm text-body-sm text-on-surface-variant" for="terms">
+                        I agree to the <a class="text-primary-container font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary-container font-semibold hover:underline" href="#">Privacy Policy</a>.
+                    </label>
+</div>
+<button class="w-full h-[48px] bg-primary-container text-on-primary-container font-label-md rounded-none hover:bg-primary transition-all duration-200 active:scale-95 shadow-md" type="submit" id="submit-btn">
+                    Sign Up
+                </button>
+</form>
+<div class="mt-lg pt-md border-t border-outline-variant text-center">
+<p class="font-body-md text-body-md text-on-surface-variant" id="auth-switch-text">
+                    Already have an account?
+                    <a class="text-primary-container font-bold hover:underline ml-xs cursor-pointer" id="auth-switch-link" onclick="switchMode('login')">Log In</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Shared Component: Footer -->
+<footer class="bg-gray-50 dark:bg-gray-950 w-full border-t mt-auto border-gray-200 dark:border-gray-800">
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 px-8 py-12 max-w-[1340px] mx-auto">
+<div class="text-lg font-bold text-gray-900 dark:text-white">
+                EduStream
+            </div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Help Center</a>
+<a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Cookie Settings</a>
+</div>
+<div class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400">
+                © 2024 EduStream, Inc. All rights reserved.
+            </div>
+</div>
+</footer>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+
+<script>
+    // ── Firebase init ──────────────────────────────────────────
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(function(user) {
+      if (user) window.location.href = '/dashboard';
+    });
+
+    let mode = 'register';
+
+    // Auto-detect mode from URL
+    (function() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('mode') === 'login') switchMode('login');
+      else switchMode('register');
+    })();
+
+    // ── Google Sign-In ─────────────────────────────────────────
+    async function signWithGoogle() {
+      clearMsgs();
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        window.location.href = '/dashboard';
+      } catch(err) {
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          showErr(mapError(err.code));
+        }
+      }
+    }
+
+    // ── Email/Password ─────────────────────────────────────────
+    async function handleSubmit(e) {
+      e.preventDefault();
+      clearMsgs();
+
+      const name  = document.getElementById('full_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const pw    = document.getElementById('password').value;
+      let valid = true;
+
+      if (mode === 'register' && !name) {
+        valid = false;
+        showErr("Please enter your name");
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        valid = false;
+        showErr("Enter a valid email address");
+      }
+      if (!pw || pw.length < 6) {
+        valid = false;
+        showErr("Password must be at least 6 characters");
+      }
+      if (!valid) return;
+
+      const subBtn = document.getElementById('submit-btn');
+      subBtn.disabled = true;
+      subBtn.style.opacity = '0.7';
+
+      try {
+        if (mode === 'register') {
+          const uc = await auth.createUserWithEmailAndPassword(email, pw);
+          await uc.user.updateProfile({ displayName: name });
+        } else {
+          await auth.signInWithEmailAndPassword(email, pw);
+        }
+        window.location.href = '/dashboard';
+      } catch(err) {
+        showErr(mapError(err.code));
+        subBtn.disabled = false;
+        subBtn.style.opacity = '1';
+      }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────
+    function switchMode(m) {
+      mode = m;
+      clearMsgs();
+      const reg = m === 'register';
+
+      const nameContainer = document.getElementById('name-container');
+      if (nameContainer) nameContainer.style.display = reg ? 'block' : 'none';
+
+      const termsContainer = document.getElementById('terms-container');
+      if (termsContainer) termsContainer.style.display = reg ? 'flex' : 'none';
+
+      document.getElementById('auth-title').textContent = reg ? 'Join EduStream' : 'Welcome back';
+      document.getElementById('auth-subtitle').textContent = reg ? 'Elevate your expertise with world-class instruction.' : 'Log in to continue learning.';
+      document.getElementById('auth-divider-text').textContent = reg ? 'or sign up with email' : 'or log in with email';
+
+      document.getElementById('submit-btn').textContent = reg ? 'Sign Up' : 'Log In';
+
+      const pwInput = document.getElementById('password');
+      pwInput.autocomplete = reg ? 'new-password' : 'current-password';
+      pwInput.placeholder = reg ? 'At least 8 characters' : 'Enter your password';
+
+      const switchText = document.getElementById('auth-switch-text');
+      if (reg) {
+        switchText.innerHTML = 'Already have an account? <a class="text-primary-container font-bold hover:underline ml-xs cursor-pointer" onclick="switchMode(\'login\')">Log In</a>';
+      } else {
+        switchText.innerHTML = 'Don\'t have an account? <a class="text-primary-container font-bold hover:underline ml-xs cursor-pointer" onclick="switchMode(\'register\')">Sign Up</a>';
+      }
+    }
+
+    function clearMsgs() {
+      let errBox = document.getElementById('global-err');
+      if (errBox) {
+        errBox.style.display = 'none';
+        errBox.textContent = '';
+      }
+    }
+
+    function showErr(msg) {
+      let errBox = document.getElementById('global-err');
+      if (!errBox) {
+        errBox = document.createElement('div');
+        errBox.id = 'global-err';
+        errBox.className = 'w-full p-3 mb-4 text-sm text-error bg-error-container rounded-md border border-error/20';
+        const form = document.querySelector('form');
+        form.parentNode.insertBefore(errBox, form);
+      }
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+    }
+
+    function mapError(code) {
+      return ({
+        'auth/email-already-in-use'  : 'This email is already registered. Try signing in.',
+        'auth/user-not-found'        : 'No account found with this email.',
+        'auth/wrong-password'        : 'Incorrect password. Try again.',
+        'auth/invalid-credential'    : 'Invalid email or password. Try again.',
+        'auth/invalid-email'         : 'Please enter a valid email address.',
+        'auth/weak-password'         : 'Password must be at least 6 characters.',
+        'auth/too-many-requests'     : 'Too many attempts. Try again later.',
+        'auth/network-request-failed': 'Network error. Check your connection.',
+        'auth/operation-not-allowed' : 'This sign-in method is disabled in Firebase Console.',
+      })[code] || 'Something went wrong. Please try again.';
+    }
+
+    // Attach event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('form').addEventListener('submit', handleSubmit);
+
+      // Wire up Google button
+      const googleBtn = document.querySelector('button:has(img)');
+      if (googleBtn) {
+        googleBtn.type = 'button';
+        googleBtn.addEventListener('click', signWithGoogle);
+      }
+
+      // Password toggle
+      const pwToggle = document.querySelector('button:has(.material-symbols-outlined[data-icon="visibility"])');
+      if (pwToggle) {
+        pwToggle.addEventListener('click', function() {
+          const pwInput = document.getElementById('password');
+          const icon = this.querySelector('.material-symbols-outlined');
+          if (pwInput.type === 'password') {
+            pwInput.type = 'text';
+            icon.textContent = 'visibility_off';
+          } else {
+            pwInput.type = 'password';
+            icon.textContent = 'visibility';
+          }
+        });
+      }
+    });
+</script>
+</body>
+</html>
