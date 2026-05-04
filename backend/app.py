@@ -298,8 +298,14 @@ def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
     stripe.api_key = key
     try:
         session = stripe.checkout.Session.retrieve(session_id)
-        if getattr(session, 'payment_status', None) != 'paid':
+        
+        # If the total amount is 0 (e.g., due to a 100% coupon), Stripe might
+        # not mark the payment_status as 'paid'. We should treat it as paid.
+        is_free = session.get('amount_total') == 0
+
+        if not is_free and getattr(session, 'payment_status', None) != 'paid':
             return False
+            
         session_uid = getattr(session, 'client_reference_id', None)
         if expected_uid and session_uid and session_uid != expected_uid:
             return False
