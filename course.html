@@ -1,0 +1,488 @@
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Detail - EduStream</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#201924",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#e0dfe2",
+                        "tertiary-container": "#707274",
+                        "primary-fixed": "#f3daff",
+                        "surface-container": "#f7eaf9",
+                        "on-background": "#201924",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#f1e4f3",
+                        "outline-variant": "#d1c1d7",
+                        "secondary": "#5e5e60",
+                        "on-secondary-fixed-variant": "#464749",
+                        "surface": "#fff7fd",
+                        "on-surface-variant": "#4e4354",
+                        "surface-tint": "#8e10db",
+                        "primary-container": "#a435f0",
+                        "surface-variant": "#ebdeee",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#6d00ab",
+                        "inverse-on-surface": "#faedfc",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#fdefff",
+                        "on-primary-container": "#fff5fe",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#e3d6e5",
+                        "inverse-primary": "#e2b6ff",
+                        "surface-container-highest": "#ebdeee",
+                        "on-tertiary-fixed": "#1a1c1e",
+                        "outline": "#807386",
+                        "tertiary": "#58595c",
+                        "primary-fixed-dim": "#e2b6ff",
+                        "on-tertiary-fixed-variant": "#454749",
+                        "on-tertiary-container": "#f8f8fa",
+                        "secondary-fixed-dim": "#c7c6c8",
+                        "primary": "#8900d4",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c6c6c9",
+                        "on-primary-fixed": "#2f004d",
+                        "inverse-surface": "#352e39",
+                        "on-secondary-container": "#626265",
+                        "surface-bright": "#fff7fd",
+                        "secondary-fixed": "#e3e2e4",
+                        "on-secondary-fixed": "#1b1c1e",
+                        "background": "#fff7fd",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#e2e2e5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "48px",
+                        "container-max": "1340px",
+                        "sm": "12px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "xl": "80px",
+                        "base": "8px",
+                        "md": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .preview-sidebar {
+            top: 100px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 w-full gap-4 bg-white border-b border-gray-200 shadow-sm font-['Inter'] text-sm tracking-tight">
+<div class="flex items-center gap-8">
+<a href="/edustream" class="text-2xl font-black text-gray-900 no-underline">EduStream</a>
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-gray-700 hover:text-[#A435F0] transition-all duration-200" href="#">Categories</a>
+<a class="text-gray-700 hover:text-[#A435F0] transition-all duration-200" href="#">Teach</a>
+<a class="text-[#A435F0] font-bold border-b-2 border-[#A435F0] pb-1 transition-all duration-200" href="#">My Learning</a>
+</div>
+</div>
+<div class="flex-grow max-w-2xl hidden md:block">
+<div class="relative flex items-center h-12 border border-gray-300 rounded-full px-4 bg-gray-50 focus-within:bg-white focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-gray-500 mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-sm" placeholder="Search for anything" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex gap-2">
+<span class="material-symbols-outlined p-2 hover:bg-gray-50 rounded-full cursor-pointer" data-icon="shopping_cart">shopping_cart</span>
+<span class="material-symbols-outlined p-2 hover:bg-gray-50 rounded-full cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined p-2 hover:bg-gray-50 rounded-full cursor-pointer" data-icon="favorite">favorite</span>
+</div>
+<button class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95">Log In</button>
+<button class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95">Sign Up</button>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="bg-[#1C1D1F] text-white py-xl px-6">
+<div class="max-w-[1340px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-xl relative">
+<div class="lg:col-span-2 flex flex-col gap-md">
+<nav class="flex items-center gap-2 text-[#C0C4FC] font-label-md text-label-md">
+<a class="hover:underline" href="#">Development</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<a class="hover:underline" href="#">Web Development</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<a class="hover:underline" href="#">Next.js</a>
+</nav>
+<h1 class="font-display text-display leading-tight">Mastering React &amp; Next.js for Professionals</h1>
+<p class="font-body-lg text-body-lg max-w-3xl">The most comprehensive guide to building production-ready, scalable applications using React 18, Next.js 14 App Router, and high-performance architectural patterns.</p>
+<div class="flex flex-wrap items-center gap-md">
+<div class="flex items-center gap-1">
+<span class="text-[#F3CA8C] font-label-md">4.8</span>
+<div class="flex text-[#F3CA8C]">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star_half" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+<span class="text-[#C0C4FC] underline text-body-sm">(12,450 ratings)</span>
+</div>
+<span class="text-white text-body-sm">84,293 students</span>
+</div>
+<div class="text-body-sm">
+                    Created by <a class="text-[#C0C4FC] underline font-bold" href="#instructor">Dr. Elena Sterling</a>
+</div>
+<div class="flex flex-wrap gap-md text-body-sm items-center">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="update">update</span>
+                        Last updated 05/2024
+                    </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+                        English [Auto]
+                    </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined" data-icon="closed_caption">closed_caption</span>
+                        English, German, Spanish
+                    </div>
+</div>
+</div>
+<!-- Preview Sidebar (Floating) -->
+<aside class="hidden lg:block absolute right-0 top-0 w-[380px] bg-white text-on-surface shadow-xl z-20 border border-gray-200">
+<div class="relative group cursor-pointer aspect-video bg-gray-900">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" data-alt="A professional close-up shot of a developer's high-resolution screen displaying complex React code with a sleek dark theme. The environment is a modern, dimly lit studio with soft purple and blue ambient lighting. In the foreground, a translucent play button overlay suggests interactive video content. The aesthetic is clean, high-tech, and authoritative, echoing the EduStream brand colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3crXk80Crrl-nfeAYXgxi4lZ0dEPD-h5iZczyULSDPBRKE2pmgYh1CR94qPvYEOmC4_f2cWE-7khyT57i-1Yl5Hky7KV6tnqRmohVErJXDoEl9iVPrIzLgAhmUpeGCcJ4aX0J5Wve4cbRvrzf2HkRXsE3G1MX_yiKRUsj1Qo1ZC3PRq_HSP3THpdIQ2VGhzuM4Yre_oxP_ROB1hzhXBXwjiSn_IsqYSAFVnEqoGKcdqX2zZhSRx8fkh5GOLOTM5B-Z8SsN59sg8XV"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-black text-4xl" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-4 left-0 right-0 text-center font-bold text-white shadow-sm">Preview this course</div>
+</div>
+<div class="p-md flex flex-col gap-md">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface">$89.99</span>
+<span class="text-secondary line-through text-body-md">$149.99</span>
+<span class="text-secondary text-body-md">40% off</span>
+</div>
+<div class="flex flex-col gap-sm">
+<button class="w-full h-12 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-all flex items-center justify-center">Add to Cart</button>
+<button class="w-full h-12 border-2 border-on-surface font-bold hover:bg-gray-50 transition-all flex items-center justify-center">Buy Now</button>
+</div>
+<div class="text-center text-body-sm text-secondary">30-Day Money-Back Guarantee</div>
+<div class="flex flex-col gap-xs">
+<h4 class="font-label-sm text-label-sm mb-xs">This course includes:</h4>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="movie">movie</span>
+                            32 hours on-demand video
+                        </div>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="article">article</span>
+                            14 articles
+                        </div>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+                            25 downloadable resources
+                        </div>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="infinity">indeterminate_question_box</span>
+                            Full lifetime access
+                        </div>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="devices">devices</span>
+                            Access on mobile and TV
+                        </div>
+<div class="flex items-center gap-base text-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="workspace_premium">workspace_premium</span>
+                            Certificate of completion
+                        </div>
+</div>
+</div>
+</aside>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="max-w-[1340px] mx-auto px-6 py-xl grid grid-cols-1 lg:grid-cols-3 gap-xl">
+<div class="lg:col-span-2 flex flex-col gap-xl">
+<!-- Learning Objectives Section -->
+<section class="border border-gray-200 p-md bg-white">
+<h2 class="font-headline-md text-headline-md mb-md">What you'll learn</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-sm">
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Architect large-scale React applications using the latest Next.js 14 App Router patterns.</p>
+</div>
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Master Server Actions for seamless data mutations without complex API route management.</p>
+</div>
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Implement advanced performance optimization including partial prerendering and PPR.</p>
+</div>
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Secure your applications with ironclad Auth.js and RBAC (Role-Based Access Control) strategies.</p>
+</div>
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Integrate Tailwind CSS for professional design systems and dark-mode optimization.</p>
+</div>
+<div class="flex gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="check">check</span>
+<p class="text-body-sm">Deploy applications to Vercel with CI/CD and edge runtime configurations.</p>
+</div>
+</div>
+</section>
+<!-- Curriculum Section -->
+<section>
+<div class="flex justify-between items-center mb-md">
+<h2 class="font-headline-md text-headline-md">Course content</h2>
+<div class="text-body-sm text-secondary">18 sections • 242 lectures • 32h 14m total length</div>
+</div>
+<div class="border border-gray-200">
+<!-- Section 1 -->
+<div class="border-b border-gray-200">
+<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+<span class="font-label-md">Introduction to Professional Web Development</span>
+</div>
+<span class="text-body-sm text-secondary">4 lectures • 25min</span>
+</div>
+</div>
+<!-- Section 2 -->
+<div class="border-b border-gray-200">
+<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+<span class="font-label-md">Modern React: React 18 and Concurrent Rendering</span>
+</div>
+<span class="text-body-sm text-secondary">12 lectures • 2h 45min</span>
+</div>
+</div>
+<!-- Section 3 (Expanded) -->
+<div class="border-b border-gray-200">
+<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="expand_less">expand_less</span>
+<span class="font-label-md">Deep Dive into Next.js 14 App Router</span>
+</div>
+<span class="text-body-sm text-secondary">24 lectures • 5h 12min</span>
+</div>
+<div class="p-md flex flex-col gap-sm bg-white">
+<div class="flex justify-between items-center text-body-sm">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+<span class="underline text-primary-container">The Layout Pattern and Route Segments</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-secondary underline cursor-pointer">Preview</span>
+<span>12:45</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+<span class="underline text-primary-container">Server Components vs. Client Components</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="text-secondary underline cursor-pointer">Preview</span>
+<span>18:22</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+<span>Data Fetching strategies: fetch vs. libraries</span>
+</div>
+<span class="text-secondary">24:10</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Instructor Section -->
+<section id="instructor">
+<h2 class="font-headline-md text-headline-md mb-md">Instructor</h2>
+<div class="flex flex-col gap-md">
+<div class="flex flex-col gap-xs">
+<h3 class="text-primary-container font-bold text-headline-sm underline decoration-2 underline-offset-4">Dr. Elena Sterling</h3>
+<p class="text-secondary font-label-md">Senior Software Architect &amp; Open Source Contributor</p>
+</div>
+<div class="flex gap-md items-start">
+<img class="w-32 h-32 rounded-full object-cover grayscale" data-alt="A professional portrait of Dr. Elena Sterling, a middle-aged woman with an intelligent and confident expression. She is in a high-end corporate office setting with blurred technology-focused backgrounds. Her attire is professional yet modern. The lighting is soft and flattering, creating a premium academic yet accessible persona that matches the EduStream brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZsZgRBSEi9wItzhLW7VQtN8AAVh6c_YNgA8MlFM02X5MZgEO4ifOyApiWXVqikXMLuK8_xzRJmLb7TQNyo5igl6qphRR4TP2tJdpsfDVsgPUm6dJHXzNKxnMNQw3NNvpxZCvBKqorngTqPBEW_XeNP-cNhaUYW68i5qU5hyhzILceKxeNHNIvAQfema6t6O9tubppYihHOso0_HKflswjf6EQorONTc6ErI3Oe6AYKy4TSb2V3ED0AEEA_D3rVLCDjdoJ8Q-v1Y_a"/>
+<div class="flex flex-col gap-xs text-body-sm">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.9 Instructor Rating
+                            </div>
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="reviews" style="font-variation-settings: 'FILL' 1;">reviews</span>
+                                452,103 Reviews
+                            </div>
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+                                1,204,556 Students
+                            </div>
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                                12 Courses
+                            </div>
+</div>
+</div>
+<p class="text-body-md leading-relaxed">
+                        Dr. Elena Sterling is a leading voice in the JavaScript ecosystem with over 15 years of experience building scalable systems for Fortune 500 companies. She is a core contributor to several major open-source projects and frequently speaks at global tech conferences like React Conf and Next.js Conf. Her teaching philosophy focuses on bridging the gap between academic theory and industry reality.
+                    </p>
+</div>
+</section>
+<!-- Reviews Section -->
+<section>
+<div class="flex items-center gap-base mb-md">
+<span class="material-symbols-outlined text-[#F3CA8C] text-2xl" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<h2 class="font-headline-md text-headline-md">4.8 course rating • 12K reviews</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Review 1 -->
+<div class="flex flex-col gap-sm border-t border-gray-100 pt-sm">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-on-surface text-white flex items-center justify-center font-bold">MK</div>
+<div>
+<h4 class="font-label-md">Marcus K.</h4>
+<div class="flex items-center gap-base">
+<div class="flex text-[#F3CA8C]">
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-secondary text-body-sm">3 weeks ago</span>
+</div>
+</div>
+</div>
+<p class="text-body-sm">This is by far the best Next.js course I've taken. The section on Server Actions was eye-opening and explained better than the official documentation. Worth every penny.</p>
+<div class="flex items-center gap-md">
+<span class="text-xs text-secondary">Helpful?</span>
+<span class="material-symbols-outlined text-sm cursor-pointer" data-icon="thumb_up">thumb_up</span>
+<span class="material-symbols-outlined text-sm cursor-pointer" data-icon="thumb_down">thumb_down</span>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="flex flex-col gap-sm border-t border-gray-100 pt-sm">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold">SA</div>
+<div>
+<h4 class="font-label-md">Sarah A.</h4>
+<div class="flex items-center gap-base">
+<div class="flex text-[#F3CA8C]">
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-secondary text-body-sm">1 month ago</span>
+</div>
+</div>
+</div>
+<p class="text-body-sm">The professional patterns taught here saved our team weeks of trial and error on our new enterprise project. Dr. Sterling's delivery is crisp and highly professional.</p>
+<div class="flex items-center gap-md">
+<span class="text-xs text-secondary">Helpful?</span>
+<span class="material-symbols-outlined text-sm cursor-pointer" data-icon="thumb_up">thumb_up</span>
+<span class="material-symbols-outlined text-sm cursor-pointer" data-icon="thumb_down">thumb_down</span>
+</div>
+</div>
+</div>
+<button class="mt-xl h-12 px-6 border-2 border-on-surface font-bold hover:bg-gray-50 transition-all">Show all reviews</button>
+</section>
+</div>
+<!-- Sticky Mobile Actions / Additional Info for Tablet+ -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-sm z-40 flex items-center justify-between gap-sm">
+<div>
+<div class="font-bold text-headline-sm">$89.99</div>
+<div class="text-secondary text-body-sm line-through">$149.99</div>
+</div>
+<button class="flex-grow h-12 bg-primary-container text-on-primary-container font-bold scale-95 duration-100">Add to Cart</button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-gray-900 dark:bg-black text-white font-['Inter'] text-xs leading-relaxed border-t border-gray-800 p-12">
+<div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 px-8 py-16">
+<div class="col-span-2">
+<span class="text-xl font-bold text-white mb-base block">EduStream</span>
+<p class="text-gray-400 mb-md max-w-xs">Connecting professionals with the highest quality instruction to drive career momentum and technical excellence.</p>
+</div>
+<div>
+<h5 class="text-white font-bold mb-md uppercase tracking-wider">Explore</h5>
+<ul class="flex flex-col gap-sm">
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Business</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Design</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Development</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Marketing</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-bold mb-md uppercase tracking-wider">Company</h5>
+<ul class="flex flex-col gap-sm">
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">About Us</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Careers</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Blog</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Help</a></li>
+</ul>
+</div>
+<div class="col-span-2">
+<h5 class="text-white font-bold mb-md uppercase tracking-wider">Legal</h5>
+<ul class="flex flex-col gap-sm">
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Terms</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Privacy Policy</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Cookie Settings</a></li>
+<li><a class="text-gray-400 hover:text-white hover:underline transition-all opacity-90 hover:opacity-100" href="#">Accessibility Statement</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-8 pt-8 border-t border-gray-800 flex justify-between items-center text-gray-500">
+<span>© 2024 EduStream, Inc. All rights reserved.</span>
+<div class="flex gap-md">
+<span class="material-symbols-outlined cursor-pointer hover:text-white" data-icon="language">language</span>
+<span class="font-bold cursor-pointer hover:text-white">English</span>
+</div>
+</div>
+</footer>
+</body></html>

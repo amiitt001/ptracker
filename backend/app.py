@@ -579,6 +579,14 @@ def auth_page():
 def dashboard():
     return send_file(os.path.join(HTML_DIR, 'dsa_tracker.html'))
 
+@app.route('/edustream')
+def edustream_page():
+    return send_file(os.path.join(HTML_DIR, 'edustream.html'))
+
+@app.route('/course')
+def course_page():
+    return send_file(os.path.join(HTML_DIR, 'course.html'))
+
 @app.route('/firebase-config.js')
 def firebase_config():
     """Serve Firebase config + app config as JS, injected from env vars."""
