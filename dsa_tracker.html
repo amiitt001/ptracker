@@ -330,14 +330,8 @@
 </section>
 </main>
 
-<div id="test-panel" style="position:fixed; bottom:20px; right:20px; background:#fff; border:1px solid #ddd; padding:12px; font-size:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); z-index:9999; border-radius:8px; display:none;">
-  <div style="font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
-    Dev Tools (Payment Test)
-    <button onclick="this.parentElement.parentElement.style.display='none'" style="cursor:pointer">×</button>
-  </div>
-  <button onclick="simulatePayment()" style="background:#8900d4; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; width:100%;">Unlock Course Manually</button>
-  <p style="margin-top:8px; color:#666; font-size:10px;">Use this to bypass Stripe while running on localhost.</p>
-</div>
+<!-- Dev Tools Removed -->
+
 <!-- Footer -->
 <footer class="bg-gray-900 text-white p-12 border-t border-gray-800">
 <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 px-8 py-16 font-['Inter'] text-xs leading-relaxed">
@@ -399,53 +393,18 @@
       if (!user) {
         window.location.href = '/auth?mode=login';
       } else {
-        // Show test panel if on localhost
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          document.getElementById('test-panel').style.display = 'block';
-        }
         handlePaymentStatus();
       }
+
     });
 
     function handlePaymentStatus() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('payment_success') === 'true') {
-        showToast('Payment Successful! Unlocking your course...');
-        // In a real app, the webhook handles this, but we'll re-verify locally too
-        setTimeout(() => {
-          window.location.href = '/player';
-        }, 2000);
-      } else if (params.get('payment_cancelled') === 'true') {
-        showToast('Payment was cancelled.', 'error');
-      }
+        // Free access in production
     }
 
-    async function simulatePayment() {
-      const user = auth.currentUser;
-      if (!user) return;
-      const token = await user.getIdToken();
-      
-      try {
-        const res = await fetch('/api/redeem', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ code: 'BETA_TESTER' })
-        });
-        const data = await res.json();
-        if (data.status === 'success') {
-          alert('Success! Course unlocked (Mocked).');
-          window.location.href = '/player';
-        } else {
-          alert('Error: ' + data.message);
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Failed to simulate payment.');
-      }
-    }
+
+    // simulatePayment removed
+
 
     function showToast(msg, type = 'success') {
       // Simple alert for now, can be enhanced to a nice toast

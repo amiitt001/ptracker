@@ -197,12 +197,14 @@
 </div>
 <div class="p-md flex flex-col gap-md">
 <div class="flex items-baseline gap-2">
-<span class="font-headline-lg text-headline-lg text-on-surface">₹1999.00</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">Free</span>
 <span class="text-secondary line-through text-body-md">₹5000.00</span>
-<span class="text-secondary text-body-md">60% off</span>
+<span class="text-secondary text-body-md">100% off</span>
+
 </div>
 <div class="flex flex-col gap-sm">
-<button onclick="handleCheckout()" class="w-full h-12 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-all flex items-center justify-center">Buy Now</button>
+<button onclick="handleCheckout()" class="w-full h-12 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-all flex items-center justify-center">Enroll Now</button>
+
 </div>
 <div class="text-center text-body-sm text-secondary">30-Day Money-Back Guarantee</div>
 <div class="flex flex-col gap-xs">
@@ -478,32 +480,8 @@
 </div>
 <script>
 async function handleCheckout() {
-    try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) {
-            headers['Authorization'] = 'Bearer ' + token;
-        } else {
-            // redirect to auth if not logged in
-            window.location.href = '/auth?mode=login&redirect=' + encodeURIComponent(window.location.pathname);
-            return;
-        }
-
-        
-        const res = await fetch('/api/checkout', {
-            method: 'POST',
-            headers: headers
-        });
-        const data = await res.json();
-        if (data.checkout_url) {
-            window.location.href = data.checkout_url;
-        } else {
-            alert('Error initiating checkout: ' + (data.error || 'Unknown error'));
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Failed to initiate checkout');
-    }
+    window.location.href = '/dashboard';
 }
+
 </script>
 </body></html>
