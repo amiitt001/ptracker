@@ -67,7 +67,7 @@ serializer = URLSafeTimedSerializer(SECRET_KEY)
 # Stripe config removed
 
 
-_service   = None
+_creds = None
 
 
 
@@ -412,10 +412,10 @@ def firebase_config():
     return Response(js, mimetype='application/javascript')
 
 
-def get_service():
-    global _service
-    if _service:
-        return _service
+def get_credentials():
+    global _creds
+    if _creds and _creds.valid:
+        return _creds
 
     creds = None
     token_env = os.environ.get('GOOGLE_DRIVE_TOKEN')
@@ -445,8 +445,14 @@ def get_service():
             with open(TOKEN_PATH, 'wb') as f:
                 pickle.dump(creds, f)
 
-    _service = build('drive', 'v3', credentials=creds)
-    return _service
+    _creds = creds
+    return _creds
+
+
+def get_service():
+    """Return a new Drive service instance per call to ensure thread-safety."""
+    creds = get_credentials()
+    return build('drive', 'v3', credentials=creds)
 
 
 @app.route('/api/health')
@@ -475,7 +481,8 @@ def list_files(folder_id):
     except RuntimeError as e:
         return jsonify({'error': str(e), 'setup_required': True}), 503
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'folderId': folder_id}), 500
 
 
 @app.route('/api/stream/<file_id>')
@@ -520,4 +527,5 @@ if __name__ == '__main__':
     print("=" * 54)
     print(f"  DSA Course Tracker  →  http://localhost:{port}")
     print("=" * 54)
-    app.run(debug=False, port=5000, host='0.0.0.0')
+    # Enable debug mode and use the correct port variable
+    app.run(debug=True, port=port, host='0.0.0.0')
