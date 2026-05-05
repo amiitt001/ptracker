@@ -5,8 +5,11 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+    <script src="/firebase-config.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -165,85 +168,22 @@
 <section class="mb-xl">
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
 <!-- Course Card 1 -->
-<div class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
+<div onclick="window.location.href='/player'" class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
 <div class="aspect-video w-full overflow-hidden relative">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A high-resolution photograph of a modern laptop on a clean white desk, displaying colorful code on the screen. The setting is a minimalist home office with bright, natural sunlight creating a focused and productive atmosphere. The color palette is dominated by whites and soft grays with vibrant syntax highlighting on the screen. The overall aesthetic is professional, academic, and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGREiIBS0hxh3yjYVCnR4DYGMLR6AOsv-TJOpQkIedzOxWEmKoV9frWxKerpg1UFwFhALxAZ-ehYCsACuZ2GbOXffNuFqakpUOIwSNDPBim_vMaNhFawQkQK7D_fYxt3N87ZF3m1_7_DTUcvvpuOMlXUA5CumVxMJR7QV9G-JxgtF0r5L_4_9L0N8bD7Mpm6Ff5DUnLyNZemqPANmmsJNQncqulxSwK88TRV1UR-z9woU28h_BYdx-lCXJYRblrheVk9X5byB-yglS"/>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="DSA" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400"/>
 <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
 <span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
 </div>
 </div>
 <div class="p-md flex-1 flex flex-col">
-<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">Complete Python Developer in 2024: Zero to Mastery</h3>
-<p class="font-body-sm text-body-sm text-secondary mb-base">Andrei Neagoie, JTM Academy</p>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">Master Data Structures & Algorithms</h3>
+<p class="font-body-sm text-body-sm text-secondary mb-base">Abdul Bari</p>
 <div class="mt-auto">
 <div class="flex justify-between mb-xs">
-<span class="font-label-sm text-label-sm text-on-surface">75% complete</span>
+<span class="font-label-sm text-label-sm text-on-surface">Continue Learning</span>
 </div>
 <div class="w-full h-1 bg-surface-variant">
-<div class="bg-primary-container h-full" style="width: 75%"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- Course Card 2 -->
-<div class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
-<div class="aspect-video w-full overflow-hidden relative">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clean, top-down photograph of a designer's workspace featuring a tablet with UI wireframes, a mechanical pencil, and a notebook. The lighting is diffused and even, emphasizing a workspace dedicated to clarity and expertise. The color scheme is a sophisticated blend of white, charcoal, and subtle purple accents. This visual represents professional momentum and systematic design logic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFa-TnLus4fpmJ3SXz-m_cY35Z_gjQ-vNFgo6vf0CeqBOchvIyliOeEk3fspXNDIUzts9Mej-G4Py8Ci4szHmNw2rAiFeEGzgCX0eP5yXEOknF90Msuar6Xw2-tl3LZ6r7EPt1fAU1gLm-6ZJOc189lSRDiZSk7rEQ_i2Ro6C8FH3ZyYyRp0xqdaKBdhpDiNROg1kwKcHMrVkfE09njVXKe8szYZWkVB_nDuCn_lZaK2NIjIIScAiL6jwISw9oTtvcJxrcn4ArFLVD"/>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
-</div>
-</div>
-<div class="p-md flex-1 flex flex-col">
-<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">User Experience Design Essentials - Adobe XD UI UX</h3>
-<p class="font-body-sm text-body-sm text-secondary mb-base">Daniel Walter Scott</p>
-<div class="mt-auto">
-<div class="flex justify-between mb-xs">
-<span class="font-label-sm text-label-sm text-on-surface">32% complete</span>
-</div>
-<div class="w-full h-1 bg-surface-variant">
-<div class="bg-primary-container h-full" style="width: 32%"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- Course Card 3 -->
-<div class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
-<div class="aspect-video w-full overflow-hidden relative">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A sleek data visualization dashboard displayed on a large high-resolution monitor. The screen shows complex graphs and charts in vibrant purple and blue tones against a dark theme interface. The room is a high-tech corporate office with soft ambient lighting and clean lines. The image evokes a sense of high-quality instruction and professional data analysis skills." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGBP-sCZaiRbWvqpEV3JBkb8sExrFxM1dw1zBOpG6m7zpoud5ICLXBuLhUmTJqyHPUB7fGGFxxKgBjkOAJJnBftWDwHe2U-Ga4QOhUWxtV_u-Uchu3GaaDi_wzdcC45_eFx5zGmKfJrpsEmuOYRO-N2lcd03c2S_ilM4Ksdrle7ByPYnKOFmIj7JAjXuheV1QOxDcE3uJxHg2ZAHcsQFzT9m7lHf-dkTX5ItFnciUAiJhuuYcYeWhiN6Q3NxgqhdY3mVVZUZgHHR0z"/>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
-</div>
-</div>
-<div class="p-md flex-1 flex flex-col">
-<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">The Data Science Course: Complete Data Science Bootcamp</h3>
-<p class="font-body-sm text-body-sm text-secondary mb-base">365 Careers</p>
-<div class="mt-auto">
-<div class="flex justify-between mb-xs">
-<span class="font-label-sm text-label-sm text-on-surface">90% complete</span>
-</div>
-<div class="w-full h-1 bg-surface-variant">
-<div class="bg-primary-container h-full" style="width: 90%"></div>
-</div>
-</div>
-</div>
-</div>
-<!-- Course Card 4 -->
-<div class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
-<div class="aspect-video w-full overflow-hidden relative">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A minimalist photograph of a corporate boardroom with large windows overlooking a city skyline at dusk. On the table is a digital tablet showing marketing growth charts. The aesthetic is clean, corporate, and highly structured, utilizing a palette of whites, grays, and deep blacks. The lighting is soft and professional, highlighting a sense of reliable authority and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8ZDzNSF45b5hmNZqf_YKK5gqKSTT2LYlM7IeZmyLV5nZOeDSN5e3KwJaaAdFiBuZMGQpv0hntW0_NJf4MREHmHUSv-mcLQiKFeB2diJI81uuGG7c4ShmkiLQBXTixOlaf7MHUWi5Z0H436OFPtpy2YfnYmX0Jx4Q7iucCpVKGSnWtWhOfZimMjTZ6cKw1EAFhKh1WBNnV_FH3QYAhHQBs2Dj_IQBrbeygRYZ94yhzunUWbyotJnuTC2j3VJCdMuEF7JIuA5W3xX6l"/>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
-</div>
-</div>
-<div class="p-md flex-1 flex flex-col">
-<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">Digital Marketing Strategy: Profit from Social Media</h3>
-<p class="font-body-sm text-body-sm text-secondary mb-base">Terry G. Robinson</p>
-<div class="mt-auto">
-<div class="flex justify-between mb-xs">
-<span class="font-label-sm text-label-sm text-on-surface">5% complete</span>
-</div>
-<div class="w-full h-1 bg-surface-variant">
-<div class="bg-primary-container h-full" style="width: 5%"></div>
+<div class="bg-primary-container h-full" style="width: 10%"></div>
 </div>
 </div>
 </div>
@@ -389,6 +329,15 @@
 </div>
 </section>
 </main>
+
+<div id="test-panel" style="position:fixed; bottom:20px; right:20px; background:#fff; border:1px solid #ddd; padding:12px; font-size:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); z-index:9999; border-radius:8px; display:none;">
+  <div style="font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between;">
+    Dev Tools (Payment Test)
+    <button onclick="this.parentElement.parentElement.style.display='none'" style="cursor:pointer">×</button>
+  </div>
+  <button onclick="simulatePayment()" style="background:#8900d4; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; width:100%;">Unlock Course Manually</button>
+  <p style="margin-top:8px; color:#666; font-size:10px;">Use this to bypass Stripe while running on localhost.</p>
+</div>
 <!-- Footer -->
 <footer class="bg-gray-900 text-white p-12 border-t border-gray-800">
 <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 px-8 py-16 font-['Inter'] text-xs leading-relaxed">
@@ -441,4 +390,66 @@
 </div>
 </div>
 </footer>
+  <script>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = '/auth?mode=login';
+      } else {
+        // Show test panel if on localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          document.getElementById('test-panel').style.display = 'block';
+        }
+        handlePaymentStatus();
+      }
+    });
+
+    function handlePaymentStatus() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment_success') === 'true') {
+        showToast('Payment Successful! Unlocking your course...');
+        // In a real app, the webhook handles this, but we'll re-verify locally too
+        setTimeout(() => {
+          window.location.href = '/player';
+        }, 2000);
+      } else if (params.get('payment_cancelled') === 'true') {
+        showToast('Payment was cancelled.', 'error');
+      }
+    }
+
+    async function simulatePayment() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const token = await user.getIdToken();
+      
+      try {
+        const res = await fetch('/api/redeem', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ code: 'BETA_TESTER' })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          alert('Success! Course unlocked (Mocked).');
+          window.location.href = '/player';
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Failed to simulate payment.');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      // Simple alert for now, can be enhanced to a nice toast
+      alert(msg);
+    }
+  </script>
 </body></html>

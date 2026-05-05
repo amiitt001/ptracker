@@ -569,7 +569,7 @@ def stripe_webhook():
 # ── Page routes ────────────────────────────────────────────────────
 @app.route('/')
 def landing():
-    return send_file(os.path.join(HTML_DIR, 'index.html'))
+    return send_file(os.path.join(HTML_DIR, 'edustream.html'))
 
 @app.route('/auth')
 def auth_page():
@@ -590,6 +590,10 @@ def edustream_auth_page():
 @app.route('/course')
 def course_page():
     return send_file(os.path.join(HTML_DIR, 'course.html'))
+
+@app.route('/player')
+def player_page():
+    return send_file(os.path.join(HTML_DIR, 'player.html'))
 
 @app.route('/firebase-config.js')
 def firebase_config():
