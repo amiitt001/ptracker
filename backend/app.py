@@ -16,7 +16,8 @@ load_dotenv(os.path.join(BACKEND_DIR, '.env'))
 from flask import Flask, Response, jsonify, request, send_file
 import requests
 import re
-import stripe
+# import stripe  # Removed for production
+
 from flask_cors import CORS
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -63,10 +64,8 @@ SCOPES     = ['https://www.googleapis.com/auth/drive.readonly']
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dsa-tracker-change-in-production')
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
-# stripe.api_key is set dynamically in routes
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
-COURSE_PRICE_AMOUNT = int(os.environ.get('COURSE_PRICE_AMOUNT', 199900)) # Default 1999.00 INR (in paise)
-COURSE_PRICE_CURRENCY = os.environ.get('COURSE_PRICE_CURRENCY', 'inr')
+# Stripe config removed
+
 
 _service   = None
 
@@ -260,118 +259,19 @@ def migrate_progress_uid(old_uid: str, new_uid: str):
 
 
 def mark_user_paid(uid: str, retries: int = 3) -> bool:
-    """Upsert paid flag with simple retry for sqlite lock/contention."""
-    for attempt in range(retries):
-        conn = None
-        try:
-            conn = get_db()
-            conn.execute('''
-                INSERT INTO progress (uid, state_json, is_paid)
-                VALUES (?, '{}', 1)
-                ON CONFLICT(uid) DO UPDATE SET is_paid = 1
-            ''', (uid,))
-            conn.commit()
-            return True
-        except sqlite3.OperationalError as e:
-            msg = str(e).lower()
-            if 'locked' in msg and attempt < retries - 1:
-                time.sleep(0.15 * (attempt + 1))
-                continue
-            print(f"[mark_user_paid] sqlite error for uid={uid}: {e}")
-            return False
-        except Exception as e:
-            print(f"[mark_user_paid] unexpected error for uid={uid}: {e}")
-            return False
-        finally:
-            if conn:
-                conn.close()
-    return False
+    return True # Always paid in production
 
 
-def is_paid_checkout_session(session_id: str, expected_uid: str = None) -> bool:
-    """Validate Stripe Checkout session as paid, optionally binding to user UID."""
-    if not session_id:
-        return False
-    key = os.environ.get('STRIPE_SECRET_KEY')
-    if not key or 'placeholder' in key:
-        return False
-    stripe.api_key = key
-    try:
-        session = stripe.checkout.Session.retrieve(session_id)
-        
-        # If the total amount is 0 (e.g., due to a 100% coupon), Stripe might
-        # not mark the payment_status as 'paid'. We should treat it as paid.
-        is_free = session.get('amount_total') == 0
 
-        if not is_free and getattr(session, 'payment_status', None) != 'paid':
-            return False
-            
-        session_uid = getattr(session, 'client_reference_id', None)
-        if expected_uid and session_uid and session_uid != expected_uid:
-            return False
-        return True
-    except Exception:
-        return False
+# Stripe session validation removed
 
-
-def stripe_session_email(session) -> str:
-    customer_details = session.get('customer_details') or {}
-    return (
-        customer_details.get('email')
-        or session.get('customer_email')
-        or ''
-    ).strip().lower()
-
-
-def is_paid_checkout_session_for_user(session_id: str, expected_uids: list, expected_email: str = '') -> bool:
-    if not session_id:
-        return False
-    key = os.environ.get('STRIPE_SECRET_KEY')
-    if not key or 'placeholder' in key:
-        return False
-    stripe.api_key = key
-    try:
-        session = stripe.checkout.Session.retrieve(session_id)
-        if session.get('payment_status') != 'paid':
-            return False
-        session_uid = session.get('client_reference_id')
-        if (not session_uid) or session_uid in expected_uids:
-            return True
-        return bool(expected_email and stripe_session_email(session) == expected_email)
-    except Exception:
-        return False
 
 
 @app.route('/api/access/check', methods=['POST'])
 def check_access():
-    """Check whether current user has paid access via DB or Stripe session fallback."""
-    try:
-        auth_header = request.headers.get('Authorization', '')
-        uids = resolve_uid_candidates_from_auth_header(auth_header)
-        if not uids:
-            return jsonify({'is_paid': False, 'reason': 'unauthorized'}), 401
-        uid = uids[0]
+    """Check whether current user has paid access (Always True in production)."""
+    return jsonify({'is_paid': True, 'source': 'production_free'}), 200
 
-        conn = get_db()
-        row = fetch_progress_for_uids(conn, uids)
-        conn.close()
-        if row and row['is_paid']:
-            if row['uid'] != uid:
-                migrate_progress_uid(row['uid'], uid)
-            return jsonify({'is_paid': True, 'source': 'db'}), 200
-
-        data = request.get_json(silent=True) or {}
-        session_id = (data.get('session_id') or '').strip()
-        auth_email = resolve_auth_email_from_header(auth_header)
-        if session_id and is_paid_checkout_session_for_user(session_id, uids, auth_email):
-            mark_user_paid(uid)
-            return jsonify({'is_paid': True, 'source': 'stripe_session'}), 200
-
-        return jsonify({'is_paid': False, 'source': 'none'}), 200
-    except Exception as e:
-        print('[check_access] unexpected error:', e)
-        traceback.print_exc()
-        return jsonify({'is_paid': False, 'reason': 'server_error'}), 200
 
 
 # ── Auth endpoint ─────────────────────────────────────────────────
@@ -411,11 +311,9 @@ def handle_progress():
     if request.method == 'GET':
         row = fetch_progress_for_uids(conn, uids)
         conn.close()
-        if row:
-            if row['uid'] != uid:
-                migrate_progress_uid(row['uid'], uid)
-            return jsonify({'state': json.loads(row['state_json']), 'is_paid': bool(row['is_paid'])}), 200
-        return jsonify({'state': {}, 'is_paid': False}), 200
+        state = json.loads(row['state_json']) if row else {}
+        return jsonify({'state': state, 'is_paid': True}), 200
+
 
     if request.method == 'POST':
         state_data = (request.get_json(silent=True) or {}).get('state', {})
@@ -461,109 +359,8 @@ def redeem_code():
         return jsonify({'status': 'error', 'message': 'Invalid or expired coupon code.'}), 400
 
 # ── Stripe Payment Endpoints ─────────────────────────────────────
-@app.route('/api/checkout', methods=['POST'])
-def create_checkout_session():
-    key = os.environ.get('STRIPE_SECRET_KEY')
-    if not key or 'placeholder' in key:
-        return jsonify({'error': 'Missing or Invalid STRIPE_SECRET_KEY in Render settings. Please check your Dashboard.'}), 500
-    stripe.api_key = key
-    auth_header = request.headers.get('Authorization', '')
-    uid = resolve_uid_from_auth_header(auth_header)
-    if not uid:
-        return jsonify({'error': 'Unauthorized'}), 401
-    auth_email = resolve_auth_email_from_header(auth_header)
+# Stripe routes removed for production
 
-    domain_url = request.headers.get('Origin', 'http://localhost:5000').rstrip('/')
-
-    try:
-        session_params = dict(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': COURSE_PRICE_CURRENCY,
-                    'product_data': {
-                        'name': 'DSA Course Tracker Premium Access',
-                    },
-                    'unit_amount': COURSE_PRICE_AMOUNT,
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url=domain_url + '/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=domain_url + '/dashboard?payment_cancelled=true',
-            client_reference_id=uid,
-            allow_promotion_codes=True
-        )
-        if auth_email:
-            session_params['customer_email'] = auth_email
-        session = stripe.checkout.Session.create(**session_params)
-        return jsonify({'checkout_url': session.url}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/checkout/verify', methods=['POST'])
-def verify_checkout_session():
-    try:
-        key = os.environ.get('STRIPE_SECRET_KEY')
-        if not key or 'placeholder' in key:
-            return jsonify({'status': 'error', 'is_paid': False, 'error': 'missing_stripe_key'}), 200
-        stripe.api_key = key
-
-        data = request.get_json(silent=True) or {}
-        session_id = (data.get('session_id') or '').strip()
-        if not session_id:
-            return jsonify({'status': 'error', 'is_paid': False, 'error': 'missing_session_id'}), 200
-
-        try:
-            session = stripe.checkout.Session.retrieve(session_id)
-        except Exception as e:
-            return jsonify({'status': 'error', 'is_paid': False, 'error': str(e)}), 200
-
-        if session.get('payment_status') != 'paid':
-            return jsonify({'status': 'pending', 'is_paid': False}), 200
-
-        uids = resolve_uid_candidates_from_auth_header(request.headers.get('Authorization', ''))
-        if not uids:
-            return jsonify({'status': 'error', 'is_paid': False, 'error': 'unable_to_resolve_uid'}), 200
-        uid = uids[0]
-        auth_email = resolve_auth_email_from_header(request.headers.get('Authorization', ''))
-        session_uid = session.get('client_reference_id')
-        email_matches = auth_email and stripe_session_email(session) == auth_email
-        if session_uid and session_uid not in uids and not email_matches:
-            return jsonify({'status': 'error', 'is_paid': False, 'error': 'session_user_mismatch'}), 403
-
-        persisted = mark_user_paid(uid)
-        return jsonify({'status': 'success', 'is_paid': True, 'uid': uid, 'persisted': persisted}), 200
-    except Exception as e:
-        print('[verify_checkout_session] unexpected error:', e)
-        traceback.print_exc()
-        return jsonify({'status': 'error', 'is_paid': False, 'error': 'server_exception'}), 200
-
-@app.route('/api/webhook/stripe', methods=['POST'])
-def stripe_webhook():
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-    if not STRIPE_WEBHOOK_SECRET:
-        return 'Webhook secret not configured', 500
-    payload = request.data
-    sig_header = request.headers.get('Stripe-Signature')
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        return 'Invalid payload', 400
-    except stripe.error.SignatureVerificationError as e:
-        return 'Invalid signature', 400
-
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        uid = session.get('client_reference_id')
-        if uid:
-            mark_user_paid(uid)
-
-    return jsonify({'status': 'success'}), 200
 
 
 # ── Page routes ────────────────────────────────────────────────────
@@ -683,48 +480,8 @@ def list_files(folder_id):
 
 @app.route('/api/stream/<file_id>')
 def stream_video(file_id):
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-    # Verify auth token and check explicitly if paid 
-    auth_token = request.args.get('token')
-    checkout_session_id = request.args.get('session_id', '').strip()
-    is_paid = False
-    
-    if not auth_token:
-        # Also try header for completeness, though Video tags use src=... url params
-        auth_hdr = request.headers.get('Authorization','')
-        if auth_hdr.startswith('Bearer '):
-            auth_token = auth_hdr[7:]
+    is_paid = True # Always True in production
 
-    if auth_token:
-        try:
-            uids = resolve_uid_candidates_from_auth_header('Bearer ' + auth_token)
-            uid = uids[0] if uids else ''
-            if uids:
-                conn = get_db()
-                row = fetch_progress_for_uids(conn, uids)
-                conn.close()
-                if row and row['is_paid']:
-                    is_paid = True
-                    if row['uid'] != uid:
-                        migrate_progress_uid(row['uid'], uid)
-        except:
-            pass
-
-    # Fallback unlock path for successful Stripe return when DB write is delayed/fails.
-    if (not is_paid) and checkout_session_id and auth_token:
-        try:
-            uids = resolve_uid_candidates_from_auth_header('Bearer ' + auth_token)
-            uid = uids[0] if uids else ''
-            auth_email = resolve_auth_email_from_header('Bearer ' + auth_token)
-            if uid and is_paid_checkout_session_for_user(checkout_session_id, uids, auth_email):
-                is_paid = True
-                mark_user_paid(uid)
-        except Exception:
-            pass
-
-    if not is_paid:
-        # Instead of 402, returning a 403 or sending an empty chunk blocks it properly
-        return jsonify({'error': 'Payment required to view video.'}), 402
 
     svc = get_service()
     creds = svc._http.credentials
