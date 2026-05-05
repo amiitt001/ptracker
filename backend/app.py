@@ -22,6 +22,7 @@ from flask_cors import CORS
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from google.auth.exceptions import RefreshError
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -478,6 +479,8 @@ def list_files(folder_id):
         files.sort(key=natural_keys)
 
         return jsonify({'files': files, 'folderId': folder_id})
+    except RefreshError as e:
+        return jsonify({'error': 'Google Drive token expired or revoked. Please refresh the token.', 'details': str(e)}), 401
     except RuntimeError as e:
         return jsonify({'error': str(e), 'setup_required': True}), 503
     except Exception as e:
