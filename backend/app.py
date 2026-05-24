@@ -372,7 +372,7 @@ def redeem_code():
 # ── Page routes ────────────────────────────────────────────────────
 @app.route('/')
 def landing():
-    return send_file(os.path.join(HTML_DIR, 'edustream.html'))
+    return send_file(os.path.join(HTML_DIR, 'gyansetu.html'))
 
 @app.route('/auth')
 def auth_page():
@@ -382,13 +382,13 @@ def auth_page():
 def dashboard():
     return send_file(os.path.join(HTML_DIR, 'dsa_tracker.html'))
 
-@app.route('/edustream')
-def edustream_page():
-    return send_file(os.path.join(HTML_DIR, 'edustream.html'))
+@app.route('/gyansetu')
+def gyansetu_page():
+    return send_file(os.path.join(HTML_DIR, 'gyansetu.html'))
 
-@app.route('/edustream_auth')
-def edustream_auth_page():
-    return send_file(os.path.join(HTML_DIR, 'edustream_auth.html'))
+@app.route('/gyansetu_auth')
+def gyansetu_auth_page():
+    return send_file(os.path.join(HTML_DIR, 'gyansetu_auth.html'))
 
 @app.route('/course')
 def course_page():
