@@ -50,6 +50,11 @@ except (ImportError, ValueError, json.JSONDecodeError) as e:
 app = Flask(__name__)
 CORS(app, origins="*")
 
+@app.after_request
+def add_coop_header(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    return response
+
 # ── Paths ──────────────────────────────────────────────────────────
 BASE_DIR   = BACKEND_DIR
 HTML_DIR   = os.path.join(BASE_DIR, '..')
