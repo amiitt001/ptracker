@@ -118,35 +118,34 @@
 
     .app { display: flex; flex-direction: column; min-height: 100vh; }
 
-    /* HEADER (Udemy Dark-themed topbar) */
+    /* HEADER */
     .topbar {
-      height: 56px; background: #2d2f31; border-bottom: 1px solid #3e4143;
+      height: 56px; background: #ffffff; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
       position: sticky; top: 0; z-index: 1000;
-      color: #ffffff;
+      color: var(--text);
     }
     .topbar-left { display: flex; align-items: center; gap: 16px; }
     .topbar-logo {
-      display: flex; align-items: center; color: #ffffff; text-decoration: none; line-height: 1;
-      background: #ffffff; border-radius: 4px; padding: 3px 8px;
+      display: flex; align-items: center; color: var(--text); text-decoration: none; line-height: 1;
     }
     .topbar-logo-img {
-      width: 152px; height: 36px; object-fit: contain; object-position: left center; display: block;
+      width: 190px; height: 42px; object-fit: contain; object-position: left center; display: block;
     }
-    .topbar-divider { width: 1px; height: 24px; background: #4f5357; }
-    .topbar-course-title { font-size: 14px; font-weight: 600; color: #ffffff; }
+    .topbar-divider { width: 1px; height: 24px; background: var(--border); }
+    .topbar-course-title { font-size: 14px; font-weight: 600; color: var(--text); }
 
     .topbar-right { display: flex; align-items: center; gap: 16px; }
 
     /* Progress ring / dropdown widget in topbar */
     .progress-container {
-      display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ffffff; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); font-size: 13px; font-weight: 600;
       transition: opacity 0.2s; position: relative; padding: 6px 8px;
     }
     .progress-container:hover { opacity: 0.85; }
     .progress-ring-wrap { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
     .progress-ring { transform: rotate(-90deg); }
-    .progress-ring-bg { stroke: #3e4143; }
+    .progress-ring-bg { stroke: #e4e8eb; }
     .progress-ring-circle { stroke: #a435f0; stroke-linecap: round; transition: stroke-dashoffset 0.35s; }
     .progress-icon { position: absolute; font-size: 12px; }
     .chevron-down { font-size: 9px; margin-left: 2px; }
@@ -158,22 +157,22 @@
     }
     .user-chip { 
       display: flex; align-items: center; gap: 8px; padding: 4px 12px; 
-      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 4px; 
-      transition: var(--transition); color: #ffffff;
+      background: #f7f9fa; border: 1px solid var(--border); border-radius: 4px; 
+      transition: var(--transition); color: var(--text);
     }
-    .user-chip:hover { background: rgba(255, 255, 255, 0.15); }
+    .user-chip:hover { background: #e4e8eb; }
     .user-avatar { 
       width: 24px; height: 24px; background: #5624d0; 
       border-radius: 50%; display: flex; align-items: center; justify-content: center; 
       font-size: 11px; font-weight: 700; color: #fff;
     }
-    #user-name { font-size: 13px; font-weight: 600; color: #ffffff; }
+    #user-name { font-size: 13px; font-weight: 600; color: var(--text); }
     .btn-logout { 
-      background: transparent; border: 1px solid #3e4143; color: #ffffff; 
+      background: transparent; border: 1px solid var(--border); color: var(--text); 
       padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; 
       cursor: pointer; transition: var(--transition); 
     }
-    .btn-logout:hover { background: rgba(255, 255, 255, 0.05); border-color: #ffffff; }
+    .btn-logout:hover { background: #f7f9fa; border-color: var(--text); }
 
     /* MAIN LAYOUT */
     .main { display: flex; height: calc(100vh - 56px); overflow: hidden; }
@@ -328,8 +327,8 @@
         flex-shrink: 0;
       }
       .topbar-logo-img {
-        width: 120px;
-        height: 30px;
+        width: 140px;
+        height: 34px;
       }
       .topbar-divider,
       .topbar-course-title {
@@ -429,7 +428,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <a href="/dashboard" class="topbar-logo" aria-label="GyanSetu dashboard">
-          <img class="topbar-logo-img" src="/assets/gyansetu-logo.png?v=2" alt="" />
+          <img class="topbar-logo-img" src="/assets/gyansetu-logo.png?v=3" alt="" />
         </a>
         <div class="topbar-divider"></div>
         <div class="topbar-course-title">Mastering Data Structures &amp; Algorithms</div>
@@ -438,7 +437,7 @@
         <div class="progress-container" id="progress-container" onclick="showProgressToast()">
           <div class="progress-ring-wrap">
             <svg class="progress-ring" width="32" height="32">
-              <circle class="progress-ring-bg" stroke="#3e4143" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16"/>
+              <circle class="progress-ring-bg" stroke="#e4e8eb" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16"/>
               <circle class="progress-ring-circle" stroke="#a435f0" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16" stroke-dasharray="75.4" stroke-dashoffset="75.4" id="progress-circle"/>
             </svg>
             <span class="progress-icon">🏆</span>
