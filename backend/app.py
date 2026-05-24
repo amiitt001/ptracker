@@ -456,6 +456,7 @@ def get_service():
     return build('drive', 'v3', credentials=creds)
 
 
+@app.route('/health')
 @app.route('/api/health')
 def health():
     return jsonify({'status': 'ok'})
