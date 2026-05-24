@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BACKEND_DIR, '.env'))
 
-from flask import Flask, Response, jsonify, request, send_file
+from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 import requests
 import re
 # import stripe  # Removed for production
@@ -485,6 +485,10 @@ def player_page():
 @app.route('/search')
 def search_page():
     return send_file(os.path.join(HTML_DIR, 'search.html'))
+
+@app.route('/assets/<path:filename>')
+def assets(filename):
+    return send_from_directory(os.path.join(HTML_DIR, 'assets'), filename)
 
 @app.route('/firebase-config.js')
 def firebase_config():
