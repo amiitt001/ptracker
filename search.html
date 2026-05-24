@@ -125,7 +125,7 @@
 </div>
 <div class="flex-1 max-w-2xl relative">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary" data-icon="search">search</span>
-<input class="w-full h-[48px] pl-10 pr-4 bg-surface-container-lowest border border-outline-variant rounded-full text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" type="text" value="Web Development"/>
+<input id="search-input" onkeydown="if(event.key==='Enter') window.location.href='/search?q='+encodeURIComponent(this.value)" class="w-full h-[48px] pl-10 pr-4 bg-surface-container-lowest border border-outline-variant rounded-full text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" type="text" value="Web Development"/>
 </div>
 </div>
 <div class="flex items-center gap-4">
@@ -140,13 +140,15 @@
 <span class="material-symbols-outlined" data-icon="favorite">favorite</span>
 </button>
 </div>
-<button class="hidden sm:block px-4 py-2 border-2 border-on-surface text-label-md hover:bg-surface-container transition-all">Log In</button>
-<button class="px-4 py-2 bg-primary-container text-white text-label-md hover:opacity-90 transition-all">Sign Up</button>
+<div id="auth-buttons" class="flex items-center gap-3">
+<button onclick="window.location.href='/gyansetu_auth?mode=login'" class="hidden sm:block px-4 py-2 border-2 border-on-surface text-label-md hover:bg-surface-container transition-all">Log In</button>
+<button onclick="window.location.href='/gyansetu_auth?mode=register'" class="px-4 py-2 bg-primary-container text-white text-label-md hover:opacity-90 transition-all">Sign Up</button>
+</div>
 </div>
 </header>
 <main class="max-w-[1340px] mx-auto px-gutter py-lg">
 <div class="mb-lg">
-<h1 class="font-display text-display text-on-surface">6,423 results for "Web Development"</h1>
+<h1 id="search-results-heading" class="font-display text-display text-on-surface">6,423 results for "Web Development"</h1>
 </div>
 <div class="flex flex-col md:flex-row gap-gutter">
 <!-- Sidebar Filters -->
@@ -230,7 +232,7 @@
 <!-- Main Course List -->
 <div class="flex-1 space-y-gutter">
 <!-- Course Card 1 -->
-<div class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
+<div onclick="window.location.href='/course'" style="cursor: pointer;" class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
 <div class="sm:w-64 h-36 shrink-0 bg-gray-100 overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional workspace with a sleek laptop displaying clean code lines on a high-resolution screen. Soft natural morning light streams through a nearby window, highlighting a minimalist white desk with a small green succulent plant. The aesthetic is modern and corporate, utilizing a bright light-mode palette with subtle purple accents echoing the brand's expertise and clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEhpvEoGrOV4ZNXR8cCh918vnf6wkSECBSzmLEttZ-pUQmkj9rS-zxa_f2od01FMAPSeXqjBSsNgpzuxskTvJK02GuqO_m8Np4fZeT6nfTNTPtbZnwYm7oITv7rPKmGmB5_8uIfDFX8mLw9QdedrsC5vZiB807OySKtRHbcSTJDowgF-fqt4b2glLgo63Pl4gTvtHXzVKqAFyxN7rpl-jm5sOGh1wTmebuHYdVWPNKYpdyOyguOhjVL5cE51RBvu6Q6FG9yXfzIQ48"/>
 </div>
@@ -261,7 +263,7 @@
 </div>
 </div>
 <!-- Course Card 2 -->
-<div class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
+<div onclick="window.location.href='/course'" style="cursor: pointer;" class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
 <div class="sm:w-64 h-36 shrink-0 bg-gray-100 overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A macro shot of a keyboard with vibrant RGB backlighting casting a soft glow on a designer's hands. The scene is set in a contemporary studio with clean lines and a polished concrete floor. High-key lighting ensures a professional academic atmosphere, while the primary purple tones of the brand are reflected in the ambient screen glow. The mood is focused and productive, emphasizing modern digital instruction." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOQ7vUv9m0o0xpJC0isBCl6KzGJAazaC07vUcWSNtKf78qrOB07JVeilUVMnnxV1ege-fTG0ALsSGgfgQ4pzS-EP21uYOjHlMiz2UuqCMyaCCgo3niTxsZhhq60tnAvmB8YQtGMBQieZ5Nk26YrwZSDLJq-rrjUf9Ht-QnsKYnr8LOrJFjPIO7kzoHqPOyotQ53WijWdQpIbJccEc5jhkql3sYAGQkWXkHcxpyOENi6sMMtAXFgKFB79i_ocDRuaToeU6Y3mjyyOB8"/>
 </div>
@@ -291,7 +293,7 @@
 </div>
 </div>
 <!-- Course Card 3 -->
-<div class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
+<div onclick="window.location.href='/course'" style="cursor: pointer;" class="course-card-hover group flex flex-col sm:flex-row gap-md p-xs bg-white border border-outline-variant rounded transition-all duration-300">
 <div class="sm:w-64 h-36 shrink-0 bg-gray-100 overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="An abstract digital composition representing interconnected networks and cloud computing nodes glowing in a soft purple light. The background is a clean, minimalist off-white gradient that creates a sense of infinite digital space. Professional studio lighting highlights the intricate geometric connections, evoking a sense of momentum and academic rigor. The overall aesthetic is highly structured and intentional, focusing on digital excellence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDiltHd6ZeSYfTI0LL1xdf84NsP3otXCyD1CKniEm4GZG3KlH3kxC02tMIDayTKv1Afo3MZ4jOslKlArptC0pB2lufzPpl89Ce8OMv7ERMieVBYjfoy2aSVXO0vLRglehl8715VTi-a8BF2OK6OqkBNMLyOid1dKz7ENoDi4l-MiMSBtcMz4xEzAwPrwzZi3Msq035WaF8TGlQzEBIWc-bUZAGcOFKBuz6aF4HBY8VX_xoVi2eMjir_5d6Oa8RjTpP_pHlkQzGMctE"/>
 </div>
@@ -360,4 +362,36 @@
 </div>
 </div>
 </footer>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script>
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(function(user) {
+    const container = document.getElementById('auth-buttons');
+    if (user && container) {
+      const displayName = user.displayName || user.email.split('@')[0];
+      const avatarChar = displayName.charAt(0).toUpperCase();
+      container.innerHTML = `
+        <a href="/dashboard" class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95 inline-block text-center rounded no-underline text-[#1C1D1F]">My Learning</a>
+        <button onclick="firebase.auth().signOut().then(() => window.location.reload())" class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95 inline-block text-center rounded border-none cursor-pointer">Sign Out</button>
+        <div class="h-10 w-10 rounded-full bg-[#A435F0] text-white flex items-center justify-center font-bold text-sm select-none" title="${displayName}">
+          ${avatarChar}
+        </div>
+      `;
+    }
+  });
+
+  // Handle query parameter for search
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('q');
+  if (query) {
+    const input = document.getElementById('search-input');
+    if (input) input.value = query;
+    const heading = document.getElementById('search-results-heading');
+    if (heading) heading.textContent = `6,423 results for "${query}"`;
+  }
+</script>
 </body></html>

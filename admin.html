@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GyanSetu Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px border-outline-variant;
+    }
+    .purple-glow:hover {
+      box-shadow: 0 0 20px rgba(164, 53, 240, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
+    <div class="flex items-center gap-6">
+      <a href="/" class="text-2xl font-black text-gray-900 no-underline tracking-tight">GyanSetu <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1 uppercase font-bold">Admin</span></a>
+      <nav class="flex items-center gap-4 text-sm font-medium">
+        <a href="/dashboard" class="text-gray-600 hover:text-[#A435F0] transition-colors">Student Dashboard</a>
+      </nav>
+    </div>
+    <div id="admin-profile" class="flex items-center gap-4">
+      <!-- Injected profile details -->
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight">Control Panel</h1>
+        <p class="text-gray-500 mt-1">Manage course content folders and handle access authorization requests.</p>
+      </div>
+      <!-- Tab selectors -->
+      <div class="flex bg-gray-100 p-1 rounded-xl self-start md:self-auto">
+        <button onclick="switchTab('courses')" id="tab-btn-courses" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all bg-white shadow text-gray-900">
+          Courses
+        </button>
+        <button onclick="switchTab('requests')" id="tab-btn-requests" class="px-5 py-2.5 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-900">
+          Access Requests
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: COURSES -->
+    <section id="tab-courses" class="space-y-8">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold">All Active Courses</h2>
+        <button onclick="openCourseModal()" class="bg-[#A435F0] hover:bg-[#8b29cf] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-sm">
+          <span class="material-symbols-outlined text-sm">add</span> Add New Course
+        </button>
+      </div>
+
+      <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dyn list -->
+        <div class="col-span-full text-center py-12 text-gray-400">Loading courses...</div>
+      </div>
+    </section>
+
+    <!-- TAB: REQUESTS -->
+    <section id="tab-requests" class="hidden space-y-8">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold">Access Authorization Requests</h2>
+        <button onclick="loadRequests()" class="text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1 text-sm font-bold">
+          <span class="material-symbols-outlined text-sm">refresh</span> Refresh
+        </button>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-50 text-xs font-bold text-gray-500 uppercase border-b border-gray-100">
+                <th class="px-6 py-4">User Email</th>
+                <th class="px-6 py-4">Course</th>
+                <th class="px-6 py-4">Requested At</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requests-tbody" class="divide-y divide-gray-100 text-sm">
+              <tr>
+                <td colspan="5" class="px-6 py-12 text-center text-gray-400">Loading requests...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- COURSE MODAL -->
+  <div id="course-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+        <h3 id="modal-title" class="text-lg font-bold">Create New Course</h3>
+        <button onclick="closeCourseModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="course-form" onsubmit="saveCourse(event)" class="p-6 overflow-y-auto space-y-6 flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Course Slug (Unique ID)</label>
+            <input type="text" id="course-id" required placeholder="e.g. python-basics" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#A435F0] focus:border-[#A435F0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Course Title</label>
+            <input type="text" id="course-title" required placeholder="e.g. Master Python Programming" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#A435F0] focus:border-[#A435F0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Instructor Name</label>
+            <input type="text" id="course-instructor" required placeholder="e.g. Abdul Bari" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#A435F0] focus:border-[#A435F0] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Thumbnail Image URL</label>
+            <input type="url" id="course-thumbnail" required placeholder="e.g. https://images.unsplash.com/..." class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#A435F0] focus:border-[#A435F0] outline-none">
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-sm">Course Sections (Google Drive Folders)</h4>
+            <button type="button" onclick="addSectionRow()" class="text-[#A435F0] hover:text-[#8b29cf] font-bold text-sm flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">add_circle</span> Add Section
+            </button>
+          </div>
+          <div id="modal-sections-list" class="space-y-3">
+            <!-- Dynamic rows -->
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-6 flex justify-end gap-3">
+          <button type="button" onclick="closeCourseModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-sm transition-all">Cancel</button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#A435F0] hover:bg-[#8b29cf] text-white font-bold text-sm transition-all shadow-sm">Save Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-lg flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300">
+    <span id="toast-icon" class="material-symbols-outlined text-green-400">check_circle</span>
+    <span id="toast-msg" class="text-sm font-semibold">Saved successfully</span>
+  </div>
+
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    let currentToken = null;
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = '/gyansetu_auth?mode=login';
+        return;
+      }
+      if (user.email !== 'admin@gyansetu.com') {
+        alert("Access Denied: Admin account required.");
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      currentToken = await user.getIdToken();
+      renderAdminProfile(user);
+      loadCourses();
+      loadRequests();
+    });
+
+    function renderAdminProfile(user) {
+      const p = document.getElementById('admin-profile');
+      const name = user.displayName || user.email.split('@')[0];
+      const initial = name.charAt(0).toUpperCase();
+      p.innerHTML = `
+        <span class="text-xs font-semibold text-gray-500 hidden sm:inline">${user.email}</span>
+        <button onclick="auth.signOut().then(() => window.location.reload())" class="text-gray-500 hover:text-gray-800 text-xs font-bold transition-colors">Sign Out</button>
+        <div class="h-9 w-9 rounded-full bg-[#A435F0] text-white flex items-center justify-center font-bold text-xs select-none shadow-sm">
+          ${initial}
+        </div>
+      `;
+    }
+
+    // Tabs Switcher
+    function switchTab(tab) {
+      const tc = document.getElementById('tab-courses');
+      const tr = document.getElementById('tab-requests');
+      const bc = document.getElementById('tab-btn-courses');
+      const br = document.getElementById('tab-btn-requests');
+
+      if (tab === 'courses') {
+        tc.classList.remove('hidden');
+        tr.classList.add('hidden');
+        bc.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition-all bg-white shadow text-gray-900";
+        br.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-900";
+      } else {
+        tc.classList.add('hidden');
+        tr.classList.remove('hidden');
+        bc.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-gray-900";
+        br.className = "px-5 py-2.5 rounded-lg text-sm font-bold transition-all bg-white shadow text-gray-900";
+        loadRequests();
+      }
+    }
+
+    // Toast Alert helper
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const message = document.getElementById('toast-msg');
+      
+      message.textContent = msg;
+      if (isError) {
+        icon.textContent = 'warning';
+        icon.className = 'material-symbols-outlined text-red-400';
+      } else {
+        icon.textContent = 'check_circle';
+        icon.className = 'material-symbols-outlined text-green-400';
+      }
+
+      t.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        t.classList.add('translate-y-24', 'opacity-0');
+      }, 4000);
+    }
+
+    // COURSES MANAGEMENT
+    async function loadCourses() {
+      try {
+        const res = await fetch('/api/courses');
+        const courses = await res.json();
+        const grid = document.getElementById('courses-grid');
+        grid.innerHTML = '';
+
+        if (!courses || courses.length === 0) {
+          grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">No courses available. Add one to get started!</div>`;
+          return;
+        }
+
+        courses.forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col purple-glow';
+          card.innerHTML = `
+            <div class="aspect-video w-full overflow-hidden bg-gray-100 border-b border-gray-100">
+              <img class="w-full h-full object-cover" src="${c.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400'}" alt="${c.title}">
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <span class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded self-start font-bold uppercase mb-2">${c.id}</span>
+              <h3 class="font-bold text-lg text-gray-900 mb-1 leading-snug">${c.title}</h3>
+              <p class="text-sm text-gray-500 mb-4">${c.instructor}</p>
+              
+              <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+                <button onclick="editCourse('${c.id}')" class="text-gray-600 hover:text-gray-900 font-bold text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">edit</span> Edit
+                </button>
+                <button onclick="deleteCourse('${c.id}')" class="text-red-500 hover:text-red-700 font-bold text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">delete</span> Delete
+                </button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to load courses.", true);
+      }
+    }
+
+    function openCourseModal(editId = '') {
+      const modal = document.getElementById('course-modal');
+      const form = document.getElementById('course-form');
+      const title = document.getElementById('modal-title');
+      const cidInput = document.getElementById('course-id');
+      
+      form.reset();
+      document.getElementById('modal-sections-list').innerHTML = '';
+      
+      if (editId) {
+        title.textContent = 'Edit Course';
+        cidInput.value = editId;
+        cidInput.disabled = true;
+        fetchAndPopulateCourse(editId);
+      } else {
+        title.textContent = 'Create New Course';
+        cidInput.disabled = false;
+        addSectionRow(); // start with one section row
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCourseModal() {
+      document.getElementById('course-modal').classList.add('hidden');
+    }
+
+    function addSectionRow(name = '', folderId = '') {
+      const list = document.getElementById('modal-sections-list');
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-3 section-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Section Name (e.g. 1. Before we Start)" required value="${name}" class="flex-grow border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#A435F0] outline-none">
+        <input type="text" placeholder="Google Drive Folder ID" required value="${folderId}" class="flex-grow border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#A435F0] outline-none">
+        <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-red-500 transition-colors">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      `;
+      list.appendChild(row);
+    }
+
+    async function fetchAndPopulateCourse(courseId) {
+      try {
+        const res = await fetch(`/api/courses/${courseId}`);
+        const c = await res.json();
+        
+        document.getElementById('course-title').value = c.title || '';
+        document.getElementById('course-instructor').value = c.instructor || '';
+        document.getElementById('course-thumbnail').value = c.thumbnail || '';
+        
+        const list = document.getElementById('modal-sections-list');
+        list.innerHTML = '';
+        if (c.sections && c.sections.length > 0) {
+          c.sections.forEach(s => {
+            addSectionRow(s.name, s.folderId);
+          });
+        } else {
+          addSectionRow();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Error retrieving course details.", true);
+      }
+    }
+
+    async function saveCourse(e) {
+      e.preventDefault();
+      if (!currentToken) return;
+
+      const id = document.getElementById('course-id').value.trim();
+      const title = document.getElementById('course-title').value.trim();
+      const instructor = document.getElementById('course-instructor').value.trim();
+      const thumbnail = document.getElementById('course-thumbnail').value.trim();
+
+      const sectionRows = document.querySelectorAll('.section-row');
+      const sections = [];
+      sectionRows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs[0].value.trim() && inputs[1].value.trim()) {
+          sections.push({
+            name: inputs[0].value.trim(),
+            folder_id: inputs[1].value.trim()
+          });
+        }
+      });
+
+      const payload = { id, title, instructor, thumbnail, sections };
+
+      try {
+        const res = await fetch('/api/courses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Save failed");
+
+        showToast("Course saved successfully!");
+        closeCourseModal();
+        loadCourses();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function editCourse(id) {
+      openCourseModal(id);
+    }
+
+    async function deleteCourse(id) {
+      if (!confirm(`Are you sure you want to delete course "${id}"?`)) return;
+      if (!currentToken) return;
+
+      try {
+        const res = await fetch(`/api/courses/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + currentToken
+          }
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Deletion failed");
+        }
+        showToast("Course deleted.");
+        loadCourses();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    // REQUESTS MANAGEMENT
+    async function loadRequests() {
+      if (!currentToken) return;
+
+      try {
+        const res = await fetch('/api/admin/requests', {
+          headers: { 'Authorization': 'Bearer ' + currentToken }
+        });
+        const requests = await res.json();
+        const tbody = document.getElementById('requests-tbody');
+        tbody.innerHTML = '';
+
+        if (!requests || requests.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No requests available.</td></tr>`;
+          return;
+        }
+
+        requests.forEach(r => {
+          let statusBadge = '';
+          if (r.status === 'approved') {
+            statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-green-50 text-green-700 uppercase">Approved</span>';
+          } else if (r.status === 'rejected') {
+            statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-red-50 text-red-700 uppercase">Rejected</span>';
+          } else {
+            statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-yellow-50 text-yellow-700 uppercase">Pending</span>';
+          }
+
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-gray-50/50 transition-colors';
+          tr.innerHTML = `
+            <td class="px-6 py-4 font-semibold text-gray-900">${r.email}</td>
+            <td class="px-6 py-4">${r.course_title} <span class="text-xs text-gray-400">(${r.course_id})</span></td>
+            <td class="px-6 py-4 text-gray-500">${new Date(r.requested_at).toLocaleString()}</td>
+            <td class="px-6 py-4">${statusBadge}</td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <button onclick="updateRequestStatus(${r.id}, 'approved')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">Approve</button>
+                <button onclick="updateRequestStatus(${r.id}, 'rejected')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">Reject</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to load requests.", true);
+      }
+    }
+
+    async function updateRequestStatus(reqId, status) {
+      if (!currentToken) return;
+
+      try {
+        const res = await fetch(`/api/admin/requests/${reqId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+          },
+          body: JSON.stringify({ status })
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Update failed");
+        }
+        showToast(`Request ${status} successfully.`);
+        loadRequests();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -100,11 +100,94 @@ def init_db():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS courses (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            instructor TEXT NOT NULL,
+            thumbnail TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            folder_id TEXT NOT NULL,
+            sort_order INTEGER DEFAULT 0,
+            FOREIGN KEY(course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS user_watched_videos (
+            uid TEXT NOT NULL,
+            course_id TEXT NOT NULL,
+            file_id TEXT NOT NULL,
+            watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (uid, course_id, file_id)
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS access_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uid TEXT NOT NULL,
+            email TEXT NOT NULL,
+            course_id TEXT NOT NULL,
+            course_title TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(uid, course_id)
+        )
+    ''')
     # Try gracefully altering table if old schema exists
     try:
         conn.execute("ALTER TABLE progress ADD COLUMN is_paid BOOLEAN DEFAULT 0")
     except Exception:
         pass
+    
+    # Populate default course if empty
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM courses")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            "INSERT INTO courses (id, title, instructor, thumbnail) VALUES (?, ?, ?, ?)",
+            ("dsa", "Master Data Structures & Algorithms", "Abdul Bari", "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400")
+        )
+        
+        # Read sections from player.html dynamically
+        sections = []
+        try:
+            player_path = os.path.join(os.path.dirname(DB_PATH), '..', 'player.html')
+            if not os.path.exists(player_path):
+                player_path = os.path.join(os.path.dirname(DB_PATH), 'player.html')
+            if os.path.exists(player_path):
+                with open(player_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                # Match all sections
+                import re
+                for sec_match in re.finditer(r'\{\s*"id"\s*:\s*"([^"]+)"\s*,\s*"name"\s*:\s*"([^"]+)"\s*,\s*"folderId"\s*:\s*"([^"]+)"', content):
+                    sections.append({
+                        'name': sec_match.group(2),
+                        'folderId': sec_match.group(3)
+                    })
+        except Exception as e:
+            print("Error parsing sections:", e)
+            
+        # Fallback if empty
+        if not sections:
+            sections = [
+                {"name": "1. Before we Start", "folderId": "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi"},
+                {"name": "2. Graph Theory", "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC"}
+            ]
+            
+        for i, sec in enumerate(sections):
+            cursor.execute(
+                "INSERT INTO sections (course_id, name, folder_id, sort_order) VALUES (?, ?, ?, ?)",
+                ("dsa", sec["name"], sec["folderId"], i)
+            )
+            
     conn.commit()
     conn.close()
 
@@ -376,7 +459,8 @@ def landing():
 
 @app.route('/auth')
 def auth_page():
-    return send_file(os.path.join(HTML_DIR, 'auth.html'))
+    from flask import redirect
+    return redirect('/gyansetu_auth')
 
 @app.route('/dashboard')
 def dashboard():
@@ -397,6 +481,10 @@ def course_page():
 @app.route('/player')
 def player_page():
     return send_file(os.path.join(HTML_DIR, 'player.html'))
+
+@app.route('/search')
+def search_page():
+    return send_file(os.path.join(HTML_DIR, 'search.html'))
 
 @app.route('/firebase-config.js')
 def firebase_config():
@@ -486,7 +574,7 @@ def list_files(folder_id):
 
         return jsonify({'files': files, 'folderId': folder_id})
     except RefreshError as e:
-        return jsonify({'error': 'Google Drive token expired or revoked. Please refresh the token.', 'details': str(e)}), 401
+        return jsonify({'error': 'Video service credentials expired or revoked. Please contact administrator.', 'details': str(e)}), 401
     except RuntimeError as e:
         return jsonify({'error': str(e), 'setup_required': True}), 503
     except Exception as e:
@@ -494,10 +582,317 @@ def list_files(folder_id):
         return jsonify({'error': str(e), 'folderId': folder_id}), 500
 
 
+FOLDER_CACHE = {}  # folder_id -> (timestamp, files)
+
+def get_folder_files_cached(folder_id):
+    now = time.time()
+    if folder_id in FOLDER_CACHE:
+        ts, files = FOLDER_CACHE[folder_id]
+        if now - ts < 300:  # 5 minutes cache
+            return files
+    try:
+        svc = get_service()
+        resp = svc.files().list(
+            q = f"'{folder_id}' in parents and trashed=false",
+            fields = "files(id, name, mimeType)",
+            pageSize = 300
+        ).execute()
+        files = resp.get('files', [])
+        
+        # Natural sort
+        def natural_keys(item):
+            return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', item.get('name', ''))]
+        files.sort(key=natural_keys)
+        
+        FOLDER_CACHE[folder_id] = (now, files)
+        return files
+    except Exception as e:
+        print(f"Error fetching folder {folder_id}: {e}")
+        if folder_id in FOLDER_CACHE:
+            return FOLDER_CACHE[folder_id][1]
+        return []
+
+def get_user_from_request_or_token():
+    auth_header = request.headers.get('Authorization', '')
+    token = request.args.get('token', '')
+    if not auth_header and token:
+        auth_header = f"Bearer {token}"
+        
+    if not auth_header.startswith('Bearer '):
+        return None, ''
+        
+    raw_token = auth_header[7:]
+    uid = resolve_uid_from_auth_header(auth_header)
+    email = resolve_auth_email_from_header(auth_header)
+    
+    if not email:
+        claims = decode_firebase_claims_unverified(raw_token)
+        email = (claims.get('email') or '').strip().lower()
+        
+    return uid, email
+
+def resolve_user_from_token(token):
+    if not token:
+        return None, ''
+    if FIREBASE_ADMIN:
+        try:
+            decoded = fb_auth.verify_id_token(token)
+            uid = decoded['uid']
+            email = (decoded.get('email') or '').strip().lower()
+            return uid, email
+        except Exception:
+            pass
+    uid = decode_firebase_uid_unverified(token) or token_to_uid(token)
+    claims = decode_firebase_claims_unverified(token)
+    email = (claims.get('email') or '').strip().lower()
+    return uid, email
+
+# ── Courses Management APIs ─────────────────────────────────────────
+
+@app.route('/api/courses', methods=['GET'])
+def api_list_courses():
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM courses ORDER BY created_at DESC").fetchall()
+    courses = [dict(row) for row in rows]
+    conn.close()
+    return jsonify(courses)
+
+@app.route('/api/courses/<course_id>', methods=['GET'])
+def api_get_course(course_id):
+    conn = get_db()
+    course = conn.execute("SELECT * FROM courses WHERE id = ?", (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        return jsonify({'error': 'Course not found'}), 404
+        
+    sections = conn.execute("SELECT * FROM sections WHERE course_id = ? ORDER BY sort_order", (course_id,)).fetchall()
+    
+    sections_list = []
+    for sec in sections:
+        folder_id = sec['folder_id']
+        files = get_folder_files_cached(folder_id)
+        videos = []
+        for f in files:
+            mime = f.get('mimeType', '')
+            name = f.get('name', '')
+            # Only include mp4 video files — skip .srt, .pdf, etc.
+            is_video = mime.startswith('video/') or name.lower().endswith('.mp4')
+            if is_video:
+                videos.append({
+                    'n': name,
+                    't': 'vid',
+                    'id': f['id']
+                })
+        sections_list.append({
+            'id': f"s{sec['id']}",
+            'name': sec['name'],
+            'folderId': folder_id,
+            'videos': videos
+        })
+    conn.close()
+    
+    return jsonify({
+        'id': course['id'],
+        'title': course['title'],
+        'instructor': course['instructor'],
+        'thumbnail': course['thumbnail'],
+        'sections': sections_list
+    })
+
+@app.route('/api/courses', methods=['POST'])
+def api_create_course():
+    uid, email = get_user_from_request_or_token()
+    if email != 'admin@gyansetu.com':
+        return jsonify({'error': 'Access denied: Admin permissions required'}), 403
+        
+    data = request.json or {}
+    course_id = data.get('id')
+    title = data.get('title')
+    instructor = data.get('instructor')
+    thumbnail = data.get('thumbnail')
+    sections_data = data.get('sections', [])
+    
+    if not course_id or not title or not instructor or not thumbnail:
+        return jsonify({'error': 'Missing required fields'}), 400
+        
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO courses (id, title, instructor, thumbnail) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET title=excluded.title, instructor=excluded.instructor, thumbnail=excluded.thumbnail",
+            (course_id, title, instructor, thumbnail)
+        )
+        conn.execute("DELETE FROM sections WHERE course_id = ?", (course_id,))
+        for idx, sec in enumerate(sections_data):
+            conn.execute(
+                "INSERT INTO sections (course_id, name, folder_id, sort_order) VALUES (?, ?, ?, ?)",
+                (course_id, sec['name'], sec['folder_id'], idx)
+            )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+        
+    conn.close()
+    return jsonify({'status': 'success', 'course_id': course_id})
+
+@app.route('/api/courses/<course_id>', methods=['DELETE'])
+def api_delete_course(course_id):
+    uid, email = get_user_from_request_or_token()
+    if email != 'admin@gyansetu.com':
+        return jsonify({'error': 'Access denied: Admin permissions required'}), 403
+        
+    conn = get_db()
+    conn.execute("DELETE FROM courses WHERE id = ?", (course_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+# ── Access Management APIs ──────────────────────────────────────────
+
+@app.route('/api/check_play_permission', methods=['GET'])
+def api_check_play_permission():
+    uid, email = get_user_from_request_or_token()
+    if not uid:
+        return jsonify({'allowed': False, 'reason': 'unauthorized', 'message': 'Log in to access videos.'}), 401
+        
+    course_id = request.args.get('course_id')
+    file_id = request.args.get('file_id')
+    
+    if not course_id:
+        return jsonify({'allowed': False, 'reason': 'missing_params', 'message': 'Missing course_id'}), 400
+        
+    if email == 'admin@gyansetu.com':
+        return jsonify({'allowed': True, 'reason': 'admin'})
+        
+    conn = get_db()
+    
+    req = conn.execute("SELECT status FROM access_requests WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()
+    if req:
+        status = req['status']
+        if status == 'approved':
+            conn.close()
+            return jsonify({'allowed': True, 'reason': 'approved'})
+        elif status == 'rejected':
+            conn.close()
+            return jsonify({'allowed': False, 'reason': 'request_rejected', 'message': 'Access request rejected by administrator.'})
+        elif status == 'pending':
+            conn.close()
+            return jsonify({'allowed': False, 'reason': 'request_pending', 'message': 'Access request is pending approval.'})
+            
+    if not file_id or file_id == 'dummy':
+        total_watched = conn.execute("SELECT COUNT(DISTINCT file_id) FROM user_watched_videos WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()[0]
+        conn.close()
+        if total_watched >= 2:
+            return jsonify({'allowed': False, 'reason': 'limit_reached', 'message': 'Free video limit reached.'})
+        else:
+            return jsonify({'allowed': True, 'reason': 'free_trial', 'watched_count': total_watched})
+            
+    watched = conn.execute("SELECT COUNT(*) FROM user_watched_videos WHERE uid = ? AND course_id = ? AND file_id = ?", (uid, course_id, file_id)).fetchone()[0]
+    if watched > 0:
+        conn.close()
+        return jsonify({'allowed': True, 'reason': 'already_watched'})
+        
+    total_watched = conn.execute("SELECT COUNT(DISTINCT file_id) FROM user_watched_videos WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()[0]
+    if total_watched >= 2:
+        conn.close()
+        return jsonify({'allowed': False, 'reason': 'limit_reached', 'message': 'You have watched your 2 free videos. Please request full course access.'})
+        
+    conn.execute("INSERT OR IGNORE INTO user_watched_videos (uid, course_id, file_id) VALUES (?, ?, ?)", (uid, course_id, file_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'allowed': True, 'reason': 'logged_watch', 'watched_count': total_watched + 1})
+
+@app.route('/api/access/request', methods=['POST'])
+def api_request_access():
+    uid, email = get_user_from_request_or_token()
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    data = request.json or {}
+    course_id = data.get('course_id')
+    course_title = data.get('course_title') or course_id  # optional, fall back to id
+    
+    if not course_id:
+        return jsonify({'error': 'Missing course_id'}), 400
+        
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO access_requests (uid, email, course_id, course_title, status) VALUES (?, ?, ?, ?, 'pending') ON CONFLICT(uid, course_id) DO UPDATE SET status='pending', updated_at=CURRENT_TIMESTAMP",
+            (uid, email, course_id, course_title)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+        
+    conn.close()
+    return jsonify({'status': 'success'})
+
+@app.route('/api/admin/requests', methods=['GET'])
+def api_admin_get_requests():
+    uid, email = get_user_from_request_or_token()
+    if email != 'admin@gyansetu.com':
+        return jsonify({'error': 'Access denied'}), 403
+        
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM access_requests ORDER BY requested_at DESC").fetchall()
+    requests_list = [dict(row) for row in rows]
+    conn.close()
+    return jsonify(requests_list)
+
+@app.route('/api/admin/requests/<int:request_id>', methods=['POST'])
+def api_admin_update_request(request_id):
+    uid, email = get_user_from_request_or_token()
+    if email != 'admin@gyansetu.com':
+        return jsonify({'error': 'Access denied'}), 403
+        
+    data = request.json or {}
+    status = data.get('status')
+    if status not in ('approved', 'rejected', 'pending'):
+        return jsonify({'error': 'Invalid status'}), 400
+        
+    conn = get_db()
+    conn.execute(
+        "UPDATE access_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        (status, request_id)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+# ── Pages Routing ───────────────────────────────────────────────────
+
+@app.route('/admin')
+def admin_page():
+    return send_file(os.path.join(HTML_DIR, 'admin.html'))
+
 @app.route('/api/stream/<file_id>')
 def stream_video(file_id):
-    is_paid = True # Always True in production
-
+    course_id = request.args.get('course_id')
+    token = request.args.get('token')
+    
+    if course_id and token:
+        uid, email = resolve_user_from_token(token)
+        if email != 'admin@gyansetu.com':
+            conn = get_db()
+            # 1. Approved?
+            req = conn.execute("SELECT status FROM access_requests WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()
+            is_approved = req and req['status'] == 'approved'
+            
+            if not is_approved:
+                # 2. Within free limit?
+                watched = conn.execute("SELECT COUNT(*) FROM user_watched_videos WHERE uid = ? AND course_id = ? AND file_id = ?", (uid, course_id, file_id)).fetchone()[0]
+                if watched == 0:
+                    total_watched = conn.execute("SELECT COUNT(DISTINCT file_id) FROM user_watched_videos WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()[0]
+                    if total_watched >= 2:
+                        conn.close()
+                        return "Access Denied: Free limit of 2 videos reached. Please request access from the admin.", 403
+                    # Log watch
+                    conn.execute("INSERT OR IGNORE INTO user_watched_videos (uid, course_id, file_id) VALUES (?, ?, ?)", (uid, course_id, file_id))
+                    conn.commit()
+            conn.close()
 
     svc = get_service()
     creds = svc._http.credentials
@@ -515,14 +910,12 @@ def stream_video(file_id):
 
     try:
         r = requests.get(url, headers=headers, stream=True)
-        # Use generator to stream chunks safely
         def generate():
             for chunk in r.iter_content(chunk_size=1024 * 1024):
                 if chunk:
                     yield chunk
 
         resp = Response(generate(), status=r.status_code)
-        # Forward necessary headers
         for key in ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges']:
             if key in r.headers:
                 resp.headers[key] = r.headers[key]

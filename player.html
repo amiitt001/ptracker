@@ -37,6 +37,75 @@
     }
 
     /* GLOBAL UTILS */
+    /* Access Lock State */
+    .access-lock-state {
+      position: absolute;
+      inset: 0;
+      background: rgba(28, 29, 31, 0.98);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #ffffff;
+      padding: 32px;
+      z-index: 99;
+      font-family: 'Inter', sans-serif;
+    }
+    .access-lock-icon-wrap {
+      background: rgba(164, 53, 240, 0.15);
+      border: 2px solid #a435f0;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: lock-pulse 2s infinite;
+    }
+    .access-lock-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .access-lock-desc {
+      color: #a1a5ab;
+      font-size: 14px;
+      max-width: 440px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .access-lock-btn {
+      background: #a435f0;
+      color: #ffffff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 4px 16px rgba(164, 53, 240, 0.35);
+    }
+    .access-lock-btn:hover:not(:disabled) {
+      background: #8b29cf;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(164, 53, 240, 0.5);
+    }
+    .access-lock-btn:disabled {
+      background: #3e4143;
+      color: #8a8d91;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    @keyframes lock-pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(164, 53, 240, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(164, 53, 240, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(164, 53, 240, 0); }
+    }
+
     .btn {
       padding: 12px 16px; border-radius: 4px; font-size: 14px; font-weight: 700; cursor: pointer;
       transition: var(--transition); border: 1px solid #2d2f31; background: transparent; color: #2d2f31;
@@ -350,7 +419,7 @@
         <div class="topbar-course-title">Mastering Data Structures &amp; Algorithms</div>
       </div>
       <div class="topbar-right">
-        <div class="progress-container" id="progress-container">
+        <div class="progress-container" id="progress-container" onclick="showProgressToast()">
           <div class="progress-ring-wrap">
             <svg class="progress-ring" width="32" height="32">
               <circle class="progress-ring-bg" stroke="#3e4143" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16"/>
@@ -360,12 +429,34 @@
           </div>
           <span class="progress-text" style="display:flex; align-items:center; gap:4px;">Your progress <span class="chevron-down">▼</span></span>
         </div>
-        <div class="streak-badge" id="streak-badge">🔥 <span id="streak-text">0 day streak</span></div>
-        <div class="user-chip">
-          <div class="user-avatar" id="user-avatar">?</div>
-          <span id="user-name"></span>
+        <div class="streak-badge" id="streak-badge" style="cursor:pointer;" onclick="showStreakToast()">🔥 <span id="streak-text">0 day streak</span></div>
+        <div class="relative" id="player-profile-wrapper">
+          <button onclick="togglePlayerMenu()" class="user-chip" style="cursor:pointer;" title="Account menu">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <span id="user-name"></span>
+            <span style="font-size:14px;opacity:0.6;">▾</span>
+          </button>
+          <!-- Dropdown -->
+          <div id="player-profile-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:240px;background:#ffffff;border:1px solid #e4e8eb;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.18);z-index:999;overflow:hidden;">
+            <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0;">
+              <div id="player-dropdown-name" style="font-weight:700;font-size:14px;color:#1c1d1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+              <div id="player-dropdown-email" style="font-size:11px;color:#6a6f73;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+            </div>
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;color:#1c1d1f;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#f7f9fa'" onmouseout="this.style.background='transparent'">
+              <span class="material-symbols-outlined" style="font-size:18px;color:#6a6f73;">school</span> My Learning
+            </a>
+            <div id="player-admin-link" style="display:none;">
+              <a href="/admin" style="display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;color:#a435f0;font-weight:700;text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='#f9f0ff'" onmouseout="this.style.background='transparent'">
+                <span class="material-symbols-outlined" style="font-size:18px;">admin_panel_settings</span> Admin Panel
+              </a>
+            </div>
+            <div style="border-top:1px solid #f0f0f0;margin-top:2px;padding-top:2px;">
+              <button onclick="logout()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;color:#d40000;font-weight:600;background:none;border:none;cursor:pointer;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='transparent'">
+                <span class="material-symbols-outlined" style="font-size:18px;">logout</span> Sign Out
+              </button>
+            </div>
+          </div>
         </div>
-        <button class="btn-logout" onclick="logout()">Sign Out</button>
       </div>
     </div>
 
@@ -381,6 +472,14 @@
               <div style="color:var(--text2);font-size:14px">Select a video from the course content to start learning</div>
             </div>
           </div>
+          <div class="access-lock-state" id="access-lock" style="display:none">
+            <div class="access-lock-icon-wrap">
+              <span class="material-symbols-outlined" style="font-size: 36px; color: #a435f0; font-variation-settings: 'FILL' 1;">lock</span>
+            </div>
+            <h3 class="access-lock-title">Free Limit Reached</h3>
+            <p class="access-lock-desc" id="lock-message">You have watched your 2 free trial videos. Please submit an access request to unlock the full course lifetime access.</p>
+            <button class="access-lock-btn" id="lock-request-btn" onclick="submitAccessRequest()">Request Full Course Access</button>
+          </div>
         </div>
         
         <div class="player-below">
@@ -391,7 +490,7 @@
             </div>
             <div class="player-btns" id="player-btns" style="display:none">
                <button class="btn btn-green" onclick="markDoneAndNext()">✓ Mark Complete + Next</button>
-               <button class="btn" onclick="openInDrive()">Drive ↗</button>
+
             </div>
           </div>
           
@@ -477,13 +576,28 @@
         </div>
       </div>
 
-      <div class="course-sidebar">
+      <div class="course-sidebar" style="display: flex; flex-direction: column;">
         <div class="sidebar-header-box">
-          <div class="sidebar-tab active">Course content</div>
-          <div class="sidebar-tab" onclick="showToast('AI Assistant is coming soon!')">AI Assistant</div>
+          <div class="sidebar-tab active" id="sidebar-tab-content" onclick="switchSidebarTab('content')">Course content</div>
+          <div class="sidebar-tab" id="sidebar-tab-ai" onclick="switchSidebarTab('ai')">AI Assistant</div>
         </div>
         <div class="sidebar-sections-wrapper" id="sections-container">
           <!-- Accordions go here -->
+        </div>
+        <div class="sidebar-sections-wrapper" id="ai-container" style="display: none; flex-direction: column; background: var(--bg2); height: 100%;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; background: var(--bg3);">
+            <div style="font-weight: 700; color: var(--text);">GyanSetu AI Tutor</div>
+            <div style="font-size: 12px; color: var(--text3);">Ask me anything about this DSA lesson!</div>
+          </div>
+          <div id="ai-chat-messages" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+            <div style="align-self: flex-start; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; max-width: 85%; color: var(--text); line-height: 1.4;">
+              Hi! I'm your AI learning assistant. How can I help you master this section?
+            </div>
+          </div>
+          <div style="padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--bg3);">
+            <input type="text" id="ai-chat-input" placeholder="Ask a question..." style="flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; color: var(--text); outline: none; font-size: 13px;" onkeydown="if(event.key==='Enter') sendAiMessage()"/>
+            <button onclick="sendAiMessage()" style="background: var(--accent); color: white; border: none; padding: 0 16px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 13px; height: 38px; display: flex; align-items: center; justify-content: center;">Send</button>
+          </div>
         </div>
       </div>
     </div>
@@ -507,2102 +621,81 @@
     const fileIdCache = {};
     let   backendAvailable = null;
 
-    const SECTIONS = [
-  {
-    "id": "s1",
-    "name": "1. Before we Start",
-    "folderId": "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi",
-    "videos": [
-      {
-        "n": "1. Instructor_s Note",
-        "t": "vid"
-      },
-      {
-        "n": "2. Introduction",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s2",
-    "name": "2. Essential C and C++ Concepts",
-    "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC",
-    "videos": [
-      {
-        "n": "1. Arrays Basics",
-        "t": "vid"
-      },
-      {
-        "n": "2. Practice  Arrays Basics",
-        "t": "vid"
-      },
-      {
-        "n": "4. Practice  Structures",
-        "t": "vid"
-      },
-      {
-        "n": "6. Practice  Pointers",
-        "t": "vid"
-      },
-      {
-        "n": "7. Reference in C++",
-        "t": "vid"
-      },
-      {
-        "n": "8. Practice  Reference",
-        "t": "vid"
-      },
-      {
-        "n": "9. Pointer to Structure",
-        "t": "vid"
-      },
-      {
-        "n": "10. Practice  Pointer to Structure",
-        "t": "vid"
-      },
-      {
-        "n": "11. Functions",
-        "t": "vid"
-      },
-      {
-        "n": "12. Practice  Functions",
-        "t": "vid"
-      },
-      {
-        "n": "13. Parameter Passing Methods",
-        "t": "vid"
-      },
-      {
-        "n": "14. Practice  Parameter Passing Methods",
-        "t": "vid"
-      },
-      {
-        "n": "16. Practice  Array as Parameter",
-        "t": "vid"
-      },
-      {
-        "n": "18. Practice  Structure as Parameter",
-        "t": "vid"
-      },
-      {
-        "n": "20. Converting a C program to a C++ class (Must Watch)",
-        "t": "vid"
-      },
-      {
-        "n": "21. Practice  Monolithic Program",
-        "t": "vid"
-      },
-      {
-        "n": "22. Practice  Modular Program",
-        "t": "vid"
-      },
-      {
-        "n": "23. Practice  Structure and Functions",
-        "t": "vid"
-      },
-      {
-        "n": "24. Practice  Object-Oriented Program",
-        "t": "vid"
-      },
-      {
-        "n": "26. Practice  C++ Class",
-        "t": "vid"
-      },
-      {
-        "n": "27. Template classes",
-        "t": "vid"
-      },
-      {
-        "n": "28. Practice  Template Class",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s3",
-    "name": "3. Required Setup for Programming",
-    "folderId": "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H",
-    "videos": [
-      {
-        "n": "1. Setup Dev-C++ and Settings",
-        "t": "vid"
-      },
-      {
-        "n": "2. Setup CodeBlocks and Settings",
-        "t": "vid"
-      },
-      {
-        "n": "3. Debugging using Dev-C++",
-        "t": "vid"
-      },
-      {
-        "n": "4. Debugging using CodeBlocks",
-        "t": "vid"
-      },
-      {
-        "n": "5. Setup Visual Studio",
-        "t": "vid"
-      },
-      {
-        "n": "6. Debugging using Visual Studio",
-        "t": "vid"
-      },
-      {
-        "n": "7. Setup Xcode",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s4",
-    "name": "4. Introduction",
-    "folderId": "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji",
-    "videos": [
-      {
-        "n": "2. Stack vs Heap Memory",
-        "t": "vid"
-      },
-      {
-        "n": "3. Stack vs Heap.  Continued__mp4",
-        "t": "vid"
-      },
-      {
-        "n": "5. ADT",
-        "t": "vid"
-      },
-      {
-        "n": "6. Time and Space Complexity",
-        "t": "vid"
-      },
-      {
-        "n": "7. Time and Space Complexity from Code",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s5",
-    "name": "5. Recursion",
-    "folderId": "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV",
-    "videos": [
-      {
-        "n": "1. How Recursion Works ( Tracing )",
-        "t": "vid"
-      },
-      {
-        "n": "2. Generalising Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "3. How Recursion uses Stack",
-        "t": "vid"
-      },
-      {
-        "n": "4. Recurrence Relation - Time Complexity of Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "5.1 7. TailHead",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Lets Code Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "6. Static and Global Variables in Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "7.1 8. StaticGlobal",
-        "t": "pdf"
-      },
-      {
-        "n": "7. Let_s Code Static and Global in Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "8. Tail Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "9. Head Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "10. Tree Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "11.1 11. TreeRecursion",
-        "t": "pdf"
-      },
-      {
-        "n": "12. Indirect Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "13.1 12. Indirect Recursion",
-        "t": "pdf"
-      },
-      {
-        "n": "13. Let_s Code Indirect Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "14. Nested Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "15.1 13. Nested Recursion",
-        "t": "pdf"
-      },
-      {
-        "n": "15. Let_s Code Nested Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "16. Sum of Natural Number using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "17.1 14. Sum of N ",
-        "t": "pdf"
-      },
-      {
-        "n": "17. Let_s Code Sum of N using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "18. Factorial using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "19.1 15. Factorial",
-        "t": "pdf"
-      },
-      {
-        "n": "19. Let_s Code Factorial using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "21.1 16. Power",
-        "t": "pdf"
-      },
-      {
-        "n": "21. Let_s Code Power Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "22. Taylor Series using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "23.1 17. Taylor Series",
-        "t": "pdf"
-      },
-      {
-        "n": "23. Let_s Code Taylor Series using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "24. Taylor Series using Horner_s Rule",
-        "t": "vid"
-      },
-      {
-        "n": "25.1 18. Taylor",
-        "t": "pdf"
-      },
-      {
-        "n": "25. Let_s Code Taylor Series Horner_s Rule - Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "26.1 18. Tayloer Series Iterative",
-        "t": "pdf"
-      },
-      {
-        "n": "28.1 19. Fibonacci",
-        "t": "pdf"
-      },
-      {
-        "n": "28. Let_s Code Fibonacci",
-        "t": "vid"
-      },
-      {
-        "n": "29. nCr using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "30.1 20. Combination",
-        "t": "pdf"
-      },
-      {
-        "n": "30. Let_s Code nCr using Recursion",
-        "t": "vid"
-      },
-      {
-        "n": "31. Tower of Hanoi Problem",
-        "t": "vid"
-      },
-      {
-        "n": "32.1 21. Tower of Hanoi",
-        "t": "pdf"
-      },
-      {
-        "n": "32. Let_s Code Tower of Hanoi",
-        "t": "vid"
-      },
-      {
-        "n": "34. Quiz 1 Solutions",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s6",
-    "name": "6. Arrays Representations",
-    "folderId": "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD",
-    "videos": [
-      {
-        "n": "1. Introduction to Array",
-        "t": "vid"
-      },
-      {
-        "n": "2. Declarations of Array",
-        "t": "vid"
-      },
-      {
-        "n": "3. Demo - Array Declaration",
-        "t": "vid"
-      },
-      {
-        "n": "4. Static vs Dynamic Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "5.1 23. Static Dyn Array",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Demo - Static vs Dynamic Array",
-        "t": "vid"
-      },
-      {
-        "n": "6. How to Increase Array Size",
-        "t": "vid"
-      },
-      {
-        "n": "7.1 23.1 Array Size",
-        "t": "pdf"
-      },
-      {
-        "n": "7. Demo - Increasing Array Size",
-        "t": "vid"
-      },
-      {
-        "n": "8. 2D Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "9.1 23.2   2D Array",
-        "t": "pdf"
-      },
-      {
-        "n": "10. Array Representation by Compiler",
-        "t": "vid"
-      },
-      {
-        "n": "11. Row Major Formula for 2D Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "12. Column Major Formula for 2D Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "13. Formulas for nD Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "14. Formulas for 3D Arrays",
-        "t": "vid"
-      },
-      {
-        "n": "16. Solutions for Quiz 2",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s7",
-    "name": "8. Strings",
-    "folderId": "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD",
-    "videos": [
-      {
-        "n": "1. Introduction to Strings",
-        "t": "vid"
-      },
-      {
-        "n": "2. Finding Length of a String",
-        "t": "vid"
-      },
-      {
-        "n": "3. Changing Case of a String",
-        "t": "vid"
-      },
-      {
-        "n": "4. Counting Words and Vowels in a String",
-        "t": "vid"
-      },
-      {
-        "n": "5. Validating a String",
-        "t": "vid"
-      },
-      {
-        "n": "6. Reversing a String",
-        "t": "vid"
-      },
-      {
-        "n": "7. Comparing Strings and Checking Palindrome",
-        "t": "vid"
-      },
-      {
-        "n": "8. Finding Duplicates in a String",
-        "t": "vid"
-      },
-      {
-        "n": "9. Finding Duplicates in a String using Bitwise Operations",
-        "t": "vid"
-      },
-      {
-        "n": "10. Checking if 2 Strings are Anagram (distinct letters)",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s8",
-    "name": "9. Matrices",
-    "folderId": "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d",
-    "videos": [
-      {
-        "n": "1. Section Introduction",
-        "t": "vid"
-      },
-      {
-        "n": "3.1 43. Diag Matrix C",
-        "t": "pdf"
-      },
-      {
-        "n": "3. Let_s Code Diagonal Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "4. C++ class for Diagonal Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "5.1 43. Diag Matrix Cpp",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Let_s Code C++ class for Diagonal matrix",
-        "t": "vid"
-      },
-      {
-        "n": "6. Lower Triangular Matrix Row-Major Mapping",
-        "t": "vid"
-      },
-      {
-        "n": "7. Lower Triangular Matrix Column-Major Mapping",
-        "t": "vid"
-      },
-      {
-        "n": "8.1 45. Lower Triangular C",
-        "t": "pdf"
-      },
-      {
-        "n": "9. Let_s Code Lower Triangular Matrix in C++",
-        "t": "vid"
-      },
-      {
-        "n": "10. Upper Triangular Matrix Row-Major Mapping",
-        "t": "vid"
-      },
-      {
-        "n": "12. Symmetric Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "13. Tri-Diagonal and Tri-Band Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "14. Toeplitz Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "15. Menu Driven Program for Matrices",
-        "t": "vid"
-      },
-      {
-        "n": "16. Menu Driven Program for Matrices using Functions",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s9",
-    "name": "10. Sparse Matrix and Polynomial Representation",
-    "folderId": "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j",
-    "videos": [
-      {
-        "n": "1. Sparse Matrix Representation",
-        "t": "vid"
-      },
-      {
-        "n": "2. Addition of Sparse Matrices",
-        "t": "vid"
-      },
-      {
-        "n": "3. Array Representation of Sparse Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "4.1 58. Sparse Matrix C",
-        "t": "pdf"
-      },
-      {
-        "n": "6.1 58. Sparse Matrix C",
-        "t": "pdf"
-      },
-      {
-        "n": "6. Let_s Code to Add Sparse Matrix",
-        "t": "vid"
-      },
-      {
-        "n": "8.1 58. Sparse Matrix C++",
-        "t": "pdf"
-      },
-      {
-        "n": "8. Let_s Code Sparse Matrix using C++ Continued__mp4",
-        "t": "vid"
-      },
-      {
-        "n": "9. Polynomial Representation",
-        "t": "vid"
-      },
-      {
-        "n": "10. Polynomial Evaluation",
-        "t": "vid"
-      },
-      {
-        "n": "11. Polynomial Addition",
-        "t": "vid"
-      },
-      {
-        "n": "12.1 60. Polynomial",
-        "t": "pdf"
-      },
-      {
-        "n": "12. Let_s Code Polynomial",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s10",
-    "name": "11. Linked List",
-    "folderId": "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy",
-    "videos": [
-      {
-        "n": "1. Why we need Dynamic Data Structure Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "2. About Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "3. More About Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "5. Let_s Code Display for Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "7.1 66. Create and Display LL",
-        "t": "pdf"
-      },
-      {
-        "n": "7. Let_s Code Recursive Display for Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "9. Sum of All Elements in a Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "10.1 67. Count SumLinked List",
-        "t": "pdf"
-      },
-      {
-        "n": "10. Let_s Code Count and Sum",
-        "t": "vid"
-      },
-      {
-        "n": "11. Maximum Element in a Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "12.1 69. Max LL",
-        "t": "pdf"
-      },
-      {
-        "n": "13. Searching in a Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "14. Improve Searching in Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "15.1 70. Search LL",
-        "t": "pdf"
-      },
-      {
-        "n": "15. Let_s Code Searching in Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "16. Inserting in a Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "17.1 73. Insert in LL",
-        "t": "pdf"
-      },
-      {
-        "n": "17. Let_s Code Insert for Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "18. Creating a Linked List using Insert",
-        "t": "vid"
-      },
-      {
-        "n": "19. Creating a Linked List by Inserting at Last",
-        "t": "vid"
-      },
-      {
-        "n": "20. Inserting in a Sorted Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "21.1 74. Create LL using Insert",
-        "t": "pdf"
-      },
-      {
-        "n": "21.1 74. SortedInsert LL",
-        "t": "pdf"
-      },
-      {
-        "n": "21.2 74. Create LL using Insert",
-        "t": "pdf"
-      },
-      {
-        "n": "21.2 74. SortedInsert LL",
-        "t": "pdf"
-      },
-      {
-        "n": "21. Let_s Code Insert in Sorted Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "22. Deleting from Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "23.1 74. Deleteing LL",
-        "t": "pdf"
-      },
-      {
-        "n": "24. Check if a Linked List is Sorted",
-        "t": "vid"
-      },
-      {
-        "n": "25.1 74. isSorted LL",
-        "t": "pdf"
-      },
-      {
-        "n": "25. Let_s Code to check if Linked List is Sorted",
-        "t": "vid"
-      },
-      {
-        "n": "26. Remove Duplicates from Sorted Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "27.1 74. Remove Duplicate LL",
-        "t": "pdf"
-      },
-      {
-        "n": "27. Let_s Code to Remove Duplicates from Sorted Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "31.1 74. Reverse LL",
-        "t": "pdf"
-      },
-      {
-        "n": "31. Let_s Code Reversing a Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "32. Concatenating 2 Linked Lists",
-        "t": "vid"
-      },
-      {
-        "n": "33. Merging 2 Linked Lists",
-        "t": "vid"
-      },
-      {
-        "n": "34.1 74. Merge LL",
-        "t": "pdf"
-      },
-      {
-        "n": "34. Let_s Code to Concatenate and Merge Linked Lists",
-        "t": "vid"
-      },
-      {
-        "n": "35. Check for LOOP in Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "36.1 74. isLoop LL",
-        "t": "pdf"
-      },
-      {
-        "n": "36. Let_s Code to Check LOOP",
-        "t": "vid"
-      },
-      {
-        "n": "38. Circular Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "40.2 194.CircularLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "40. Let\u2019s Code Circular Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "41. Inserting in a Circular Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "42. Let_s Code Insert for a Circular Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "44.1 88. Circluar Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "47. Insert in a Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "48. Let_s Code Insert for Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "49. Deleting from Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "50. Let_s Code Delete for Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "51. Reverse a Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "52.1 206.ReverseLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "52. Let_s Code Reverse for Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "53. Circular Doubly Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "54. Comparison of Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "55. Comparison of Array with Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "56. Student Challenge  Finding Middle Element of a Linked List__mp4",
-        "t": "vid"
-      },
-      {
-        "n": "57. Student Challenge  Finding Intersecting point of Two Linked List",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s11",
-    "name": "12. Sparse Matrix and Polynomial using Linked List",
-    "folderId": "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy",
-    "videos": [
-      {
-        "n": "1STUDE~1.MP4",
-        "t": "vid"
-      },
-      {
-        "n": "2STUDE~1.MP4",
-        "t": "vid"
-      },
-      {
-        "n": "3.1 96. Polynomial Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "3. Let_s Code Polynomial",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s12",
-    "name": "13. Stack",
-    "folderId": "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6",
-    "videos": [
-      {
-        "n": "2. Stack using Array",
-        "t": "vid"
-      },
-      {
-        "n": "4.2 100. Stack Array",
-        "t": "pdf"
-      },
-      {
-        "n": "4. Let_s Code Stack using Array",
-        "t": "vid"
-      },
-      {
-        "n": "5. Stack using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "6. Stack Operations using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "7.1 101. Stack LL C",
-        "t": "pdf"
-      },
-      {
-        "n": "7. Let_s Code Stack using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "8.1 222.StackLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "8.2 222.StackLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "8. Let_s Code C++ class for Stack using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "9. Parenthesis Matching",
-        "t": "vid"
-      },
-      {
-        "n": "10.1 224.ParenthesisMatchingC",
-        "t": "pdf"
-      },
-      {
-        "n": "10.2 224.ParenthesisMatchingC",
-        "t": "pdf"
-      },
-      {
-        "n": "10. Program for Parenthesis Matching",
-        "t": "vid"
-      },
-      {
-        "n": "12. More on Parenthesis Matching",
-        "t": "vid"
-      },
-      {
-        "n": "13. Infix to Postfix Conversion",
-        "t": "vid"
-      },
-      {
-        "n": "14. Associativity and Unary Operators",
-        "t": "vid"
-      },
-      {
-        "n": "15. Infix to Postfix using Stack Method 1",
-        "t": "vid"
-      },
-      {
-        "n": "18.1 110. InToPost",
-        "t": "pdf"
-      },
-      {
-        "n": "18. Let_s Code Infix to Postfix Conversion",
-        "t": "vid"
-      },
-      {
-        "n": "19.1 233.InfixToPostfixC",
-        "t": "pdf"
-      },
-      {
-        "n": "19.2 233.InfixToPostfixC",
-        "t": "pdf"
-      },
-      {
-        "n": "19. Student Challenge Infix to Postfix with Associativity and Parenthesis",
-        "t": "vid"
-      },
-      {
-        "n": "20. Evaluation of Postfix Expression",
-        "t": "vid"
-      },
-      {
-        "n": "21. Program for Evaluation of Postfix",
-        "t": "vid"
-      },
-      {
-        "n": "22.2 236.PostfixEvalutionC",
-        "t": "pdf"
-      }
-    ]
-  },
-  {
-    "id": "s13",
-    "name": "14. Queues",
-    "folderId": "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC",
-    "videos": [
-      {
-        "n": "1. Queue ADT",
-        "t": "vid"
-      },
-      {
-        "n": "3. Queue using Two Pointers",
-        "t": "vid"
-      },
-      {
-        "n": "4. Implementing Queue using Array",
-        "t": "vid"
-      },
-      {
-        "n": "5.1 117. Queue using Array C",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Let_s Code Queue using Array",
-        "t": "vid"
-      },
-      {
-        "n": "6.2 242.QueueUsingArrayC",
-        "t": "pdf"
-      },
-      {
-        "n": "6. Let_s Code Queue in C++",
-        "t": "vid"
-      },
-      {
-        "n": "8. Circular Queue",
-        "t": "vid"
-      },
-      {
-        "n": "9.1 245.CircularQueueC",
-        "t": "pdf"
-      },
-      {
-        "n": "9.2 245.CircularQueueC",
-        "t": "pdf"
-      },
-      {
-        "n": "9. Let_s Code Circular Queue",
-        "t": "vid"
-      },
-      {
-        "n": "10. Queue using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "11.1 247.QueueUsingLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "11.2 247.QueueUsingLLC",
-        "t": "pdf"
-      },
-      {
-        "n": "11. Let_s Code Queue using Linked List",
-        "t": "vid"
-      },
-      {
-        "n": "12. Double Ended Queue DEQUEUE",
-        "t": "vid"
-      },
-      {
-        "n": "14. Queue using 2 Stacks",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s14",
-    "name": "15. Trees",
-    "folderId": "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0",
-    "videos": [
-      {
-        "n": "1. Terminology",
-        "t": "vid"
-      },
-      {
-        "n": "2. Number of Binary Trees using N Nodes",
-        "t": "vid"
-      },
-      {
-        "n": "3. Height vs Nodes in Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "4. Internal Nodes vs External Nodes in Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "5. Strict Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "6. Height vs Node of Strict Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "7. Internal vs External Nodes of Strict Binary Trees",
-        "t": "vid"
-      },
-      {
-        "n": "8. n-ary Trees",
-        "t": "vid"
-      },
-      {
-        "n": "9. Analysis of n-Ary Trees",
-        "t": "vid"
-      },
-      {
-        "n": "10. Representation of Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "11. Linked Representation of Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "12. Full vs Complete Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "13. Strict vs Complete Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "14. Binary Tree Traversals",
-        "t": "vid"
-      },
-      {
-        "n": "16. Binary Tree Traversal Easy Method 2",
-        "t": "vid"
-      },
-      {
-        "n": "17. Binary Tree Traversal Easy Method 3",
-        "t": "vid"
-      },
-      {
-        "n": "18. Creating Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "19. Program to Create Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "20.1 146.Tree",
-        "t": "pdf"
-      },
-      {
-        "n": "20.2 146.Tree",
-        "t": "pdf"
-      },
-      {
-        "n": "20. Let_s Code Creating Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "21.1 TreeCPP Complete",
-        "t": "pdf"
-      },
-      {
-        "n": "21.2 142. TreeCpp",
-        "t": "pdf"
-      },
-      {
-        "n": "21.3 142. TreeCpp",
-        "t": "pdf"
-      },
-      {
-        "n": "21.4 TreeCPP Complete",
-        "t": "pdf"
-      },
-      {
-        "n": "21. Let_s Code Creating Binary Tree in C++",
-        "t": "vid"
-      },
-      {
-        "n": "22. Preorder Tree Traversal",
-        "t": "vid"
-      },
-      {
-        "n": "24. Iterative Preorder",
-        "t": "vid"
-      },
-      {
-        "n": "25. Iterative Inorder",
-        "t": "vid"
-      },
-      {
-        "n": "26. Let_s Code Iterative Traversals",
-        "t": "vid"
-      },
-      {
-        "n": "27. Level Order Traversal",
-        "t": "vid"
-      },
-      {
-        "n": "28.1 278.LevelOrderTraversalC",
-        "t": "pdf"
-      },
-      {
-        "n": "28. Let_s Code Level Order Traversal",
-        "t": "vid"
-      },
-      {
-        "n": "29. Can we Generate Tree from Traversals",
-        "t": "vid"
-      },
-      {
-        "n": "30. Generating Tree from Traversals",
-        "t": "vid"
-      },
-      {
-        "n": "31. Height and Count of Binary Tree",
-        "t": "vid"
-      },
-      {
-        "n": "32.1 Tree Count and Height",
-        "t": "pdf"
-      },
-      {
-        "n": "32. Let_s Code Height and Count",
-        "t": "vid"
-      },
-      {
-        "n": "33. Student Challenge  Count Leaf Nodes of a Binary Tree",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s15",
-    "name": "16. Binary Search Trees",
-    "folderId": "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4",
-    "videos": [
-      {
-        "n": "1. BST intro",
-        "t": "vid"
-      },
-      {
-        "n": "2. Searching in a Binary Search Tree",
-        "t": "vid"
-      },
-      {
-        "n": "3. Inserting in a Binary Search Tree",
-        "t": "vid"
-      },
-      {
-        "n": "5. Creating a Binary Search Tree",
-        "t": "vid"
-      },
-      {
-        "n": "6. Let_s code Binary Search Tree",
-        "t": "vid"
-      },
-      {
-        "n": "7. Deleting from Binary Search Tree",
-        "t": "vid"
-      },
-      {
-        "n": "8. Let_s Code Recursive Insert and Delete on BST",
-        "t": "vid"
-      },
-      {
-        "n": "10. Program for Generating BST from Preorder",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s16",
-    "name": "17. AVL Trees",
-    "folderId": "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90",
-    "videos": [
-      {
-        "n": "2. Inserting in AVL with Rotations",
-        "t": "vid"
-      },
-      {
-        "n": "3. General form of AVL Rotations",
-        "t": "vid"
-      },
-      {
-        "n": "4.1 298.LL_LRRotationonAVLTreeC",
-        "t": "pdf"
-      },
-      {
-        "n": "4. Let_s Code LL Rotation on AVL",
-        "t": "vid"
-      },
-      {
-        "n": "5.2 299.RR_RLRotationonAVLTreeC",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Let_s Code LR Rotation on AVL",
-        "t": "vid"
-      },
-      {
-        "n": "8. Height Analysis of AVL Trees",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s17",
-    "name": "18. Search Trees",
-    "folderId": "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK",
-    "videos": [
-      {
-        "n": "1. 2-3 Trees",
-        "t": "vid"
-      },
-      {
-        "n": "2. 2-3-4 Trees",
-        "t": "vid"
-      },
-      {
-        "n": "3. Re-Black Trees Introduction",
-        "t": "vid"
-      },
-      {
-        "n": "4. Red-Black Tree creation",
-        "t": "vid"
-      },
-      {
-        "n": "5. Red-Black Trees vs 2-3-4 Trees",
-        "t": "vid"
-      },
-      {
-        "n": "6. Creating Red-Black Tree similar to Creating 2-3-4 Tree",
-        "t": "vid"
-      },
-      {
-        "n": "8. Red-Black Tree Deletion Examples",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s18",
-    "name": "19. Heap",
-    "folderId": "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5",
-    "videos": [
-      {
-        "n": "1. Introduction to Heap",
-        "t": "vid"
-      },
-      {
-        "n": "2. Inserting in a Heap",
-        "t": "vid"
-      },
-      {
-        "n": "4. Creating a Heap",
-        "t": "vid"
-      },
-      {
-        "n": "5. Deleting from Heap and Heap Sort",
-        "t": "vid"
-      },
-      {
-        "n": "6.1 HeapSort New",
-        "t": "pdf"
-      },
-      {
-        "n": "6. Let_s Code Heap Sort",
-        "t": "vid"
-      },
-      {
-        "n": "7. Heapify - Faster Method for creating Heap",
-        "t": "vid"
-      },
-      {
-        "n": "8. Heap as Priority Queue",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s19",
-    "name": "20. Sorting Techniques",
-    "folderId": "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm",
-    "videos": [
-      {
-        "n": "1. Criteria used for Analysing Sorts",
-        "t": "vid"
-      },
-      {
-        "n": "2. Bubble Sort",
-        "t": "vid"
-      },
-      {
-        "n": "3.1 322.BubbleSortC",
-        "t": "pdf"
-      },
-      {
-        "n": "3. Let_s Code Bubble Sort",
-        "t": "vid"
-      },
-      {
-        "n": "4. Insertion Sort",
-        "t": "vid"
-      },
-      {
-        "n": "5. Insertion Sort  Continued__mp4",
-        "t": "vid"
-      },
-      {
-        "n": "6. Program for Insertion Sort",
-        "t": "vid"
-      },
-      {
-        "n": "7. Analysis of Insertion Sort",
-        "t": "vid"
-      },
-      {
-        "n": "8.2 327.InsertionSortC",
-        "t": "pdf"
-      },
-      {
-        "n": "8. Let_s Code Insertion Sort",
-        "t": "vid"
-      },
-      {
-        "n": "9. Comparing Bubble and Insertion Sort",
-        "t": "vid"
-      },
-      {
-        "n": "10. Selection Sort",
-        "t": "vid"
-      },
-      {
-        "n": "11. Program for Selection Sort",
-        "t": "vid"
-      },
-      {
-        "n": "12. Analysis of Selection Sort",
-        "t": "vid"
-      },
-      {
-        "n": "13.1 332.SelectionSortC",
-        "t": "pdf"
-      },
-      {
-        "n": "13. Let_s Code Selection Sort",
-        "t": "vid"
-      },
-      {
-        "n": "14. Idea behind Quick Sort",
-        "t": "vid"
-      },
-      {
-        "n": "15. Quick Sort",
-        "t": "vid"
-      },
-      {
-        "n": "16. Analysis of Quick Sort",
-        "t": "vid"
-      },
-      {
-        "n": "17. Analysis of Quick Sort Continued__mp4",
-        "t": "vid"
-      },
-      {
-        "n": "18.2 337.QuickSortC",
-        "t": "pdf"
-      },
-      {
-        "n": "18. Let_s Code Quick Sort",
-        "t": "vid"
-      },
-      {
-        "n": "19.2 338.MergingFunctionC",
-        "t": "pdf"
-      },
-      {
-        "n": "19. Merging",
-        "t": "vid"
-      },
-      {
-        "n": "20. Iterative Merge Sort",
-        "t": "vid"
-      },
-      {
-        "n": "21.1 IMergeSortNEW",
-        "t": "pdf"
-      },
-      {
-        "n": "21. Let_s Code Iterative Merge Sort",
-        "t": "vid"
-      },
-      {
-        "n": "22. Recursive Merge Sort",
-        "t": "vid"
-      },
-      {
-        "n": "23.2 342.RecursiveMergeSortC",
-        "t": "pdf"
-      },
-      {
-        "n": "23. Let_s Code Recursive Merge Sort",
-        "t": "vid"
-      },
-      {
-        "n": "24. Count Sort",
-        "t": "vid"
-      },
-      {
-        "n": "25.1 344.CountSortFunctionC",
-        "t": "pdf"
-      },
-      {
-        "n": "25. Let_s Code Count Sort",
-        "t": "vid"
-      },
-      {
-        "n": "26. Radix Sort",
-        "t": "vid"
-      },
-      {
-        "n": "27. Bin  Bucket Sort",
-        "t": "vid"
-      },
-      {
-        "n": "28. Shell Sort",
-        "t": "vid"
-      },
-      {
-        "n": "29.1 348.ShellSortC",
-        "t": "pdf"
-      }
-    ]
-  },
-  {
-    "id": "s20",
-    "name": "21. Hashing Technique",
-    "folderId": "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF",
-    "videos": [
-      {
-        "n": "1. Introduction to Hashing",
-        "t": "vid"
-      },
-      {
-        "n": "2. Chaining",
-        "t": "vid"
-      },
-      {
-        "n": "3.1 351.HashingC",
-        "t": "pdf"
-      },
-      {
-        "n": "3. Let_s Code Chaining",
-        "t": "vid"
-      },
-      {
-        "n": "4. Linear Probing",
-        "t": "vid"
-      },
-      {
-        "n": "5.2 353.LinearProbingC",
-        "t": "pdf"
-      },
-      {
-        "n": "5. Let_s Code Linear Probing",
-        "t": "vid"
-      },
-      {
-        "n": "6. Quadratic Probing",
-        "t": "vid"
-      },
-      {
-        "n": "7. Double Hashing",
-        "t": "vid"
-      },
-      {
-        "n": "8. Hash Function Ideas",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s21",
-    "name": "22. Graphs",
-    "folderId": "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe",
-    "videos": [
-      {
-        "n": "1. Introduction to Graphs",
-        "t": "vid"
-      },
-      {
-        "n": "2. Representation of Undirected Graph",
-        "t": "vid"
-      },
-      {
-        "n": "3. Representation of Directed Graphs",
-        "t": "vid"
-      },
-      {
-        "n": "4. Breadth First Search",
-        "t": "vid"
-      },
-      {
-        "n": "5. Program for BFS",
-        "t": "vid"
-      },
-      {
-        "n": "6. Depth First Search",
-        "t": "vid"
-      },
-      {
-        "n": "7. Program for DFS",
-        "t": "vid"
-      },
-      {
-        "n": "8.1 Graph BFS DFS",
-        "t": "pdf"
-      },
-      {
-        "n": "8. Let_s Code BFS _ DFS",
-        "t": "vid"
-      },
-      {
-        "n": "10. Prim_s Minimum Cost Spanning Tree",
-        "t": "vid"
-      },
-      {
-        "n": "11. Prim_s Program",
-        "t": "vid"
-      },
-      {
-        "n": "12. Let_s Code Prim_s using",
-        "t": "vid"
-      },
-      {
-        "n": "13. Kruskal_s Minimum Cost Spanning Tree",
-        "t": "vid"
-      },
-      {
-        "n": "14. Disjoint Subsets",
-        "t": "vid"
-      },
-      {
-        "n": "15. Kruskal_s Program",
-        "t": "vid"
-      },
-      {
-        "n": "16. Let_s Code Kruskla_s Program",
-        "t": "vid"
-      }
-    ]
-  },
-  {
-    "id": "s22",
-    "name": "23. Asymptotic Notations",
-    "folderId": "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T",
-    "videos": [
-      {
-        "n": "1. Asymptotic Notations Big Oh , Omega , Theta",
-        "t": "vid"
-      },
-      {
-        "n": "2.1 1. TailHead Recursion",
-        "t": "pdf"
-      },
-      {
-        "n": "2.2 2. StaticGlobal",
-        "t": "pdf"
-      },
-      {
-        "n": "2.3 7. Factorial",
-        "t": "pdf"
-      },
-      {
-        "n": "2.4 20 Delete",
-        "t": "pdf"
-      },
-      {
-        "n": "2.5 13. Combination",
-        "t": "pdf"
-      },
-      {
-        "n": "2.7 26. isSorted",
-        "t": "pdf"
-      },
-      {
-        "n": "2.8 3. TreeRecursion",
-        "t": "pdf"
-      },
-      {
-        "n": "2.9 10. Tayloer Series Iterative",
-        "t": "pdf"
-      },
-      {
-        "n": "2.10 15. Static Dyn Array",
-        "t": "pdf"
-      },
-      {
-        "n": "2.11 12. Fibonacci",
-        "t": "pdf"
-      },
-      {
-        "n": "2.12 11. Taylor",
-        "t": "pdf"
-      },
-      {
-        "n": "2.13 28. Merge 2",
-        "t": "pdf"
-      },
-      {
-        "n": "2.14 8. Power",
-        "t": "pdf"
-      },
-      {
-        "n": "2.15 29. Array Menu C",
-        "t": "pdf"
-      },
-      {
-        "n": "2.16 14. Tower of Hanoi",
-        "t": "pdf"
-      },
-      {
-        "n": "2.17 4. Indirect Recursion",
-        "t": "pdf"
-      },
-      {
-        "n": "2.18 32. Array C++ class",
-        "t": "pdf"
-      },
-      {
-        "n": "2.20 9. Taylor Series",
-        "t": "pdf"
-      },
-      {
-        "n": "2.21 19. Insert",
-        "t": "pdf"
-      },
-      {
-        "n": "2.22 6 Sum of N ",
-        "t": "pdf"
-      },
-      {
-        "n": "2.23 34. Diag Matrix Cpp",
-        "t": "pdf"
-      },
-      {
-        "n": "2.24 23. Get Set",
-        "t": "pdf"
-      },
-      {
-        "n": "2.26 41. Create and Display LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.27 24. Reverse Array",
-        "t": "pdf"
-      },
-      {
-        "n": "2.28 72. Circular Queue",
-        "t": "pdf"
-      },
-      {
-        "n": "2.29 37. Sparse Matrix C",
-        "t": "pdf"
-      },
-      {
-        "n": "2.30 27. Merge",
-        "t": "pdf"
-      },
-      {
-        "n": "2.31 83. Quick Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.32 18.   2D Array",
-        "t": "pdf"
-      },
-      {
-        "n": "2.33 30. Set Operations",
-        "t": "pdf"
-      },
-      {
-        "n": "2.34 74. TreeCpp",
-        "t": "pdf"
-      },
-      {
-        "n": "2.35 25. is Sorted",
-        "t": "pdf"
-      },
-      {
-        "n": "2.36 38. Sparse Matrix C++",
-        "t": "pdf"
-      },
-      {
-        "n": "2.37 63. Stack Array",
-        "t": "pdf"
-      },
-      {
-        "n": "2.39 80. Bubble Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.40 69. Evaulation Postfix",
-        "t": "pdf"
-      },
-      {
-        "n": "2.41 36. Lower Triangular CPP",
-        "t": "pdf"
-      },
-      {
-        "n": "2.42 40. Polynomial Array",
-        "t": "pdf"
-      },
-      {
-        "n": "2.43 55. Reverse LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.44 43. Count SumLinked List",
-        "t": "pdf"
-      },
-      {
-        "n": "2.45 35. Lower Triangular C",
-        "t": "pdf"
-      },
-      {
-        "n": "2.46 60. Doubly Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "2.47 57. Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "2.48 56. SortedInsert LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.49 IMergeSortNEW",
-        "t": "pdf"
-      },
-      {
-        "n": "2.50 50. Deleteing LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.51 45. Search LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.52 76. BST Insert Delete",
-        "t": "pdf"
-      },
-      {
-        "n": "2.54 44. Max LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.57 89. Graph",
-        "t": "pdf"
-      },
-      {
-        "n": "2.59 51. isLoop LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.60 22. BinarySearch",
-        "t": "pdf"
-      },
-      {
-        "n": "2.61 54. Remove Duplicate LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.62 77. AVL ",
-        "t": "pdf"
-      },
-      {
-        "n": "2.63 93. Linear Probing",
-        "t": "pdf"
-      },
-      {
-        "n": "2.64 85. Merge Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.65 90. Hashing",
-        "t": "pdf"
-      },
-      {
-        "n": "2.66 86. Recursive Merge Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.67 78. AVL #2",
-        "t": "pdf"
-      },
-      {
-        "n": "2.68 52. isSorted LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.69 58. LinkedList CPP",
-        "t": "pdf"
-      },
-      {
-        "n": "2.70 65. Stack Linked List CPP",
-        "t": "pdf"
-      },
-      {
-        "n": "2.71 87. Count Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.73 46. Insert in LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.74 HeapSort New",
-        "t": "pdf"
-      },
-      {
-        "n": "2.76 95. Tree Level Order Traversal",
-        "t": "pdf"
-      },
-      {
-        "n": "2.77 48. Concat LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.78 59. Circluar Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "2.79 81. Insertion Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.80 42. Deleting from LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.81 47. LinearLinkedList",
-        "t": "pdf"
-      },
-      {
-        "n": "2.82 61. Polynomial Linked List",
-        "t": "pdf"
-      },
-      {
-        "n": "2.83 33. Diag Matrix C",
-        "t": "pdf"
-      },
-      {
-        "n": "2.84 49. Create LL using Insert",
-        "t": "pdf"
-      },
-      {
-        "n": "2.85 73. Queue LL",
-        "t": "pdf"
-      },
-      {
-        "n": "2.86 64. Stack Array CPP",
-        "t": "pdf"
-      },
-      {
-        "n": "2.87 82. Selection Sort",
-        "t": "pdf"
-      },
-      {
-        "n": "2.88 67. Parantheses Matching",
-        "t": "pdf"
-      },
-      {
-        "n": "2.89 31. Array C++ #2",
-        "t": "pdf"
-      },
-      {
-        "n": "2.90 75. Tree",
-        "t": "pdf"
-      },
-      {
-        "n": "2.91 94. Graph BFS DFS",
-        "t": "pdf"
-      },
-      {
-        "n": "2.92 68. InToPost",
-        "t": "pdf"
-      },
-      {
-        "n": "2.93 66. Stack LL C",
-        "t": "pdf"
-      }
-    ]
-  }
-]
-;
+    let SECTIONS = [];
+    let courseTitle = '';
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('course') || 'dsa';
 
-    const COLORS = [
-      { bg: '#f3daff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#fdefff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#ebdeee', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#f3daff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#fdefff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#ebdeee', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#f3daff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#fdefff', icon: '#8900d4', fill: '#8900d4' },
-      { bg: '#ebdeee', icon: '#8900d4', fill: '#8900d4' },
-    ];
-
+    // ── State & UI Globals ────────────────────────────────
     let state = {};
-    let isPaid = true;
-
+    let isPaid = false;
     let currentVideo = null;
-    let openSections = new Set(['s5']);
-    let activeSidebarSec = null;
+    const openSections = new Set();
+    const COLORS = ['#a435f0','#2d82f0','#f05d32','#16a34a','#d97706','#db2777','#0891b2','#7c3aed'];
+
+    const STATE_KEY = 'dsa_progress_v2_' + courseId;
+    const STREAK_KEY = 'dsa_streak_v2';
+    const STREAK_DATE_KEY = 'dsa_streak_date_v2';
+
+    function getKey(sid, vi) { return sid + '_' + vi; }
+    function isDone(sid, vi) { return !!state[getKey(sid, vi)]; }
 
     function loadState() {
-      try { state = JSON.parse(localStorage.getItem('dsa_tracker_v2') || '{}'); } catch (e) { state = {}; }
-      // Load streak
-      const today = new Date().toDateString();
-      const sd = state._streakData || { lastDate: null, streak: 0 };
-      if (sd.lastDate !== today) {
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (sd.lastDate === yesterday.toDateString()) {
-          // streak continues (will be bumped when they mark something done today)
-        } else if (sd.lastDate !== today) {
-          // only reset if more than 1 day ago
-          if (sd.lastDate && sd.lastDate !== yesterday.toDateString()) {
-            sd.streak = 0;
-          }
-        }
-        state._streakData = sd;
-      }
-    }
-
-    async function pushStateToServer() {
-      if (typeof firebase === 'undefined' || !firebase.auth().currentUser) return;
-      try {
-        const token = await firebase.auth().currentUser.getIdToken();
-        await fetch(`${API_BASE}/api/progress`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ state })
-        });
-      } catch (e) { console.error('Failed to sync progress to server:', e); }
-    }
-
-    async function pullStateFromServer() {
-      if (typeof firebase === 'undefined' || !firebase.auth().currentUser) return;
-      try {
-        const token = await firebase.auth().currentUser.getIdToken();
-        const res = await fetch(`${API_BASE}/api/progress`, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.is_paid) isPaid = true;
-        if (data.state && Object.keys(data.state).length > 0) {
-          state = data.state;
-          localStorage.setItem('dsa_tracker_v2', JSON.stringify(state));
-          updateStats();
-          renderAll();
-        }
-      } catch (e) { console.error('Failed to pull progress from server:', e); }
+      try { state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); } catch { state = {}; }
     }
 
     function saveState() {
-      try { localStorage.setItem('dsa_tracker_v2', JSON.stringify(state)); } catch (e) { }
-      pushStateToServer();
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+      // Best-effort persist to server
+      const user = firebase.auth().currentUser;
+      if (user) {
+        user.getIdToken().then(token => {
+          fetch('/api/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ state })
+          }).catch(() => {});
+        });
+      }
     }
 
     function bumpStreak() {
       const today = new Date().toDateString();
-      const sd = state._streakData || { lastDate: null, streak: 0 };
-      if (sd.lastDate !== today) {
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (sd.lastDate === yesterday.toDateString()) {
-          sd.streak = (sd.streak || 0) + 1;
-        } else {
-          sd.streak = 1;
-        }
-        sd.lastDate = today;
-        state._streakData = sd;
-        saveState();
-      }
-      updateStreak();
+      const last = localStorage.getItem(STREAK_DATE_KEY);
+      if (last === today) return;
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      let streak = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
+      if (last === yesterday) streak++;
+      else streak = 1;
+      localStorage.setItem(STREAK_KEY, streak);
+      localStorage.setItem(STREAK_DATE_KEY, today);
     }
 
     function updateStreak() {
-      const sd = state._streakData || { streak: 0 };
-      const s = sd.streak || 0;
-      document.getElementById('streak-text').textContent = s + ' day' + (s !== 1 ? 's' : '') + ' streak';
+      const streak = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
+      const el = document.getElementById('streak-text');
+      if (el) el.textContent = streak + ' day streak';
     }
 
-    function getKey(sid, vi) { return sid + '_' + vi; }
-    function isDone(sid, vi) { return !!state[getKey(sid, vi)]; }
+    async function pullStateFromServer() {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        const token = await user.getIdToken();
+        const res = await fetch('/api/progress', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.state && Object.keys(data.state).length > 0) {
+          state = { ...state, ...data.state };
+          localStorage.setItem(STATE_KEY, JSON.stringify(state));
+          renderAll();
+        }
+      } catch (e) {
+        console.warn('pullStateFromServer failed:', e);
+      }
+    }
 
     function countDone(sec) { return sec.videos.filter((v, i) => isDone(sec.id, i)).length; }
     function totalVideos() { return SECTIONS.reduce((a, s) => a + s.videos.length, 0); }
@@ -2643,7 +736,8 @@
       document.querySelectorAll('.video-row').forEach(r => r.classList.remove('playing'));
       const row = document.getElementById('vrow_' + sec.id + '_' + vi);
       if (row) { row.classList.add('playing'); row.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-      // Modal opens only on explicit user click (▶ Play Video)
+      // Also trigger the actual video player
+      playVideo(sec, vi);
     }
 
     function closePlayer() {
@@ -2710,7 +804,7 @@
        try {
            const user = firebase.auth().currentUser;
            if(!user) {
-               window.location.href = '/auth';
+               window.location.href = '/gyansetu_auth';
                return;
            }
            const res = await fetch(`${API_BASE}/api/checkout`, {
@@ -2745,6 +839,100 @@
       
       const content = document.getElementById(tabId + '-tab');
       if (content) content.style.display = 'block';
+    }
+
+    function switchSidebarTab(tab) {
+      const tabContent = document.getElementById('sidebar-tab-content');
+      const tabAi = document.getElementById('sidebar-tab-ai');
+      const sectionsContainer = document.getElementById('sections-container');
+      const aiContainer = document.getElementById('ai-container');
+      
+      if (tab === 'content') {
+        tabContent.classList.add('active');
+        tabAi.classList.remove('active');
+        sectionsContainer.style.display = 'block';
+        aiContainer.style.display = 'none';
+      } else {
+        tabContent.classList.remove('active');
+        tabAi.classList.add('active');
+        sectionsContainer.style.display = 'none';
+        aiContainer.style.display = 'flex';
+      }
+    }
+
+    const DSA_MOCK_RESPONSES = [
+      "That is a great question! For this specific lesson, make sure you understand the time and space complexity trade-offs.",
+      "In Data Structures & Algorithms, practice is key. Try writing out the code for this data structure from scratch.",
+      "Common patterns here involve using a two-pointer technique or a sliding window. Do you want to see a code example?",
+      "To optimize this algorithm, we can use memoization (Dynamic Programming) to avoid redundant recursive calls.",
+      "The key thing to watch out for in recursion is the base case. If the base case is missing or incorrect, it will result in a stack overflow.",
+      "A hash map gives us O(1) average lookup time, which is incredibly useful for optimizing search operations from O(n^2) to O(n)."
+    ];
+
+    function sendAiMessage() {
+      const input = document.getElementById('ai-chat-input');
+      const messagesContainer = document.getElementById('ai-chat-messages');
+      if (!input || !messagesContainer) return;
+      const text = input.value.trim();
+      if (!text) return;
+      
+      // Append user message
+      const userMsg = document.createElement('div');
+      userMsg.style.alignSelf = 'flex-end';
+      userMsg.style.background = 'var(--accent)';
+      userMsg.style.color = '#ffffff';
+      userMsg.style.borderRadius = '8px';
+      userMsg.style.padding = '10px 14px';
+      userMsg.style.maxWidth = '85%';
+      userMsg.style.lineHeight = '1.4';
+      userMsg.textContent = text;
+      messagesContainer.appendChild(userMsg);
+      
+      // Clear input
+      input.value = '';
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Append loading indicator
+      const loadingMsg = document.createElement('div');
+      loadingMsg.style.alignSelf = 'flex-start';
+      loadingMsg.style.background = 'var(--bg3)';
+      loadingMsg.style.border = '1px solid var(--border)';
+      loadingMsg.style.borderRadius = '8px';
+      loadingMsg.style.padding = '10px 14px';
+      loadingMsg.style.maxWidth = '85%';
+      loadingMsg.style.color = 'var(--text3)';
+      loadingMsg.textContent = 'Typing...';
+      messagesContainer.appendChild(loadingMsg);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Mock delay
+      setTimeout(() => {
+        messagesContainer.removeChild(loadingMsg);
+        
+        // Pick a response based on keywords or random
+        let responseText = "";
+        const lower = text.toLowerCase();
+        if (lower.includes('complexity') || lower.includes('big o')) {
+          responseText = "Time complexity measures the execution time of an algorithm relative to the input size (n). In this lesson, we aim for O(log n) or O(n) complexity. Space complexity measures memory overhead.";
+        } else if (lower.includes('code') || lower.includes('example')) {
+          responseText = "Here is a standard implementation snippet:\n\n```javascript\n// Quick partition pattern\nfunction swap(arr, i, j) {\n  let temp = arr[i];\n  arr[i] = arr[j];\n  arr[j] = temp;\n}\n```";
+        } else {
+          responseText = DSA_MOCK_RESPONSES[Math.floor(Math.random() * DSA_MOCK_RESPONSES.length)];
+        }
+        
+        const aiMsg = document.createElement('div');
+        aiMsg.style.alignSelf = 'flex-start';
+        aiMsg.style.background = 'var(--bg3)';
+        aiMsg.style.border = '1px solid var(--border)';
+        aiMsg.style.borderRadius = '8px';
+        aiMsg.style.padding = '10px 14px';
+        aiMsg.style.maxWidth = '85%';
+        aiMsg.style.color = 'var(--text)';
+        aiMsg.style.lineHeight = '1.4';
+        aiMsg.innerHTML = responseText.replace(/\\n/g, '<br>');
+        messagesContainer.appendChild(aiMsg);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 800);
     }
 
     function markDoneAndNext() {
@@ -2859,7 +1047,7 @@
       renderSections();
     }
 
-    // ── VIDEO PLAYER (Google Drive Embed) ────────────────────────
+    // ── VIDEO PLAYER (Video Stream) ────────────────────────
 
     async function checkBackend() {
       if (backendAvailable !== null) return backendAvailable;
@@ -2884,7 +1072,7 @@
         const res  = await fetch(`${API_BASE}/api/files/${folderId}`);
         const data = await res.json();
         if (!res.ok || data.error) {
-          const errMsg = data.error || 'Failed to fetch files from Google Drive';
+          const errMsg = data.error || 'Failed to fetch files from video server';
           folderCache[folderId] = { error: errMsg };
           throw new Error(errMsg);
         }
@@ -2948,31 +1136,12 @@
       const iframe = document.getElementById('video-iframe');
       const wrap = document.getElementById('iframe-wrap');
       const loading = document.getElementById('modal-loading');
-      let savedSessionId = localStorage.getItem('dsa_last_checkout_session') || '';
-
-      // Validate stored checkout session against the backend. Keep the
-      // session id even if a check is slow/fails so the backend can retry
-      // Stripe verification later instead of losing the payment proof.
-      if (!isPaid && savedSessionId) {
-        const user = firebase.auth().currentUser;
-        if (user) {
-          let hasAccess = await verifyCheckoutReturn(user, savedSessionId);
-          if (!hasAccess) {
-            hasAccess = await checkPaidAccess(user, savedSessionId);
-          }
-          if (hasAccess) {
-            isPaid = true;
-            renderAll();
-          }
-        }
-      }
-
+      const lockOverlay = document.getElementById('access-lock');
+      
+      if (lockOverlay) lockOverlay.style.display = 'none';
       iframe.src = '';
       wrap.style.display = 'none';
       loading.style.display = 'flex';
-      
-      // Paywall check removed for production
-
       
       loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Connecting to server...</div>';
 
@@ -2982,18 +1151,36 @@
         return;
       }
 
-      loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Finding video in Drive...</div>';
+      loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Verifying play permissions...</div>';
       try {
-        const fileId = await resolveFileId(sec, vi);
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error("Please log in first.");
+        const token = await user.getIdToken();
+        
+        const video = sec.videos[vi];
+        const fileId = video.id;
 
         if (!fileId) {
-          loading.innerHTML = '<div style="font-size:32px;margin-bottom:12px">🔍</div><div style="color:var(--text2);font-size:14px">Video not found in Drive folder</div>';
+          loading.innerHTML = '<div style="font-size:32px;margin-bottom:12px">🔍</div><div style="color:var(--text2);font-size:14px">Video not found on server</div>';
           return;
         }
 
-        const token = await firebase.auth().currentUser.getIdToken();
-        let streamUrl = `${API_BASE}/api/stream/${fileId}?token=` + token;
-        if (savedSessionId) streamUrl += '&session_id=' + encodeURIComponent(savedSessionId);
+        // Check permission against backend
+        const permRes = await fetch(`/api/check_play_permission?course_id=${courseId}&file_id=${fileId}`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const permData = await permRes.json();
+        
+        if (!permRes.ok || !permData.allowed) {
+          loading.style.display = 'none';
+          showAccessRequestModal(permData.reason, permData.message);
+          return;
+        }
+
+        // Allowed! Proceed to stream
+        loading.innerHTML = '<div class="modal-spinner"></div><div style="color:var(--text2);font-size:14px;margin-top:12px">Connecting to video stream...</div>';
+        
+        let streamUrl = `${API_BASE}/api/stream/${fileId}?token=${token}&course_id=${encodeURIComponent(courseId)}`;
         iframe.src = streamUrl;
         iframe.onended = markDoneAndNext;
         wrap.style.display = 'block';
@@ -3003,9 +1190,70 @@
       }
     }
 
-    function setCurrentVideo(sec, vi) {
-      playVideo(sec, vi);
+    async function submitAccessRequest() {
+      const btn = document.getElementById('lock-request-btn');
+      if (!btn) return;
+      btn.disabled = true;
+      btn.innerText = "Submitting Request...";
+      
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) throw new Error("Please log in first.");
+        const token = await user.getIdToken();
+        
+        const res = await fetch('/api/access/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ course_id: courseId, course_title: courseTitle || courseId })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          btn.innerText = "Access Requested (Pending Approval)";
+          btn.disabled = true;
+          document.getElementById('lock-message').innerText = "Your access request has been sent to the administrator. Once approved, you will get full lifetime access to this course.";
+          showToast("Access request submitted successfully!");
+        } else {
+          throw new Error(data.error || "Failed to submit request.");
+        }
+      } catch (err) {
+        showToast(err.message);
+        btn.disabled = false;
+        btn.innerText = "Request Full Course Access";
+      }
     }
+
+    function showAccessRequestModal(reason, msg) {
+      const lockOverlay = document.getElementById('access-lock');
+      const lockMsg = document.getElementById('lock-message');
+      const lockBtn = document.getElementById('lock-request-btn');
+      
+      if (!lockOverlay) return;
+      
+      lockOverlay.style.display = 'flex';
+      
+      if (reason === 'request_pending') {
+        lockMsg.innerText = "Your access request is currently pending administrator approval. Please wait for the administrator to approve it.";
+        lockBtn.innerText = "Access Requested (Pending Approval)";
+        lockBtn.disabled = true;
+      } else if (reason === 'request_rejected') {
+        lockMsg.innerText = "Your access request for this course was declined by the administrator. Contact support if you believe this is an error.";
+        lockBtn.innerText = "Access Rejected by Admin";
+        lockBtn.disabled = true;
+      } else if (reason === 'limit_reached') {
+        lockMsg.innerText = "Free Limit Reached! You have watched your 2 free trial videos for this course. Please submit an access request to unlock full lifetime access.";
+        lockBtn.innerText = "Request Full Course Access";
+        lockBtn.disabled = false;
+      } else {
+        lockMsg.innerText = msg || "You need administrator permission to access this video. Please request access below.";
+        lockBtn.innerText = "Request Full Course Access";
+        lockBtn.disabled = false;
+      }
+    }
+
 
     async function verifyCheckoutReturn(user, sessionId) {
       if (!sessionId) return false;
@@ -3078,8 +1326,7 @@
     }
     
 // ── FIREBASE AUTH GUARD ─────────────────────────────────
-    
-    const urlParams = new URLSearchParams(window.location.search);
+
   const paymentSuccess = urlParams.get('payment_success');
   const paymentCancelled = urlParams.get('payment_cancelled');
   const checkoutSessionId = urlParams.get('session_id');
@@ -3091,14 +1338,51 @@
     firebase.initializeApp(firebaseConfig);
     const _auth = firebase.auth();
 
-        _auth.onAuthStateChanged(async function(user) {
+    _auth.onAuthStateChanged(async function(user) {
       const overlay = document.getElementById('fb-loading');
       if (overlay) overlay.remove();
 
-      if (!user) { window.location.href = '/auth'; return; }
+      if (!user) { window.location.href = '/gyansetu_auth'; return; }
       const display = user.displayName || user.email.split('@')[0];
       document.getElementById('user-name').textContent = display;
       if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
+
+      // Show Admin Panel nav button if admin
+      if (user.email === 'admin@gyansetu.com') {
+        const topbarRight = document.querySelector('.topbar-right');
+        if (topbarRight && !document.getElementById('admin-topbar-link')) {
+          const adminLink = document.createElement('a');
+          adminLink.id = 'admin-topbar-link';
+          adminLink.className = 'btn-logout';
+          adminLink.style.background = '#8b29cf';
+          adminLink.style.borderColor = '#8b29cf';
+          adminLink.style.color = '#ffffff';
+          adminLink.style.marginRight = '12px';
+          adminLink.style.textDecoration = 'none';
+          adminLink.style.display = 'inline-flex';
+          adminLink.style.alignItems = 'center';
+          adminLink.href = '/admin';
+          adminLink.textContent = 'Admin Panel';
+          topbarRight.insertBefore(adminLink, topbarRight.firstChild);
+        }
+      }
+
+      // Load course details
+      try {
+        const courseRes = await fetch(`/api/courses/${courseId}`);
+        if (!courseRes.ok) throw new Error("Course not found");
+        const courseData = await courseRes.json();
+        
+        SECTIONS = courseData.sections || [];
+        courseTitle = courseData.title || courseId;
+        
+        // Update header course title
+        const courseTitleEl = document.querySelector('.topbar-course-title');
+        if (courseTitleEl) courseTitleEl.textContent = courseTitle;
+        
+      } catch (err) {
+        console.error("Error loading course details:", err);
+      }
 
       loadState();
       renderAll();
@@ -3106,7 +1390,6 @@
       if (paymentSuccess || paymentCancelled || checkoutSessionId) {
         window.history.replaceState({}, document.title, "/dashboard");
       }
-
 
       await pullStateFromServer();
       
@@ -3131,8 +1414,23 @@
 
     function logout() {
       _auth.signOut().then(function() {
-        window.location.href = '/auth';
+        window.location.href = '/gyansetu_auth';
       });
+    }
+
+    function showProgressToast() {
+      const done = totalDone(), total = totalVideos();
+      const pct = Math.round(done / total * 100) || 0;
+      showToast(`📊 Progress: ${done} / ${total} videos done (${pct}%)`);
+    }
+
+    function showStreakToast() {
+      const s = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
+      if (s === 0) {
+        showToast("Complete a lesson today to start your learning streak! 🔥");
+      } else {
+        showToast(`Keep it up! You are on a ${s}-day learning streak! 🔥`);
+      }
     }
 
   </script>

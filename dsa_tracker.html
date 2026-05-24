@@ -127,7 +127,7 @@
 <a href="/" class="text-2xl font-black text-gray-900 no-underline">GyanSetu</a>
 <div class="hidden md:flex flex-1 max-w-2xl relative">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
-<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-full text-body-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Search for anything" type="text"/>
+<input id="search-input" onkeydown="if(event.key==='Enter') window.location.href='/search?q='+encodeURIComponent(this.value)" class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-full text-body-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Search for anything" type="text"/>
 </div>
 <nav class="hidden lg:flex items-center gap-6">
 <a class="text-gray-700 hover:text-[#A435F0] transition-all duration-200" href="#">Categories</a>
@@ -147,8 +147,32 @@
 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
 </button>
 </div>
-<div class="h-10 w-10 rounded-full bg-primary-container overflow-hidden border-2 border-primary-fixed">
-<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a student with a warm, confident expression in a bright, modern studio setting. The lighting is high-key and soft, creating a clean light-mode aesthetic that fits the corporate modern style. The background is a subtle, out-of-focus tech office with soft purple and white accents. The image conveys expertise and a focus on lifelong learning." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNGP-FQSG_TGcmQufuW7_16vhSEsiWklj2faAA44Tnw3s--vhXRarUwRdXqOd0zPR16EUpO_0Cs_oxaM3gsSEGGnDostfM4dP91qGWiqiT_hnDDlX48znnskt9qP71_gZ02i9t9pSN6XFDo0b1ZJLds9Y8XNCIkfCln-KEtD8aoYF23yNUiCEpGiWEVIpNQ5lHStd_u2zN94ljcDnUbmRQOsyvIK-F_qTkfqCDniAD6U-Nw5q2oDsS7H0ph-J382ZJaAmPYdvv0aHx"/>
+<div class="relative" id="profile-menu-wrapper">
+  <button id="profile-chip" onclick="toggleProfileMenu()" class="flex items-center gap-2 h-10 px-3 rounded-full hover:bg-gray-100 transition-all duration-200 cursor-pointer border border-transparent hover:border-gray-200">
+    <div id="dashboard-avatar" class="h-9 w-9 rounded-full bg-[#A435F0] text-white flex items-center justify-center font-bold text-sm select-none shadow-sm">?</div>
+    <span id="dashboard-name" class="hidden sm:block text-sm font-semibold text-gray-700 max-w-[120px] truncate"></span>
+    <span class="material-symbols-outlined text-gray-400 text-base">expand_more</span>
+  </button>
+  <!-- Dropdown -->
+  <div id="profile-dropdown" class="hidden absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-100">
+      <p id="dropdown-name" class="font-bold text-gray-900 text-sm truncate"></p>
+      <p id="dropdown-email" class="text-xs text-gray-500 truncate mt-0.5"></p>
+    </div>
+    <a href="/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+      <span class="material-symbols-outlined text-base text-gray-400">school</span> My Learning
+    </a>
+    <div id="admin-dropdown-link" class="hidden">
+      <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 text-sm text-[#A435F0] font-bold hover:bg-purple-50 transition-colors">
+        <span class="material-symbols-outlined text-base">admin_panel_settings</span> Admin Panel
+      </a>
+    </div>
+    <div class="border-t border-gray-100 mt-1 pt-1">
+      <button onclick="signOutUser()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors font-semibold">
+        <span class="material-symbols-outlined text-base">logout</span> Sign Out
+      </button>
+    </div>
+  </div>
 </div>
 </div>
 </header>
@@ -166,28 +190,8 @@
 </div>
 <!-- Enrolled Courses Grid -->
 <section class="mb-xl">
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-<!-- Course Card 1 -->
-<div onclick="window.location.href='/player'" class="course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant">
-<div class="aspect-video w-full overflow-hidden relative">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="DSA" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400"/>
-<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
-</div>
-</div>
-<div class="p-md flex-1 flex flex-col">
-<h3 class="font-headline-sm text-headline-sm text-on-surface mb-xs line-clamp-2">Master Data Structures & Algorithms</h3>
-<p class="font-body-sm text-body-sm text-secondary mb-base">Abdul Bari</p>
-<div class="mt-auto">
-<div class="flex justify-between mb-xs">
-<span class="font-label-sm text-label-sm text-on-surface">Continue Learning</span>
-</div>
-<div class="w-full h-1 bg-surface-variant">
-<div class="bg-primary-container h-full" style="width: 10%"></div>
-</div>
-</div>
-</div>
-</div>
+<div id="enrolled-courses-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+  <div class="col-span-full text-center py-12 text-gray-400">Loading your courses...</div>
 </div>
 </section>
 <!-- Recently Viewed - Bento Layout -->
@@ -389,25 +393,129 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
       if (!user) {
-        window.location.href = '/auth?mode=login';
+        window.location.href = '/gyansetu_auth?mode=login';
       } else {
-        handlePaymentStatus();
-      }
+        const name = user.displayName || user.email.split('@')[0];
+        const initial = name.charAt(0).toUpperCase();
 
+        // Populate profile chip
+        document.getElementById('dashboard-avatar').textContent = initial;
+        document.getElementById('dashboard-name').textContent = name;
+        document.getElementById('dropdown-name').textContent = name;
+        document.getElementById('dropdown-email').textContent = user.email;
+
+        // Show admin link if admin
+        if (user.email === 'admin@gyansetu.com') {
+          document.getElementById('admin-dropdown-link').classList.remove('hidden');
+          const nav = document.querySelector('nav');
+          if (nav && !document.getElementById('admin-nav-link')) {
+            const adminLink = document.createElement('a');
+            adminLink.id = 'admin-nav-link';
+            adminLink.className = 'text-[#A435F0] font-bold hover:underline transition-all duration-200';
+            adminLink.href = '/admin';
+            adminLink.textContent = 'Admin Panel';
+            nav.appendChild(adminLink);
+          }
+        }
+
+        handlePaymentStatus();
+        await loadDashboardCourses(user);
+      }
     });
+
+    function toggleProfileMenu() {
+      const dd = document.getElementById('profile-dropdown');
+      dd.classList.toggle('hidden');
+    }
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('profile-menu-wrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('profile-dropdown').classList.add('hidden');
+      }
+    });
+
+    function signOutUser() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = '/gyansetu_auth?mode=login';
+      });
+    }
 
     function handlePaymentStatus() {
         // Free access in production
     }
 
-
-    // simulatePayment removed
-
+    async function loadDashboardCourses(user) {
+      const grid = document.getElementById('enrolled-courses-grid');
+      if (!grid) return;
+      
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/courses');
+        const courses = await res.json();
+        
+        grid.innerHTML = '';
+        if (!courses || courses.length === 0) {
+          grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No courses available.</div>';
+          return;
+        }
+        
+        for (const c of courses) {
+          const checkRes = await fetch(`/api/check_play_permission?course_id=${c.id}&file_id=dummy`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const checkData = await checkRes.json();
+          
+          let statusText = 'Free Access (2 videos limit)';
+          let statusColor = 'text-amber-600';
+          if (checkData.allowed) {
+            if (checkData.reason === 'admin' || checkData.reason === 'approved') {
+              statusText = 'Full Lifetime Access';
+              statusColor = 'text-emerald-600';
+            }
+          } else {
+            if (checkData.reason === 'request_pending') {
+              statusText = 'Access Requested (Pending)';
+              statusColor = 'text-blue-600';
+            } else if (checkData.reason === 'request_rejected') {
+              statusText = 'Access Rejected';
+              statusColor = 'text-rose-600';
+            } else if (checkData.reason === 'limit_reached') {
+              statusText = 'Free Limit Reached (Locked)';
+              statusColor = 'text-rose-600';
+            }
+          }
+          
+          const card = document.createElement('div');
+          card.onclick = () => { window.location.href = `/player?course=${c.id}`; };
+          card.className = 'course-card-hover group cursor-pointer bg-white overflow-hidden flex flex-col border border-outline-variant rounded-2xl shadow-sm transition-all duration-300';
+          card.innerHTML = `
+            <div class="aspect-video w-full overflow-hidden relative">
+              <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${c.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400'}"/>
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+              </div>
+            </div>
+            <div class="p-4 flex-grow flex flex-col">
+              <h3 class="font-bold text-base text-gray-900 mb-1 leading-snug line-clamp-2">${c.title}</h3>
+              <p class="text-xs text-gray-500 mb-4">${c.instructor}</p>
+              <div class="mt-auto flex justify-between items-center text-xs font-semibold ${statusColor}">
+                <span>${statusText}</span>
+                <span class="text-[#A435F0] flex items-center gap-0.5">Start →</span>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        }
+      } catch (err) {
+        console.error('Error loading courses:', err);
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-rose-500 font-semibold">Failed to load courses.</div>';
+      }
+    }
 
     function showToast(msg, type = 'success') {
-      // Simple alert for now, can be enhanced to a nice toast
       alert(msg);
     }
   </script>

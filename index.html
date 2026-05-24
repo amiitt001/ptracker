@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GyanSetu Tracker — Master Data Structures &amp; Algorithms</title>
-  <meta name="description" content="Track your DSA learning journey with direct Drive video playback, streak tracking, and section-by-section progress. Built for serious learners." />
+  <meta name="description" content="Track your DSA learning journey with seamless video playback, streak tracking, and section-by-section progress. Built for serious learners." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -223,9 +223,9 @@
       <div class="nav-dot"></div>
       <span class="nav-name">GyanSetu Tracker</span>
     </a>
-    <div class="nav-right">
-      <a class="nav-btn nav-ghost"  href="/auth">Sign In</a>
-      <a class="nav-btn nav-filled" href="/auth?mode=register">Get Started</a>
+    <div class="nav-right" id="nav-auth-buttons">
+      <a class="nav-btn nav-ghost"  href="/gyansetu_auth?mode=login">Sign In</a>
+      <a class="nav-btn nav-filled" href="/gyansetu_auth?mode=register">Get Started</a>
     </div>
   </nav>
 
@@ -238,15 +238,15 @@
           Abdul Bari — DSA Masterclass
         </div>
         <h1>Master DSA.<br><span class="grad">Track Every Step.</span></h1>
-        <p class="hero-sub">Your personal learning tracker for Data Structures &amp; Algorithms. Watch directly from Drive, track sections, and build daily streaks.</p>
-        <div class="hero-cta">
-          <a class="cta-main" href="/auth?mode=register">Start Learning Free →</a>
-          <a class="cta-sec"  href="/auth">Sign In</a>
+        <p class="hero-sub">Your personal learning tracker for Data Structures &amp; Algorithms. Watch videos directly inside the tracker, track sections, and build daily streaks.</p>
+        <div class="hero-cta" id="hero-cta-buttons">
+          <a class="cta-main" href="/gyansetu_auth?mode=register">Start Learning Free →</a>
+          <a class="cta-sec"  href="/gyansetu_auth?mode=login">Sign In</a>
         </div>
         <div class="hero-pills">
           <div class="hpill"><span class="hpill-check">✓</span> 22 Sections</div>
           <div class="hpill"><span class="hpill-check">✓</span> 100+ Videos</div>
-          <div class="hpill"><span class="hpill-check">✓</span> Drive Playback</div>
+          <div class="hpill"><span class="hpill-check">✓</span> Cloud Playback</div>
           <div class="hpill"><span class="hpill-check">✓</span> Streak Tracking</div>
         </div>
       </div>
@@ -346,7 +346,7 @@
       <div class="feat-card g-blue">
         <div class="feat-icon i-blue">▶️</div>
         <div class="feat-title">Direct Video Playback</div>
-        <div class="feat-desc">Watch videos from Google Drive directly inside the tracker — no tab switching, full focus.</div>
+        <div class="feat-desc">Watch videos directly inside the tracker — no tab switching, full focus.</div>
       </div>
       <div class="feat-card g-orng">
         <div class="feat-icon i-orng">🔥</div>
@@ -391,10 +391,57 @@
   <div class="cta-band" style="margin:0 40px 80px;position:relative;z-index:1">
     <h2>Ready to master DSA?</h2>
     <p>Join learners who are systematically working through Data Structures &amp; Algorithms.</p>
-    <a class="cta-main" href="/auth?mode=register" style="display:inline-flex">Get Started Free →</a>
+    <a class="cta-main" id="bottom-cta-button" href="/gyansetu_auth?mode=register" style="display:inline-flex">Get Started Free →</a>
   </div>
 
   <footer>GyanSetu Tracker &nbsp;&middot;&nbsp; Built for learners</footer>
 
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="/firebase-config.js"></script>
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().onAuthStateChanged(function(user) {
+      const navAuth = document.getElementById('nav-auth-buttons');
+      const heroCta = document.getElementById('hero-cta-buttons');
+      const bottomCta = document.getElementById('bottom-cta-button');
+
+      if (user) {
+        if (navAuth) {
+          navAuth.innerHTML = `
+            <a class="nav-btn nav-ghost" href="/dashboard">Dashboard</a>
+            <button class="nav-btn nav-filled" onclick="firebase.auth().signOut().then(() => window.location.reload())" style="cursor:pointer;border:none;">Sign Out</button>
+          `;
+        }
+        if (heroCta) {
+          heroCta.innerHTML = `
+            <a class="cta-main" href="/dashboard">Go to Dashboard →</a>
+          `;
+        }
+        if (bottomCta) {
+          bottomCta.href = "/dashboard";
+          bottomCta.textContent = "Go to Dashboard →";
+        }
+      } else {
+        if (navAuth) {
+          navAuth.innerHTML = `
+            <a class="nav-btn nav-ghost" href="/gyansetu_auth?mode=login">Sign In</a>
+            <a class="nav-btn nav-filled" href="/gyansetu_auth?mode=register">Get Started</a>
+          `;
+        }
+        if (heroCta) {
+          heroCta.innerHTML = `
+            <a class="cta-main" href="/gyansetu_auth?mode=register">Start Learning Free →</a>
+            <a class="cta-sec" href="/gyansetu_auth?mode=login">Sign In</a>
+          `;
+        }
+        if (bottomCta) {
+          bottomCta.href = "/gyansetu_auth?mode=register";
+          bottomCta.textContent = "Get Started Free →";
+        }
+      }
+    });
+  </script>
 </body>
 </html>

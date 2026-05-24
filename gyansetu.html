@@ -123,7 +123,7 @@
 <div class="flex-1 max-w-2xl px-4">
 <div class="relative group">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
-<input class="w-full h-12 pl-10 pr-4 bg-surface-container border border-outline-variant rounded-full text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all shadow-sm" placeholder="Search for courses..." type="text"/>
+<input id="search-input" onkeydown="if(event.key==='Enter') window.location.href='/search?q='+encodeURIComponent(this.value)" class="w-full h-12 pl-10 pr-4 bg-surface-container border border-outline-variant rounded-full text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all shadow-sm" placeholder="Search for courses..." type="text"/>
 </div>
 </div>
 <div class="flex items-center gap-4">
@@ -142,8 +142,10 @@
 <span class="material-symbols-outlined text-gray-700" data-icon="favorite">favorite</span>
 </button>
 </div>
+<div id="auth-buttons" class="flex items-center gap-3">
 <a href="/gyansetu_auth?mode=login" class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95 inline-block text-center rounded">Log In</a>
 <a href="/gyansetu_auth?mode=register" class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95 inline-block text-center rounded">Sign Up</a>
+</div>
 </div>
 </header>
 <main class="max-w-[1340px] mx-auto px-gutter overflow-x-hidden">
@@ -454,4 +456,26 @@
 </div>
 </div>
 </footer>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
+<script>
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(function(user) {
+    const container = document.getElementById('auth-buttons');
+    if (user && container) {
+      const displayName = user.displayName || user.email.split('@')[0];
+      const avatarChar = displayName.charAt(0).toUpperCase();
+      container.innerHTML = `
+        <a href="/dashboard" class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95 inline-block text-center rounded">My Learning</a>
+        <button onclick="firebase.auth().signOut().then(() => window.location.reload())" class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95 inline-block text-center rounded">Sign Out</button>
+        <div class="h-10 w-10 rounded-full bg-[#A435F0] text-white flex items-center justify-center font-bold text-sm select-none" title="${displayName}">
+          ${avatarChar}
+        </div>
+      `;
+    }
+  });
+</script>
 </body></html>

@@ -126,7 +126,7 @@
 <div class="flex-grow max-w-2xl hidden md:block">
 <div class="relative flex items-center h-12 border border-gray-300 rounded-full px-4 bg-gray-50 focus-within:bg-white focus-within:shadow-md transition-all">
 <span class="material-symbols-outlined text-gray-500 mr-2" data-icon="search">search</span>
-<input class="bg-transparent border-none focus:ring-0 w-full text-sm" placeholder="Search for anything" type="text"/>
+<input id="search-input" onkeydown="if(event.key==='Enter') window.location.href='/search?q='+encodeURIComponent(this.value)" class="bg-transparent border-none focus:ring-0 w-full text-sm" placeholder="Search for anything" type="text"/>
 </div>
 </div>
 <div class="flex items-center gap-4">
@@ -135,8 +135,10 @@
 <span class="material-symbols-outlined p-2 hover:bg-gray-50 rounded-full cursor-pointer" data-icon="notifications">notifications</span>
 <span class="material-symbols-outlined p-2 hover:bg-gray-50 rounded-full cursor-pointer" data-icon="favorite">favorite</span>
 </div>
+<div id="auth-buttons" class="flex items-center gap-3">
 <a href="/gyansetu_auth?mode=login" class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95 inline-block text-center rounded">Log In</a>
 <a href="/gyansetu_auth?mode=register" class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95 inline-block text-center rounded">Sign Up</a>
+</div>
 </div>
 </nav>
 <!-- Hero Section -->
@@ -203,7 +205,7 @@
 
 </div>
 <div class="flex flex-col gap-sm">
-<button onclick="handleCheckout()" class="w-full h-12 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-all flex items-center justify-center">Enroll Now</button>
+<button id="enroll-btn" onclick="handleCheckout()" class="w-full h-12 bg-primary-container text-on-primary-container font-bold hover:opacity-90 transition-all flex items-center justify-center">Enroll Now</button>
 
 </div>
 <div class="text-center text-body-sm text-secondary">30-Day Money-Back Guarantee</div>
@@ -273,27 +275,59 @@
 <div class="border border-gray-200">
 <!-- Section 1 -->
 <div class="border-b border-gray-200">
-<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+<div onclick="toggleSyllabusSection(this)" class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
 <div class="flex items-center gap-base">
 <span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
 <span class="font-label-md">Introduction to Professional Web Development</span>
 </div>
 <span class="text-body-sm text-secondary">4 lectures • 25min</span>
 </div>
+<div class="p-md flex flex-col gap-sm bg-white" style="display: none;">
+  <div class="flex justify-between items-center text-body-sm">
+    <div class="flex items-center gap-base">
+      <span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+      <span class="underline text-primary-container">Welcome to the Course &amp; Outline</span>
+    </div>
+    <span>05:12</span>
+  </div>
+  <div class="flex justify-between items-center text-body-sm">
+    <div class="flex items-center gap-base">
+      <span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+      <span>Setup and Tools Installation</span>
+    </div>
+    <span>12:30</span>
+  </div>
+</div>
 </div>
 <!-- Section 2 -->
 <div class="border-b border-gray-200">
-<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
+<div onclick="toggleSyllabusSection(this)" class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
 <div class="flex items-center gap-base">
 <span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
 <span class="font-label-md">Modern React: React 18 and Concurrent Rendering</span>
 </div>
 <span class="text-body-sm text-secondary">12 lectures • 2h 45min</span>
 </div>
+<div class="p-md flex flex-col gap-sm bg-white" style="display: none;">
+  <div class="flex justify-between items-center text-body-sm">
+    <div class="flex items-center gap-base">
+      <span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+      <span class="underline text-primary-container">React 18 Concurrent Features Overview</span>
+    </div>
+    <span>15:40</span>
+  </div>
+  <div class="flex justify-between items-center text-body-sm">
+    <div class="flex items-center gap-base">
+      <span class="material-symbols-outlined text-secondary" data-icon="play_circle">play_circle</span>
+      <span>State Batching and Updates</span>
+    </div>
+    <span>22:15</span>
+  </div>
+</div>
 </div>
 <!-- Section 3 (Expanded) -->
 <div class="border-b border-gray-200">
-<div class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer">
+<div onclick="toggleSyllabusSection(this)" class="bg-gray-50 p-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors">
 <div class="flex items-center gap-base">
 <span class="material-symbols-outlined" data-icon="expand_less">expand_less</span>
 <span class="font-label-md">Deep Dive into Next.js 14 App Router</span>
@@ -430,10 +464,10 @@
 <!-- Sticky Mobile Actions / Additional Info for Tablet+ -->
 <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-sm z-40 flex items-center justify-between gap-sm">
 <div>
-<div class="font-bold text-headline-sm">$89.99</div>
-<div class="text-secondary text-body-sm line-through">$149.99</div>
+<div class="font-bold text-headline-sm">Free</div>
+<div class="text-secondary text-body-sm line-through">₹5000.00</div>
 </div>
-<button class="flex-grow h-12 bg-primary-container text-on-primary-container font-bold scale-95 duration-100">Add to Cart</button>
+<button id="mobile-enroll-btn" onclick="handleCheckout()" class="flex-grow h-12 bg-primary-container text-on-primary-container font-bold scale-95 duration-100">Enroll Now</button>
 </div>
 </main>
 <!-- Footer -->
@@ -478,10 +512,63 @@
 <span class="font-bold cursor-pointer hover:text-white">English</span>
 </div>
 </div>
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+<script src="/firebase-config.js"></script>
 <script>
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+let isLoggedIn = false;
+
+auth.onAuthStateChanged(function(user) {
+  const container = document.getElementById('auth-buttons');
+  const enrollBtn = document.getElementById('enroll-btn');
+  const mobileEnrollBtn = document.getElementById('mobile-enroll-btn');
+
+  if (user) {
+    isLoggedIn = true;
+    const displayName = user.displayName || user.email.split('@')[0];
+    const avatarChar = displayName.charAt(0).toUpperCase();
+    if (container) {
+      container.innerHTML = `
+        <a href="/dashboard" class="px-4 py-2 border-2 border-[#1C1D1F] font-bold hover:bg-gray-50 transition-all duration-100 scale-95 inline-block text-center rounded">My Learning</a>
+        <button onclick="firebase.auth().signOut().then(() => window.location.reload())" class="px-4 py-2 bg-[#A435F0] text-white font-bold hover:opacity-90 transition-all duration-100 scale-95 inline-block text-center rounded">Sign Out</button>
+        <div class="h-10 w-10 rounded-full bg-[#A435F0] text-white flex items-center justify-center font-bold text-sm select-none" title="${displayName}">
+          ${avatarChar}
+        </div>
+      `;
+    }
+    if (enrollBtn) {
+      enrollBtn.textContent = 'Go to Course';
+    }
+    if (mobileEnrollBtn) {
+      mobileEnrollBtn.textContent = 'Go to Course';
+    }
+  } else {
+    isLoggedIn = false;
+  }
+});
+
 async function handleCheckout() {
+  if (isLoggedIn) {
     window.location.href = '/dashboard';
+  } else {
+    window.location.href = '/gyansetu_auth?mode=register';
+  }
 }
 
+function toggleSyllabusSection(header) {
+  const nextEl = header.nextElementSibling;
+  if (!nextEl) return;
+  const isHidden = nextEl.style.display === 'none';
+  nextEl.style.display = isHidden ? 'block' : 'none';
+  const icon = header.querySelector('[data-icon]');
+  if (icon) {
+    icon.textContent = isHidden ? 'expand_less' : 'expand_more';
+    icon.setAttribute('data-icon', isHidden ? 'expand_less' : 'expand_more');
+  }
+}
 </script>
 </body></html>
