@@ -69,7 +69,7 @@
       background: #000;
       position: relative;
       width: 100%;
-      aspect-ratio: 4/3;
+      aspect-ratio: 16/9; 
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
       display: flex;
       justify-content: center;
@@ -104,7 +104,7 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     /* BELOW PLAYER */
-    .player-below { padding: 40px; max-width: 1100px; margin: 0 auto; width: 100%; }
+    .player-below { padding: 40px; max-width: 1300px; margin: 2rem auto 0; width: 100%; }
     .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
     .player-title { font-size: 32px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 8px; }
     .player-label { font-size: 12px; text-transform: uppercase; color: var(--green); font-weight: 700; margin-bottom: 8px; }
@@ -262,7 +262,7 @@
       <div class="main-player-area" id="main-scroll">
         <div class="player-container" id="player-container">
           <div class="iframe-ratio-box" id="iframe-wrap" style="display:none">
-            <video id="video-iframe" controls autoplay playsinline controlsList="nodownload" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+            <video id="video-iframe" controls autoplay playsinline controlsList="nodownload" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000;"></video>
           </div>
           <div class="modal-loading-state" id="modal-loading">
             <div style="text-align:center">
