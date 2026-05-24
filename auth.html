@@ -388,7 +388,8 @@
             'auth/too-many-requests'     : 'Too many attempts. Try again later.',
             'auth/network-request-failed': 'Network error. Check your connection.',
             'auth/operation-not-allowed' : 'This sign-in method is disabled in Firebase Console.',
-        })[code] || 'Something went wrong. Please try again.';
+            'auth/unauthorized-domain'   : 'This domain (gyansetu-ubna.onrender.com) is not authorized in your Firebase Console for OAuth (Google/Facebook). Please add it under Authentication -> Settings -> Authorized domains.',
+        })[code] || `Error: ${code || 'Unknown error'}. Please try again.`;
     }
 </script>
 </body>
