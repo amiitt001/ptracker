@@ -490,6 +490,10 @@ def search_page():
 def assets(filename):
     return send_from_directory(os.path.join(HTML_DIR, 'assets'), filename)
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_file(os.path.join(HTML_DIR, 'assets', 'gyansetu-logo-mark.png'), mimetype='image/png')
+
 @app.route('/firebase-config.js')
 def firebase_config():
     """Serve Firebase config + app config as JS, injected from env vars."""

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GyanSetu Admin Panel</title>
+  <link rel="icon" type="image/png" href="/assets/gyansetu-logo-mark.png">
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
@@ -31,7 +32,10 @@
   <!-- Top Bar -->
   <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
     <div class="flex items-center gap-6">
-      <a href="/" class="text-2xl font-black text-gray-900 no-underline tracking-tight">GyanSetu <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1 uppercase font-bold">Admin</span></a>
+      <a href="/" class="flex items-center gap-2 no-underline" aria-label="GyanSetu home">
+        <img class="h-11 w-[170px] object-contain" src="/assets/gyansetu-logo.png?v=2" alt="GyanSetu">
+        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded uppercase font-bold">Admin</span>
+      </a>
       <nav class="flex items-center gap-4 text-sm font-medium">
         <a href="/dashboard" class="text-gray-600 hover:text-[#A435F0] transition-colors">Student Dashboard</a>
       </nav>

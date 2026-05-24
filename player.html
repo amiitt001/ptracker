@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GyanSetu Tracker</title>
-  <link rel="icon" type="image/png" href="assets/gyansetu-logo-mark.png" />
+  <link rel="icon" type="image/png" href="/assets/gyansetu-logo-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -128,9 +128,10 @@
     .topbar-left { display: flex; align-items: center; gap: 16px; }
     .topbar-logo {
       display: flex; align-items: center; color: #ffffff; text-decoration: none; line-height: 1;
+      background: #ffffff; border-radius: 4px; padding: 3px 8px;
     }
     .topbar-logo-img {
-      width: 152px; height: 42px; object-fit: contain; object-position: left center; display: block;
+      width: 152px; height: 36px; object-fit: contain; object-position: left center; display: block;
     }
     .topbar-divider { width: 1px; height: 24px; background: #4f5357; }
     .topbar-course-title { font-size: 14px; font-weight: 600; color: #ffffff; }
@@ -328,7 +329,7 @@
       }
       .topbar-logo-img {
         width: 120px;
-        height: 34px;
+        height: 30px;
       }
       .topbar-divider,
       .topbar-course-title {
@@ -428,7 +429,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <a href="/dashboard" class="topbar-logo" aria-label="GyanSetu dashboard">
-          <img class="topbar-logo-img" src="assets/gyansetu-logo.png" alt="" />
+          <img class="topbar-logo-img" src="/assets/gyansetu-logo.png?v=2" alt="" />
         </a>
         <div class="topbar-divider"></div>
         <div class="topbar-course-title">Mastering Data Structures &amp; Algorithms</div>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GyanSetu Tracker — Master Data Structures &amp; Algorithms</title>
   <meta name="description" content="Track your DSA learning journey with seamless video playback, streak tracking, and section-by-section progress. Built for serious learners." />
+  <link rel="icon" type="image/png" href="/assets/gyansetu-logo-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -54,7 +55,8 @@
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo { display: flex; align-items: center; text-decoration: none; background: #ffffff; border-radius: 4px; padding: 3px 8px; }
+    .nav-logo-img { width: 168px; height: 38px; object-fit: contain; display: block; }
     .nav-dot   { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
     .nav-name  { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
     .nav-right { display: flex; align-items: center; gap: 10px; }
@@ -220,8 +222,7 @@
   <!-- NAV -->
   <nav>
     <a class="nav-logo" href="/">
-      <div class="nav-dot"></div>
-      <span class="nav-name">GyanSetu Tracker</span>
+      <img class="nav-logo-img" src="/assets/gyansetu-logo.png?v=2" alt="GyanSetu" />
     </a>
     <div class="nav-right" id="nav-auth-buttons">
       <a class="nav-btn nav-ghost"  href="/gyansetu_auth?mode=login">Sign In</a>

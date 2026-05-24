@@ -2,6 +2,7 @@
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="/assets/gyansetu-logo-mark.png"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -106,13 +107,23 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
         body { font-family: 'Inter', sans-serif; }
+        .brand-logo {
+            width: 220px;
+            height: auto;
+            display: block;
+        }
+        .footer-logo {
+            width: 130px;
+            height: auto;
+            display: block;
+        }
     </style>
 </head>
 <body class="bg-background min-h-screen flex flex-col">
 <!-- Top Branding Header (Non-Navigation Shell for Transactional Flow) -->
 <header class="w-full py-md px-8 flex justify-center">
-<a class="text-primary-container font-display text-[28px] tracking-tighter" href="/">
-            GyanSetu
+<a class="inline-flex items-center" href="/" aria-label="GyanSetu home">
+<img class="brand-logo" src="/assets/gyansetu-logo.png?v=2" alt="GyanSetu" />
 </a>
 </header>
 <!-- Main Content: Sign Up Canvas -->
@@ -181,9 +192,7 @@
 <!-- Shared Component: Footer -->
 <footer class="bg-gray-50 dark:bg-gray-950 w-full border-t mt-auto border-gray-200 dark:border-gray-800">
 <div class="flex flex-col md:flex-row justify-between items-center gap-4 px-8 py-12 max-w-[1340px] mx-auto">
-<div class="text-lg font-bold text-gray-900 dark:text-white">
-                GyanSetu
-            </div>
+<img class="footer-logo" src="/assets/gyansetu-logo.png?v=2" alt="GyanSetu" />
 <div class="flex flex-wrap justify-center gap-6">
 <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Terms of Service</a>
 <a class="font-['Inter'] text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
