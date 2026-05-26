@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="/assets/gyansetu-logo-mark.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #ffffff;
@@ -501,7 +502,7 @@
           <div class="player-header">
             <div>
                <div class="player-label" id="player-label">Course Overview</div>
-               <div class="player-title" id="player-title">Welcome to the Tracker</div>
+               <div class="player-title" id="player-title">Welcome to GyanSetu</div>
             </div>
             <div class="player-btns" id="player-btns" style="display:none">
                <button class="btn btn-green" onclick="markDoneAndNext()">✓ Mark Complete + Next</button>
@@ -1362,8 +1363,15 @@
       document.getElementById('user-name').textContent = display;
       if(document.getElementById('user-avatar')) document.getElementById('user-avatar').textContent = display.charAt(0).toUpperCase();
 
+      // Populate dropdown details
+      if (document.getElementById('player-dropdown-name')) document.getElementById('player-dropdown-name').textContent = display;
+      if (document.getElementById('player-dropdown-email')) document.getElementById('player-dropdown-email').textContent = user.email;
+
       // Show Admin Panel nav button if admin
       if (user.email === 'admin@gyansetu.com') {
+        const pal = document.getElementById('player-admin-link');
+        if (pal) pal.style.display = 'block';
+
         const topbarRight = document.querySelector('.topbar-right');
         if (topbarRight && !document.getElementById('admin-topbar-link')) {
           const adminLink = document.createElement('a');
@@ -1447,6 +1455,22 @@
         showToast(`Keep it up! You are on a ${s}-day learning streak! 🔥`);
       }
     }
+
+    function togglePlayerMenu() {
+      const dd = document.getElementById('player-profile-dropdown');
+      if (dd) {
+        dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+      const wrapper = document.getElementById('player-profile-wrapper');
+      const dd = document.getElementById('player-profile-dropdown');
+      if (wrapper && dd && !wrapper.contains(e.target)) {
+        dd.style.display = 'none';
+      }
+    });
 
   </script>
 </body>

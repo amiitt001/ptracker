@@ -179,10 +179,64 @@ def init_db():
         if not sections:
             sections = [
                 {"name": "1. Before we Start", "folderId": "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi"},
-                {"name": "2. Graph Theory", "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC"}
+                {"name": "2. Essential C and C++ Concepts", "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC"},
+                {"name": "3. Required Setup for Programming", "folderId": "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H"},
+                {"name": "4. Introduction", "folderId": "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji"},
+                {"name": "5. Recursion", "folderId": "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV"},
+                {"name": "6. Arrays Representations", "folderId": "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD"},
+                {"name": "8. Strings", "folderId": "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD"},
+                {"name": "9. Matrices", "folderId": "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d"},
+                {"name": "10. Sparse Matrix and Polynomial Representation", "folderId": "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j"},
+                {"name": "11. Linked List", "folderId": "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy"},
+                {"name": "12. Sparse Matrix and Polynomial using Linked List", "folderId": "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy"},
+                {"name": "13. Stack", "folderId": "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6"},
+                {"name": "14. Queues", "folderId": "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC"},
+                {"name": "15. Trees", "folderId": "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0"},
+                {"name": "16. Binary Search Trees", "folderId": "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4"},
+                {"name": "17. AVL Trees", "folderId": "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90"},
+                {"name": "18. Search Trees", "folderId": "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK"},
+                {"name": "19. Heap", "folderId": "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5"},
+                {"name": "20. Sorting Techniques", "folderId": "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm"},
+                {"name": "21. Hashing Technique", "folderId": "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF"},
+                {"name": "22. Graphs", "folderId": "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe"},
+                {"name": "23. Asymptotic Notations", "folderId": "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T"}
             ]
             
         for i, sec in enumerate(sections):
+            cursor.execute(
+                "INSERT INTO sections (course_id, name, folder_id, sort_order) VALUES (?, ?, ?, ?)",
+                ("dsa", sec["name"], sec["folderId"], i)
+            )
+
+    # Ensure all 22 default sections are present (handles migration/updating existing databases)
+    cursor.execute("SELECT COUNT(*) FROM sections WHERE course_id = ?", ("dsa",))
+    if cursor.fetchone()[0] < 22:
+        cursor.execute("DELETE FROM sections WHERE course_id = ?", ("dsa",))
+        default_sections = [
+            {"name": "1. Before we Start", "folderId": "1O1BBBfEykrnpfVhV_Z6gzB04SqEsOubi"},
+            {"name": "2. Essential C and C++ Concepts", "folderId": "1S26KOEUUaXHXkzbJVP2S-neU9RzfK5bC"},
+            {"name": "3. Required Setup for Programming", "folderId": "1JvDE_7vpWSngceFbl_Zxl7OWFUJ5Mz8H"},
+            {"name": "4. Introduction", "folderId": "1dFB9j2kbMPigozYjKqFCeDOBtRL3F-Ji"},
+            {"name": "5. Recursion", "folderId": "1GEaEAgs2D4jh0x6FrhX2upqV-UWahrvV"},
+            {"name": "6. Arrays Representations", "folderId": "1Wv1txT8YlvVWseayp4hJZIeHC4KTXODD"},
+            {"name": "8. Strings", "folderId": "1mKjHGrDVZgOQnG0EvPkyNciBC3elZKtD"},
+            {"name": "9. Matrices", "folderId": "1bCybGGqHJ72DA6ZzobDrgTKyIGMe3i9d"},
+            {"name": "10. Sparse Matrix and Polynomial Representation", "folderId": "1OXtIcPqHqiCCISiHKXs7W0-h8wcGEd6j"},
+            {"name": "11. Linked List", "folderId": "1dmAEIuNne2Wj4Q8ePxs9qDcdX4izH-cy"},
+            {"name": "12. Sparse Matrix and Polynomial using Linked List", "folderId": "1cWDxL2SYFFlp9VcJhtBvvWZV2odxoUWy"},
+            {"name": "13. Stack", "folderId": "1kZkpch8dnTR8SYXhMWYApeYa_TI_W_W6"},
+            {"name": "14. Queues", "folderId": "1cc6aN3F4iyWGb_qg0qYYcXWWOdz7jUXC"},
+            {"name": "15. Trees", "folderId": "1cO-T9YpdyTZvlyzRiZ7UjTir9-gSPNa0"},
+            {"name": "16. Binary Search Trees", "folderId": "19teDeYr8V16jYgMy4lAhn-ARqVkm-ir4"},
+            {"name": "17. AVL Trees", "folderId": "1_BmJYl7RX7CZp5dRG2BVuabf7FvIJe90"},
+            {"name": "18. Search Trees", "folderId": "1v-MV8RRrhykX_HVtUxYbibHraqdQE1YK"},
+            {"name": "19. Heap", "folderId": "1X-VGJrLAs0SDf-xg6C9CK9LcUGEAVYM5"},
+            {"name": "20. Sorting Techniques", "folderId": "1ayU-c75l73ikRnfBFkLjAOugkuky2qAm"},
+            {"name": "21. Hashing Technique", "folderId": "1RrZ5hwa2UCtmWmeWBsTbJzSjBEtW7oFF"},
+            {"name": "22. Graphs", "folderId": "13rQ95SB0qbNlfdpf9D4XwX8o_fne7zGe"},
+            {"name": "23. Asymptotic Notations", "folderId": "1uNQi6kvnxI67joYkXuL-FHOs4-EmSa_T"}
+        ]
+        for i, sec in enumerate(default_sections):
             cursor.execute(
                 "INSERT INTO sections (course_id, name, folder_id, sort_order) VALUES (?, ?, ?, ?)",
                 ("dsa", sec["name"], sec["folderId"], i)
