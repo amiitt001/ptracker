@@ -19,7 +19,7 @@ if os.path.exists(TOKEN_PATH):
 
 print("Starting local server for Google Drive authentication...")
 flow = InstalledAppFlow.from_client_secrets_file(CREDS_PATH, SCOPES)
-creds = flow.run_local_server(port=5050, open_browser=False)
+creds = flow.run_local_server(port=5050, open_browser=False, access_type='offline', prompt='consent')
 
 print("Authentication successful! Saving credentials...")
 with open(TOKEN_PATH, 'wb') as f:
