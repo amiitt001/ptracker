@@ -1428,14 +1428,6 @@
         iframe.src = streamUrl;
         iframe.onended = markDoneAndNext;
         
-        // Auto mark complete and play next after running 5 seconds on screen
-        iframe.ontimeupdate = function() {
-          if (iframe.currentTime >= 5) {
-            iframe.ontimeupdate = null;
-            markDoneAndNext();
-          }
-        };
-        
         wrap.style.display = 'block';
         loading.style.display = 'none';
       } catch (err) {
