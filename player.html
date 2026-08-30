@@ -620,7 +620,7 @@
                   <circle class="autoplay-bg-circle" cx="50" cy="50" r="45"></circle>
                   <circle class="autoplay-progress-circle" id="autoplay-progress-circle" cx="50" cy="50" r="45"></circle>
                 </svg>
-                <div class="autoplay-countdown-number" id="autoplay-countdown-number">5</div>
+                <div class="autoplay-countdown-number" id="autoplay-countdown-number">3</div>
               </div>
               <div class="autoplay-actions">
                 <button class="autoplay-btn btn-cancel" id="autoplay-cancel-btn">Cancel</button>
@@ -1298,7 +1298,7 @@
 
     
     let autoplayTimer = null;
-    let autoplayCountdownVal = 5;
+    let autoplayCountdownVal = 3;
 
     function startAutoplayCountdown(nextSec, nextVi) {
       if (autoplayTimer) clearInterval(autoplayTimer);
@@ -1314,14 +1314,14 @@
       nextTitleEl.textContent = `${nextSec.name} - ${nextVi + 1}. ${nextVideo.n}`;
       
       overlay.style.display = 'flex';
-      autoplayCountdownVal = 5;
+      autoplayCountdownVal = 3;
       countdownNumEl.textContent = autoplayCountdownVal;
 
       if (progressCircle) {
         progressCircle.style.strokeDashoffset = '0';
       }
 
-      const totalMs = 5000;
+      const totalMs = 3000;
       let elapsedMs = 0;
       const intervalMs = 100;
 
