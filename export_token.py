@@ -17,7 +17,7 @@ TOKEN_PATH = os.path.join(os.path.dirname(__file__), 'backend', 'token.pickle')
 
 if not os.path.exists(TOKEN_PATH):
     print("❌  token.pickle not found.")
-    print("   Run  'cd backend && python app.py'  first to authenticate with Google.")
+    print("   Run  'python3 backend/app.py'  first to authenticate with Google.")
     exit(1)
 
 with open(TOKEN_PATH, 'rb') as f:
