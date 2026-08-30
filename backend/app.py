@@ -26,11 +26,14 @@ from google.auth.exceptions import RefreshError
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
-# Optional: Firebase Admin for server-side token verification
+db_firestore = None
+FIRESTORE_AVAILABLE = False
+
 try:
     import firebase_admin
     from firebase_admin import credentials as fb_creds
     from firebase_admin import auth as fb_auth
+    from firebase_admin import firestore
     _FB_JSON = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON', '').strip()
     _FB_KEY = os.environ.get('FIREBASE_SERVICE_ACCOUNT', os.path.join(BACKEND_DIR, 'serviceAccountKey.json'))
     if _FB_KEY and not os.path.isabs(_FB_KEY):
@@ -43,6 +46,14 @@ try:
         FIREBASE_ADMIN = True
     else:
         FIREBASE_ADMIN = False
+
+    if FIREBASE_ADMIN:
+        try:
+            db_firestore = firestore.client()
+            FIRESTORE_AVAILABLE = True
+            print("[firebase] Firestore client initialized successfully!")
+        except Exception as fe:
+            print(f"[firebase] Firestore init error: {fe}")
 except (ImportError, ValueError, json.JSONDecodeError) as e:
     print(f"[firebase] Admin SDK not configured: {e}")
     FIREBASE_ADMIN = False
@@ -462,15 +473,30 @@ def handle_progress():
     conn = get_db()
     
     if request.method == 'GET':
+        state = {}
+        # Try fetching from Firestore first for permanent persistence
+        if FIRESTORE_AVAILABLE and db_firestore:
+            try:
+                doc_ref = db_firestore.collection('user_progress').document(uid)
+                doc = doc_ref.get()
+                if doc.exists:
+                    fs_data = doc.to_dict() or {}
+                    state = fs_data.get('state', {})
+                    conn.close()
+                    return jsonify({'state': state, 'is_paid': True}), 200
+            except Exception as fe:
+                print(f"[firestore] Progress GET error: {fe}")
+
         row = fetch_progress_for_uids(conn, uids)
         conn.close()
         state = json.loads(row['state_json']) if row else {}
         return jsonify({'state': state, 'is_paid': True}), 200
 
-
     if request.method == 'POST':
         state_data = (request.get_json(silent=True) or {}).get('state', {})
         state_json = json.dumps(state_data)
+        
+        # 1. Update SQLite local cache
         conn.execute('''
             INSERT INTO progress (uid, state_json, updated_at) 
             VALUES (?, ?, CURRENT_TIMESTAMP)
@@ -480,6 +506,20 @@ def handle_progress():
         ''', (uid, state_json))
         conn.commit()
         conn.close()
+
+        # 2. Sync to Firebase Firestore for permanent cloud storage
+        if FIRESTORE_AVAILABLE and db_firestore:
+            try:
+                doc_ref = db_firestore.collection('user_progress').document(uid)
+                doc_ref.set({
+                    'uid': uid,
+                    'state': state_data,
+                    'is_paid': True,
+                    'updated_at': firestore.SERVER_TIMESTAMP
+                }, merge=True)
+            except Exception as fe:
+                print(f"[firestore] Progress POST sync error: {fe}")
+
         return jsonify({'status': 'ok'}), 200
 
 
@@ -961,9 +1001,22 @@ def stream_video(file_id):
                     if total_watched >= 2:
                         conn.close()
                         return "Access Denied: Free limit of 2 videos reached. Please request access from the admin.", 403
-                    # Log watch
+                    # Log watch in SQLite
                     conn.execute("INSERT OR IGNORE INTO user_watched_videos (uid, course_id, file_id) VALUES (?, ?, ?)", (uid, course_id, file_id))
                     conn.commit()
+
+                    # Sync watch tracking to Firestore
+                    if FIRESTORE_AVAILABLE and db_firestore:
+                        try:
+                            doc_id = f"{uid}_{course_id}_{file_id}"
+                            db_firestore.collection('user_watched_videos').document(doc_id).set({
+                                'uid': uid,
+                                'course_id': course_id,
+                                'file_id': file_id,
+                                'watched_at': firestore.SERVER_TIMESTAMP
+                            }, merge=True)
+                        except Exception as fe:
+                            print(f"[firestore] Watched video sync error: {fe}")
             conn.close()
 
     svc = get_service()
