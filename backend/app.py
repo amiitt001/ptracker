@@ -60,7 +60,8 @@ BASE_DIR   = BACKEND_DIR
 HTML_DIR   = os.path.join(BASE_DIR, '..')
 TOKEN_PATH = os.path.join(BASE_DIR, 'token.pickle')
 CREDS_PATH = os.path.join(BASE_DIR, 'credentials.json')
-DB_PATH    = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'users.db'))
+DEFAULT_DB_DIR = '/tmp' if os.environ.get('VERCEL') else BASE_DIR
+DB_PATH    = os.environ.get('DATABASE_PATH', os.path.join(DEFAULT_DB_DIR, 'users.db'))
 DB_DIR     = os.path.dirname(os.path.abspath(DB_PATH))
 if DB_DIR:
     os.makedirs(DB_DIR, exist_ok=True)
