@@ -1596,8 +1596,8 @@
       if (document.getElementById('player-dropdown-name')) document.getElementById('player-dropdown-name').textContent = display;
       if (document.getElementById('player-dropdown-email')) document.getElementById('player-dropdown-email').textContent = user.email;
 
-      // Show Admin Panel nav button if admin
-      if (user.email === 'admin@gyansetu.com') {
+      const ADMIN_EMAILS = ['admin@gyansetu.com', 'amitverma2k99@gmail.com'];
+      if (ADMIN_EMAILS.includes(user.email)) {
         const pal = document.getElementById('player-admin-link');
         if (pal) pal.style.display = 'block';
 

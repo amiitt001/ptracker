@@ -71,6 +71,15 @@ SCOPES     = ['https://www.googleapis.com/auth/drive.readonly']
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dsa-tracker-change-in-production')
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
+ADMIN_EMAILS = [
+    e.strip().lower() for e in os.environ.get('ADMIN_EMAILS', 'admin@gyansetu.com,amitverma2k99@gmail.com').split(',') if e.strip()
+]
+
+def is_admin_email(email):
+    if not email:
+        return False
+    return email.strip().lower() in ADMIN_EMAILS
+
 # Stripe config removed
 
 
@@ -765,7 +774,7 @@ def api_get_course(course_id):
 @app.route('/api/courses', methods=['POST'])
 def api_create_course():
     uid, email = get_user_from_request_or_token()
-    if email != 'admin@gyansetu.com':
+    if not is_admin_email(email):
         return jsonify({'error': 'Access denied: Admin permissions required'}), 403
         
     data = request.json or {}
@@ -801,7 +810,7 @@ def api_create_course():
 @app.route('/api/courses/<course_id>', methods=['DELETE'])
 def api_delete_course(course_id):
     uid, email = get_user_from_request_or_token()
-    if email != 'admin@gyansetu.com':
+    if not is_admin_email(email):
         return jsonify({'error': 'Access denied: Admin permissions required'}), 403
         
     conn = get_db()
@@ -824,7 +833,7 @@ def api_check_play_permission():
     if not course_id:
         return jsonify({'allowed': False, 'reason': 'missing_params', 'message': 'Missing course_id'}), 400
         
-    if email == 'admin@gyansetu.com':
+    if is_admin_email(email):
         return jsonify({'allowed': True, 'reason': 'admin'})
         
     conn = get_db()
@@ -896,7 +905,7 @@ def api_request_access():
 @app.route('/api/admin/requests', methods=['GET'])
 def api_admin_get_requests():
     uid, email = get_user_from_request_or_token()
-    if email != 'admin@gyansetu.com':
+    if not is_admin_email(email):
         return jsonify({'error': 'Access denied'}), 403
         
     conn = get_db()
@@ -908,7 +917,7 @@ def api_admin_get_requests():
 @app.route('/api/admin/requests/<int:request_id>', methods=['POST'])
 def api_admin_update_request(request_id):
     uid, email = get_user_from_request_or_token()
-    if email != 'admin@gyansetu.com':
+    if not is_admin_email(email):
         return jsonify({'error': 'Access denied'}), 403
         
     data = request.json or {}
@@ -938,7 +947,7 @@ def stream_video(file_id):
     
     if course_id and token:
         uid, email = resolve_user_from_token(token)
-        if email != 'admin@gyansetu.com':
+        if not is_admin_email(email):
             conn = get_db()
             # 1. Approved?
             req = conn.execute("SELECT status FROM access_requests WHERE uid = ? AND course_id = ?", (uid, course_id)).fetchone()

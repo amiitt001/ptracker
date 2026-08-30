@@ -407,8 +407,8 @@
         document.getElementById('dropdown-name').textContent = name;
         document.getElementById('dropdown-email').textContent = user.email;
 
-        // Show admin link if admin
-        if (user.email === 'admin@gyansetu.com') {
+        const ADMIN_EMAILS = ['admin@gyansetu.com', 'amitverma2k99@gmail.com'];
+        if (ADMIN_EMAILS.includes(user.email)) {
           document.getElementById('admin-dropdown-link').classList.remove('hidden');
           const nav = document.querySelector('nav');
           if (nav && !document.getElementById('admin-nav-link')) {

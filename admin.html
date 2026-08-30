@@ -175,7 +175,8 @@
         window.location.href = '/gyansetu_auth?mode=login';
         return;
       }
-      if (user.email !== 'admin@gyansetu.com') {
+      const ADMIN_EMAILS = ['admin@gyansetu.com', 'amitverma2k99@gmail.com'];
+      if (!ADMIN_EMAILS.includes(user.email)) {
         alert("Access Denied: Admin account required.");
         window.location.href = '/dashboard';
         return;
